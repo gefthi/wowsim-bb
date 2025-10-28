@@ -1,0 +1,24 @@
+emberstorm:
+  damage_multiplier: 1.15  # +15% fire/shadow damage
+
+improved_immolate:
+  damage_multiplier: 1.30  # +30% all Immolate damage
+
+aftermath:
+  dot_damage_multiplier: 1.06  # +6% DoT damage only (for Immolate)
+
+fire_and_brimstone:
+  immolate_target_damage: 1.10  # +10% on Immolated targets
+  conflagrate_crit_bonus: 0.25  # +25% crit chance
+
+ruin:
+  crit_multiplier: 2.0  # Crits do 200% instead of 150%
+
+shadow_and_flame:
+  bonus_sp_percentage: 0.20  # Gains +20% of bonus SP
+
+devastation:
+  crit_bonus: 0.05  # +5% crit
+
+backlash:
+  crit_bonus: 0.01  # +1% crit

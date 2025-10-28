@@ -1,0 +1,18 @@
+server:
+  level: 60
+  name: "Ascension Retail--"
+
+stat_conversions:
+  crit_rating_per_percent: 14
+  haste_rating_per_percent: 10
+
+hit_mechanics:
+  boss_hit_cap: 17  # +3 level difference
+  equal_level_miss_chance: 4  # Base miss vs same level
+
+gcd:
+  base: 1.5
+  minimum: 1.0
+
+spell_power:
+  unified: true  # Single stat for all schools
