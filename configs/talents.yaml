@@ -8,8 +8,11 @@ aftermath:
   dot_damage_multiplier: 1.06  # +6% DoT damage only (for Immolate)
 
 fire_and_brimstone:
-  immolate_target_damage: 1.10  # +10% on Immolated targets
+  # FIXED: Only applies to Incinerate and Chaos Bolt (NOT all spells!)
+  damage_multiplier: 1.10  # +10% on Immolated targets
   conflagrate_crit_bonus: 0.25  # +25% crit chance
+  applies_to_incinerate: true
+  applies_to_chaos_bolt: true
 
 ruin:
   crit_multiplier: 2.0  # Crits do 200% instead of 150%
@@ -18,7 +21,26 @@ shadow_and_flame:
   bonus_sp_percentage: 0.20  # Gains +20% of bonus SP
 
 devastation:
-  crit_bonus: 0.05  # +5% crit
+  points: 5  # 5/5 points
+  crit_bonus_per_point: 0.01  # 1% per point = 5% total
 
 backlash:
-  crit_bonus: 0.01  # +1% crit
+  points: 1  # 1/3 points (user configurable)
+  crit_bonus_per_point: 0.01  # 1% per point
+
+pyroclasm:
+  points: 3  # 3/3 points
+  enabled: true
+  damage_multiplier: 1.06  # +6% fire/shadow damage when active
+  duration: 10.0  # 10 seconds base (16s with Endless Flames ME)
+  proc_spells:
+    - conflagrate
+    - searing_pain  # Not implemented yet
+
+improved_soul_leech:
+  points: 2  # 2/2 points
+  enabled: true
+  instant_mana_return: 0.02  # 2% of max mana instantly
+  hot_mana_per_tick: 0.01  # 1% of max mana per 5 seconds
+  hot_duration: 15.0  # 15 seconds
+  hot_tick_interval: 5.0  # Every 5 seconds

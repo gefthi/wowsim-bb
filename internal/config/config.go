@@ -87,8 +87,10 @@ type Talents struct {
 		DotDamageMultiplier float64 `yaml:"dot_damage_multiplier"`
 	} `yaml:"aftermath"`
 	FireAndBrimstone struct {
-		ImmolateTargetDamage float64 `yaml:"immolate_target_damage"`
-		ConflagrateCritBonus float64 `yaml:"conflagrate_crit_bonus"`
+		DamageMultiplier       float64 `yaml:"damage_multiplier"`
+		ConflagrateCritBonus   float64 `yaml:"conflagrate_crit_bonus"`
+		AppliesToIncinerate    bool    `yaml:"applies_to_incinerate"`
+		AppliesToChaosBolt     bool    `yaml:"applies_to_chaos_bolt"`
 	} `yaml:"fire_and_brimstone"`
 	Ruin struct {
 		CritMultiplier float64 `yaml:"crit_multiplier"`
@@ -97,11 +99,28 @@ type Talents struct {
 		BonusSPPercentage float64 `yaml:"bonus_sp_percentage"`
 	} `yaml:"shadow_and_flame"`
 	Devastation struct {
-		CritBonus float64 `yaml:"crit_bonus"`
+		Points            int     `yaml:"points"`
+		CritBonusPerPoint float64 `yaml:"crit_bonus_per_point"`
 	} `yaml:"devastation"`
 	Backlash struct {
-		CritBonus float64 `yaml:"crit_bonus"`
+		Points            int     `yaml:"points"`
+		CritBonusPerPoint float64 `yaml:"crit_bonus_per_point"`
 	} `yaml:"backlash"`
+	Pyroclasm struct {
+		Points           int      `yaml:"points"`
+		Enabled          bool     `yaml:"enabled"`
+		DamageMultiplier float64  `yaml:"damage_multiplier"`
+		Duration         float64  `yaml:"duration"`
+		ProcSpells       []string `yaml:"proc_spells"`
+	} `yaml:"pyroclasm"`
+	ImprovedSoulLeech struct {
+		Points             int     `yaml:"points"`
+		Enabled            bool    `yaml:"enabled"`
+		InstantManaReturn  float64 `yaml:"instant_mana_return"`
+		HotManaPerTick     float64 `yaml:"hot_mana_per_tick"`
+		HotDuration        float64 `yaml:"hot_duration"`
+		HotTickInterval    float64 `yaml:"hot_tick_interval"`
+	} `yaml:"improved_soul_leech"`
 }
 
 // Player holds player character configuration

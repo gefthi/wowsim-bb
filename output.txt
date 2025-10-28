@@ -1,6 +1,7 @@
 WotLK Destruction Warlock Simulator - Phase 1 MVP
 ==================================================
 
+Character: Destruction Warlock (Level 60)
 Character Stats:
   Spell Power: 800
   Crit: 25.0%
@@ -12,7 +13,7 @@ Character Stats:
 Simulation Config:
   Fight Duration: 300 seconds
   Iterations: 1000
-  Target: Boss (+3 levels)
+  Target: Boss (Level 63)
 
 Running simulation...
 
@@ -22,20 +23,230 @@ Simulation Results
 Duration: 300s
 Iterations: 1000
 
-Total DPS: 990.44
-Total Damage: 297133
+Total DPS: 1011.32
+Total Damage: 303396
 
 Spell Breakdown:
 ----------------------------------------
-Immolate:     21 casts  |  91823 damage (30.9%)  |  4 avg
-Incinerate:   31 casts  |  58436 damage (19.7%)  |  2 avg
-Chaos Bolt:   21 casts  |  67911 damage (22.9%)  |  3 avg
-Conflagrate:  21 casts  |  78963 damage (26.6%)  |  4 avg
-Life Tap:     11 casts
+Immolate:     21 casts  |  91300 damage (30.1%)  |  4 avg
+Incinerate:   32 casts  |  63593 damage (21.0%)  |  2 avg
+Chaos Bolt:   20 casts  |  69897 damage (23.0%)  |  3 avg
+Conflagrate:  21 casts  |  78605 damage (25.9%)  |  4 avg
+Life Tap:      7 casts
 
 Statistics:
 ----------------------------------------
-Total Casts: 105
+Total Casts: 102
 Misses:      0 (0.0%)
-Crits:       34 (32.9%)
+Crits:       34 (33.7%)
+========================================
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character: Destruction Warlock (Level 60)
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (Level 63)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 1014.92
+Total Damage: 304477
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  91624 damage (30.1%)  |  4 avg
+Incinerate:   32 casts  |  63655 damage (20.9%)  |  2 avg
+Chaos Bolt:   20 casts  |  70368 damage (23.1%)  |  3 avg
+Conflagrate:  21 casts  |  78831 damage (25.9%)  |  4 avg
+Life Tap:      7 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 102
+Misses:      0 (0.0%)
+Crits:       35 (34.1%)
+========================================
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character: Destruction Warlock (Level 60)
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (Level 63)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 1014.34
+Total Damage: 304301
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  91927 damage (30.2%)  |  4 avg
+Incinerate:   32 casts  |  63553 damage (20.9%)  |  2 avg
+Chaos Bolt:   20 casts  |  70043 damage (23.0%)  |  3 avg
+Conflagrate:  21 casts  |  78778 damage (25.9%)  |  4 avg
+Life Tap:      7 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 102
+Misses:      0 (0.0%)
+Crits:       34 (34.0%)
+========================================
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character: Destruction Warlock (Level 60)
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (Level 63)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 1013.32
+Total Damage: 303995
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  91817 damage (30.2%)  |  4 avg
+Incinerate:   32 casts  |  63539 damage (20.9%)  |  2 avg
+Chaos Bolt:   20 casts  |  70102 damage (23.1%)  |  3 avg
+Conflagrate:  21 casts  |  78538 damage (25.8%)  |  4 avg
+Life Tap:      7 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 102
+Misses:      0 (0.0%)
+Crits:       34 (33.9%)
+========================================
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character: Destruction Warlock (Level 60)
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (Level 63)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 1012.10
+Total Damage: 303629
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  91654 damage (30.2%)  |  4 avg
+Incinerate:   32 casts  |  63599 damage (20.9%)  |  2 avg
+Chaos Bolt:   20 casts  |  69826 damage (23.0%)  |  3 avg
+Conflagrate:  21 casts  |  78550 damage (25.9%)  |  4 avg
+Life Tap:      7 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 102
+Misses:      0 (0.0%)
+Crits:       34 (33.8%)
+========================================
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character: Destruction Warlock (Level 60)
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (Level 63)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 1014.45
+Total Damage: 304334
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  92027 damage (30.2%)  |  4 avg
+Incinerate:   32 casts  |  63434 damage (20.8%)  |  2 avg
+Chaos Bolt:   20 casts  |  70173 damage (23.1%)  |  3 avg
+Conflagrate:  21 casts  |  78701 damage (25.9%)  |  4 avg
+Life Tap:      7 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 102
+Misses:      0 (0.0%)
+Crits:       34 (33.9%)
 ========================================

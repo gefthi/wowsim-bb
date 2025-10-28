@@ -40,14 +40,16 @@ type Character struct {
 	Stats     Stats
 	Resources Resources
 	
-	// Buffs (not implemented in Phase 1)
-	Backdraft Buff
+	// Buffs
+	Backdraft         Buff  // Not implemented in Phase 1
+	Pyroclasm         Buff  // Phase 2: +6% fire/shadow damage
+	ImprovedSoulLeech Buff  // Phase 2: Mana regen over time
 	
 	// Debuffs on target
 	Immolate Debuff
 	
 	// Cooldowns
-	ChaosBolt  Cooldown
+	ChaosBolt   Cooldown
 	Conflagrate Cooldown
 	
 	// GCD
@@ -57,6 +59,9 @@ type Character struct {
 	CurrentTime time.Duration
 	IsCasting   bool
 	CastEndsAt  time.Duration
+	
+	// Soul Leech tracking (for HoT ticks)
+	SoulLeechLastTick time.Duration
 }
 
 // NewCharacter creates a new character with given stats
