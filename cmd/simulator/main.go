@@ -15,25 +15,25 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Println()
 	
-	// Load configuration
+	// Load configuration (now includes player.yaml)
 	cfg, err := config.LoadConfig("./configs")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 	
-	// Create character with example stats
-	// These are placeholder values - will be configurable in Phase 2
+	// Create character from config
 	charStats := character.Stats{
-		SpellPower: 800,
-		CritPct:    25.0,  // 25% crit
-		HastePct:   0.0,   // No haste in Phase 1
-		Spirit:     200,
-		HitPct:     17.0,  // Hit capped for boss
-		MaxMana:    8000,
+		SpellPower: cfg.Player.Stats.SpellPower,
+		CritPct:    cfg.Player.Stats.CritPercent,
+		HastePct:   cfg.Player.Stats.HastePercent,
+		Spirit:     cfg.Player.Stats.Spirit,
+		HitPct:     cfg.Player.Stats.HitPercent,
+		MaxMana:    cfg.Player.Stats.MaxMana,
 	}
 	
 	char := character.NewCharacter(charStats)
 	
+	fmt.Printf("Character: %s (Level %d)\n", cfg.Player.Character.Name, cfg.Player.Character.Level)
 	fmt.Println("Character Stats:")
 	fmt.Printf("  Spell Power: %.0f\n", char.Stats.SpellPower)
 	fmt.Printf("  Crit: %.1f%%\n", char.Stats.CritPct)
@@ -43,17 +43,20 @@ func main() {
 	fmt.Printf("  Max Mana: %.0f\n", char.Stats.MaxMana)
 	fmt.Println()
 	
-	// Configure simulation
+	// Configure simulation from YAML
+	isBoss := cfg.Player.Target.Type == "boss"
 	simConfig := engine.SimulationConfig{
-		Duration:   5 * time.Minute, // 5 minute fight
-		Iterations: 1000,             // 1000 iterations for good average
-		IsBoss:     true,             // Boss target (17% hit cap)
+		Duration:   time.Duration(cfg.Player.Simulation.DurationSeconds) * time.Second,
+		Iterations: cfg.Player.Simulation.Iterations,
+		IsBoss:     isBoss,
 	}
 	
 	fmt.Printf("Simulation Config:\n")
 	fmt.Printf("  Fight Duration: %.0f seconds\n", simConfig.Duration.Seconds())
 	fmt.Printf("  Iterations: %d\n", simConfig.Iterations)
-	fmt.Printf("  Target: %s\n", map[bool]string{true: "Boss (+3 levels)", false: "Equal Level"}[simConfig.IsBoss])
+	fmt.Printf("  Target: %s (Level %d)\n", 
+		map[bool]string{true: "Boss", false: "Equal Level"}[simConfig.IsBoss],
+		cfg.Player.Target.Level)
 	fmt.Println()
 	
 	fmt.Println("Running simulation...")

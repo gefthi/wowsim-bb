@@ -1,0 +1,22 @@
+# Player Configuration
+# Edit these values to match your character's stats
+
+character:
+  name: "Destruction Warlock"
+  level: 60
+
+stats:
+  spell_power: 800.0
+  crit_percent: 25.0    # Total crit % (base + gear + talents: Devastation 5% + Backlash 3%)
+  haste_percent: 0.0    # Not implemented yet (Phase 5)
+  spirit: 200.0
+  hit_percent: 5.0     # Hit capped for boss (17% for +3 level difference)
+  max_mana: 8000.0
+
+target:
+  type: "boss"          # "boss" or "equal_level"
+  level: 63             # Boss = player level + 3 (60 + 3 = 63)
+
+simulation:
+  duration_seconds: 300  # Fight duration (5 minutes = 300 seconds)
+  iterations: 1000       # Number of simulation runs for averaging

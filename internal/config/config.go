@@ -104,11 +104,36 @@ type Talents struct {
 	} `yaml:"backlash"`
 }
 
+// Player holds player character configuration
+type Player struct {
+	Character struct {
+		Name  string `yaml:"name"`
+		Level int    `yaml:"level"`
+	} `yaml:"character"`
+	Stats struct {
+		SpellPower   float64 `yaml:"spell_power"`
+		CritPercent  float64 `yaml:"crit_percent"`
+		HastePercent float64 `yaml:"haste_percent"`
+		Spirit       float64 `yaml:"spirit"`
+		HitPercent   float64 `yaml:"hit_percent"`
+		MaxMana      float64 `yaml:"max_mana"`
+	} `yaml:"stats"`
+	Target struct {
+		Type  string `yaml:"type"`
+		Level int    `yaml:"level"`
+	} `yaml:"target"`
+	Simulation struct {
+		DurationSeconds int `yaml:"duration_seconds"`
+		Iterations      int `yaml:"iterations"`
+	} `yaml:"simulation"`
+}
+
 // Config holds all configuration
 type Config struct {
 	Constants Constants
 	Spells    Spells
 	Talents   Talents
+	Player    Player
 }
 
 // LoadConfig loads all YAML configuration files
@@ -139,6 +164,15 @@ func LoadConfig(configDir string) (*Config, error) {
 		return nil, err
 	}
 	if err := yaml.Unmarshal(data, &cfg.Talents); err != nil {
+		return nil, err
+	}
+	
+	// Load player
+	data, err = os.ReadFile(configDir + "/player.yaml")
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(data, &cfg.Player); err != nil {
 		return nil, err
 	}
 	

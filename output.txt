@@ -1,0 +1,41 @@
+WotLK Destruction Warlock Simulator - Phase 1 MVP
+==================================================
+
+Character Stats:
+  Spell Power: 800
+  Crit: 25.0%
+  Haste: 0.0%
+  Spirit: 200
+  Hit: 17.0%
+  Max Mana: 8000
+
+Simulation Config:
+  Fight Duration: 300 seconds
+  Iterations: 1000
+  Target: Boss (+3 levels)
+
+Running simulation...
+
+========================================
+Simulation Results
+========================================
+Duration: 300s
+Iterations: 1000
+
+Total DPS: 990.44
+Total Damage: 297133
+
+Spell Breakdown:
+----------------------------------------
+Immolate:     21 casts  |  91823 damage (30.9%)  |  4 avg
+Incinerate:   31 casts  |  58436 damage (19.7%)  |  2 avg
+Chaos Bolt:   21 casts  |  67911 damage (22.9%)  |  3 avg
+Conflagrate:  21 casts  |  78963 damage (26.6%)  |  4 avg
+Life Tap:     11 casts
+
+Statistics:
+----------------------------------------
+Total Casts: 105
+Misses:      0 (0.0%)
+Crits:       34 (32.9%)
+========================================
