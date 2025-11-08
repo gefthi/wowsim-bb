@@ -37,6 +37,7 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - ❌ Stat weights calculation (Phase 5)
 - ❌ Haste mechanics (Phase 6)
 - ❌ Web UI + APL tools (Phase 7+)
+- ❌ User-editable rotation APL (design drafted in `doc/apl-schema.md`)
 
 ## Requirements
 
@@ -92,6 +93,7 @@ Edit the YAML files in `configs/`:
 - `constants.yaml` - Server constants (stat conversions, GCD, hit caps)
 - `spells.yaml` - All spell data (damage, costs, coefficients)
 - `talents.yaml` - Talent modifiers
+- `rotations/destruction-default.yaml` - Draft YAML APL (priority list) definitions
 
 No recompilation needed after editing YAML files!
 

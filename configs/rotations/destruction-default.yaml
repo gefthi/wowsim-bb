@@ -1,0 +1,39 @@
+name: "Destruction - Default"
+description: |
+  Baseline rotation without Mystic Enchants. Maintains Immolate,
+  dumps Conflagrate/Chaos Bolt on cooldown, and taps for mana when needed.
+variables:
+  life_tap_threshold: 0.30
+rotation:
+  - action: cast_spell
+    spell: immolate
+    when:
+      any:
+        - not:
+            debuff_active:
+              debuff: immolate
+        - dot_remaining:
+            spell: immolate
+            lt_seconds: 3
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate
+        - cooldown_ready:
+            spell: conflagrate
+  - action: cast_spell
+    spell: chaos_bolt
+    when:
+      cooldown_ready:
+        spell: chaos_bolt
+  - action: cast_spell
+    spell: incinerate
+    when: true
+  - action: cast_spell
+    spell: life_tap
+    when:
+      resource_percent:
+        resource: mana
+        lt: ${life_tap_threshold}

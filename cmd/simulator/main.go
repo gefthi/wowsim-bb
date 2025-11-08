@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"time"
 
+	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
 	"wotlk-destro-sim/internal/config"
 	"wotlk-destro-sim/internal/engine"
@@ -19,6 +21,17 @@ func main() {
 	cfg, err := config.LoadConfig("./configs")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	rotationDir := "./configs/rotations"
+	rotationFile := "destruction-default.yaml"
+	rotRaw, err := apl.LoadRotation(rotationDir, rotationFile)
+	if err != nil {
+		log.Fatalf("Failed to load rotation %s: %v", filepath.Join(rotationDir, rotationFile), err)
+	}
+	compiledRotation, err := apl.Compile(rotRaw)
+	if err != nil {
+		log.Fatalf("Failed to compile rotation: %v", err)
 	}
 
 	// Create character from config
@@ -63,7 +76,7 @@ func main() {
 	fmt.Println()
 
 	// Create and run simulator
-	sim := engine.NewSimulator(cfg, simConfig, time.Now().UnixNano())
+	sim := engine.NewSimulator(cfg, simConfig, compiledRotation, time.Now().UnixNano())
 	result := sim.Run(char)
 
 	// Print results

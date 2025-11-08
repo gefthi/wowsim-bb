@@ -393,6 +393,61 @@ The **ORIGINAL** simulation tool that pioneered combat simulation for WoW. Writt
 
 ---
 
+## Rotation DSL / APL Plan (Pre-Implementation)
+
+We do **not** want to hardcode priorities once Mystic Enchants arrive. The Action Priority Language (APL) will be:
+
+1. **YAML-driven** – users edit `configs/rotations/*.yaml`.
+2. **Condition-based** – predicates like `buff_active`, `dot_remaining`, `resource_percent`, `cooldown_ready`, `charges`, `time_elapsed`. Nest via `all` / `any`.
+3. **Action-rich** – `cast_spell`, `use_item`, `wait`, `macro` (chain multiple actions), future `channel`.
+4. **Top-to-bottom evaluation** – loop through the list each decision, execute the first entry whose condition is true, then restart at the top.
+5. **Extensible** – rotations may define `variables` (e.g., `life_tap_threshold`) and `imports` to extend a base list for rune-specific tweaks.
+
+### YAML Skeleton
+
+```yaml
+variables:
+  life_tap_threshold: 0.30
+imports:
+  - rotations/base.yaml
+
+rotation:
+  - action: cast_spell
+    spell: immolate
+    when:
+      any:
+        - not_active: immolate
+        - dot_remaining:
+            spell: immolate
+            lt_seconds: 3
+
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - cooldown_ready: conflagrate
+        - debuff_active:
+            debuff: immolate
+
+  - action: cast_spell
+    spell: life_tap
+    when:
+      resource_percent:
+        resource: mana
+        lt: ${life_tap_threshold}
+```
+
+### Engine Notes
+
+- YAML parsed once → compiled into structs with typed predicates/actions for quick runtime evaluation.
+- Each `Condition` implements `Eval(state)`; each `Action` implements `Execute(state)`.
+- CLI helper (`sim validate-rotation`) warns about unknown spells/conditions.
+- Debug flag prints the first N decisions to help users tune their list.
+
+This is the working contract for the Phase 4+ implementation. We proceed in small, verifiable iterations (loader → validation → execution) to keep the sim buildable at every step.
+
+---
+
 ## 📊 Simulation Core Design
 
 ### Core Concepts (from wowsims reference)

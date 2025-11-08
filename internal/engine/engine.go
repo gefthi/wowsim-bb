@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"time"
+	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
 	"wotlk-destro-sim/internal/config"
 	"wotlk-destro-sim/internal/spells"
@@ -121,14 +122,16 @@ func (r *SimulationResult) recordSpellCast(spell spells.SpellType, castResult sp
 type Simulator struct {
 	Config    *config.Config
 	SimConfig SimulationConfig
+	Rotation  *apl.CompiledRotation
 	BaseSeed  int64
 }
 
 // NewSimulator creates a new simulator
-func NewSimulator(cfg *config.Config, simCfg SimulationConfig, seed int64) *Simulator {
+func NewSimulator(cfg *config.Config, simCfg SimulationConfig, rotation *apl.CompiledRotation, seed int64) *Simulator {
 	return &Simulator{
 		Config:    cfg,
 		SimConfig: simCfg,
+		Rotation:  rotation,
 		BaseSeed:  seed,
 	}
 }
@@ -169,47 +172,64 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 
 	// Combat loop
 	for char.CurrentTime < s.SimConfig.Duration {
-		// Check if we need to reapply Immolate (< 3s remaining or not active)
-		immolateTimeLeft := char.Immolate.ExpiresAt - char.CurrentTime
-		if !char.Immolate.Active || immolateTimeLeft < 3*time.Second {
-			if !hasImmolate || immolateTimeLeft < 3*time.Second {
-				if s.tryCast(char, spells.SpellImmolate, result, spellEngine) {
-					hasImmolate = true
-					continue
+		if !hasImmolate && char.Immolate.Active {
+			hasImmolate = true
+		}
+
+		if char.CurrentTime < char.GCDReadyAt {
+			wait := char.GCDReadyAt - char.CurrentTime
+			s.advanceTime(char, wait, result)
+			continue
+		}
+
+		executed := false
+		if s.Rotation != nil {
+			if s.executeRotation(char, result, spellEngine) {
+				executed = true
+			}
+		} else {
+			// Fallback to legacy priority in case rotation missing
+			immolateTimeLeft := char.Immolate.ExpiresAt - char.CurrentTime
+			if !char.Immolate.Active || immolateTimeLeft < 3*time.Second {
+				if !hasImmolate || immolateTimeLeft < 3*time.Second {
+					if s.tryCast(char, spells.SpellImmolate, result, spellEngine) {
+						hasImmolate = true
+						executed = true
+					}
+				}
+			}
+			if !executed && char.IsCooldownReady(&char.Conflagrate) {
+				if s.tryCast(char, spells.SpellConflagrate, result, spellEngine) {
+					executed = true
+				}
+			}
+			if !executed && char.IsCooldownReady(&char.ChaosBolt) {
+				if s.tryCast(char, spells.SpellChaosBolt, result, spellEngine) {
+					executed = true
+				}
+			}
+			if !executed {
+				manaThreshold := char.Stats.MaxMana * 0.30
+				if char.Resources.CurrentMana < manaThreshold {
+					if s.tryCast(char, spells.SpellLifeTap, result, spellEngine) {
+						executed = true
+					}
+				}
+			}
+			if !executed {
+				if s.tryCast(char, spells.SpellIncinerate, result, spellEngine) {
+					executed = true
+				}
+			}
+			if !executed {
+				if s.tryCast(char, spells.SpellLifeTap, result, spellEngine) {
+					result.OOMEvents++
+					executed = true
 				}
 			}
 		}
 
-		// Priority 2: Conflagrate on CD
-		if char.IsCooldownReady(&char.Conflagrate) {
-			if s.tryCast(char, spells.SpellConflagrate, result, spellEngine) {
-				continue
-			}
-		}
-
-		// Priority 3: Chaos Bolt on CD
-		if char.IsCooldownReady(&char.ChaosBolt) {
-			if s.tryCast(char, spells.SpellChaosBolt, result, spellEngine) {
-				continue
-			}
-		}
-
-		// Priority 4: Life Tap if low mana (< 30%)
-		manaThreshold := char.Stats.MaxMana * 0.30
-		if char.Resources.CurrentMana < manaThreshold {
-			if s.tryCast(char, spells.SpellLifeTap, result, spellEngine) {
-				continue
-			}
-		}
-
-		// Priority 5: Incinerate (filler)
-		if s.tryCast(char, spells.SpellIncinerate, result, spellEngine) {
-			continue
-		}
-
-		// Priority 6: Life Tap if OOM (can't cast anything else)
-		if s.tryCast(char, spells.SpellLifeTap, result, spellEngine) {
-			result.OOMEvents++
+		if executed {
 			continue
 		}
 
