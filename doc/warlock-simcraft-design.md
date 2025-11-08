@@ -431,7 +431,7 @@ rotation:
 
 - YAML parsed once → compiled into structs with typed predicates/actions for quick runtime evaluation.
 - Each `Condition` implements `Eval(state)`; each `Action` implements `Execute(state)`.
-- CLI helper (`sim validate-rotation`) warns about unknown spells/conditions.
+- CLI helper (`go run ./cmd/aplvalidate -rotation ...`) validates syntax/names before running the sim.
 - Debug flag prints the first N decisions to help users tune their list.
 
 This is the working contract for the Phase 4+ implementation. We proceed in small, verifiable iterations (loader → validation → execution) to keep the sim buildable at every step.

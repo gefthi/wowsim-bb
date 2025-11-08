@@ -7,6 +7,7 @@ import "time"
 type EvaluationContext interface {
 	BuffActive(name string) bool
 	BuffRemaining(name string) time.Duration
+	BuffCharges(name string) int
 	DebuffActive(name string) bool
 	DebuffRemaining(name string) time.Duration
 	ResourcePercent(resource string) float64
@@ -160,4 +161,83 @@ func (c cooldownReadyCondition) Eval(ctx EvaluationContext) bool {
 		return false
 	}
 	return ctx.CooldownReady(c.name)
+}
+
+type cooldownRemainingCondition struct {
+	name string
+	lt   *time.Duration
+	lte  *time.Duration
+	gt   *time.Duration
+	gte  *time.Duration
+}
+
+func (c cooldownRemainingCondition) Eval(ctx EvaluationContext) bool {
+	if ctx == nil {
+		return false
+	}
+	remaining := ctx.CooldownRemaining(c.name)
+	if c.lt != nil && !(remaining < *c.lt) {
+		return false
+	}
+	if c.lte != nil && !(remaining <= *c.lte) {
+		return false
+	}
+	if c.gt != nil && !(remaining > *c.gt) {
+		return false
+	}
+	if c.gte != nil && !(remaining >= *c.gte) {
+		return false
+	}
+	return true
+}
+
+type buffActiveCondition struct {
+	name         string
+	minRemaining *time.Duration
+	maxRemaining *time.Duration
+}
+
+func (c buffActiveCondition) Eval(ctx EvaluationContext) bool {
+	if ctx == nil {
+		return false
+	}
+	if !ctx.BuffActive(c.name) {
+		return false
+	}
+	remaining := ctx.BuffRemaining(c.name)
+	if c.minRemaining != nil && remaining < *c.minRemaining {
+		return false
+	}
+	if c.maxRemaining != nil && remaining > *c.maxRemaining {
+		return false
+	}
+	return true
+}
+
+type chargesCondition struct {
+	buff string
+	lt   *int
+	lte  *int
+	gt   *int
+	gte  *int
+}
+
+func (c chargesCondition) Eval(ctx EvaluationContext) bool {
+	if ctx == nil {
+		return false
+	}
+	charges := ctx.BuffCharges(c.buff)
+	if c.lt != nil && !(charges < *c.lt) {
+		return false
+	}
+	if c.lte != nil && !(charges <= *c.lte) {
+		return false
+	}
+	if c.gt != nil && !(charges > *c.gt) {
+		return false
+	}
+	if c.gte != nil && !(charges >= *c.gte) {
+		return false
+	}
+	return true
 }

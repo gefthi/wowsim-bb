@@ -15,11 +15,33 @@ type rotationContext struct {
 }
 
 func (c *rotationContext) BuffActive(name string) bool {
-	return false
+	buff := c.getBuff(name)
+	if buff == nil {
+		return false
+	}
+	if !buff.Active {
+		return false
+	}
+	return buff.ExpiresAt > c.char.CurrentTime
 }
 
 func (c *rotationContext) BuffRemaining(name string) time.Duration {
-	return 0
+	buff := c.getBuff(name)
+	if buff == nil {
+		return 0
+	}
+	if !buff.Active || buff.ExpiresAt <= c.char.CurrentTime {
+		return 0
+	}
+	return buff.ExpiresAt - c.char.CurrentTime
+}
+
+func (c *rotationContext) BuffCharges(name string) int {
+	buff := c.getBuff(name)
+	if buff == nil {
+		return 0
+	}
+	return buff.Charges
 }
 
 func (c *rotationContext) DebuffActive(name string) bool {
@@ -84,8 +106,17 @@ func (c *rotationContext) CooldownRemaining(name string) time.Duration {
 	return 0
 }
 
-func (c *rotationContext) BuffRemainingDuration(name string) time.Duration {
-	return 0
+func (c *rotationContext) getBuff(name string) *character.Buff {
+	switch strings.ToLower(name) {
+	case "pyroclasm":
+		return &c.char.Pyroclasm
+	case "backdraft":
+		return &c.char.Backdraft
+	case "improved_soul_leech", "soul_leech":
+		return &c.char.ImprovedSoulLeech
+	default:
+		return nil
+	}
 }
 
 func spellFromName(name string) (spells.SpellType, bool) {
@@ -134,7 +165,8 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 				if step.Condition != nil && !step.Condition.Eval(ctx) {
 					continue
 				}
-				if step.Type == apl.ActionCastSpell {
+				switch step.Type {
+				case apl.ActionCastSpell:
 					spell, ok := spellFromName(step.Spell)
 					if !ok {
 						continue
@@ -142,10 +174,24 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 					if s.tryCast(char, spell, result, spellEngine) {
 						return true
 					}
+				case apl.ActionWait:
+					if step.Duration <= 0 {
+						continue
+					}
+					s.advanceTime(char, step.Duration, result)
+					return true
+				default:
+					continue
 				}
 			}
+		case apl.ActionWait:
+			if action.Duration <= 0 {
+				continue
+			}
+			s.advanceTime(char, action.Duration, result)
+			return true
 		default:
-			// wait/use_item not implemented yet
+			// use_item not implemented yet
 			continue
 		}
 	}

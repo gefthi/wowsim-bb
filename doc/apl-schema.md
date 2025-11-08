@@ -97,8 +97,10 @@ Available primitives (initial set):
 | `cooldown_remaining` | `spell`/`item`, `lt_seconds`     | Time until ready                                       |
 | `resource_percent` | `resource` (`mana`, `health`...), comparator (`lt`, `gt`) | Resource threshold                                     |
 | `charges`          | `buff`, optional `gte`, `lte`      | e.g., Backdraft charge count                           |
-| `time_elapsed`     | `gt_seconds` / `lt_seconds`        | Fight timer gates                                      |
+| `time_elapsed`     | `gt_seconds` / `lt_seconds`        | Fight timer gates (TODO)                               |
 | `true` / `false`   | none                               | Always/never (useful for quick toggles)                |
+
+> **Naming note**: Spell/buff/debuff/resource identifiers must exist in `internal/apl/names.go`. Add new entries there whenever mechanics are introduced so the validator accepts them.
 
 Combinators:
 - `all`: every child true (logical AND).
@@ -116,16 +118,16 @@ If `when` is omitted on an action, it defaults to `true`.
    - On failure (e.g., not enough mana) the engine falls through to the next entry.
 3. If nothing succeeds, fallback action (`wait` for GCD or emergency Life Tap) runs to prevent stalls.
 
-## Validation & Debugging (Upcoming)
+## Validation & Debugging
 
-- `sim validate-rotation <file>` – **TODO**: CLI to check imports, unknown spells/items, missing fields, bad variable references.
-- `debug_apl: true` (CLI flag) – planned debug logging of the first N decisions to help iterate quickly.
+- `go run ./cmd/aplvalidate -rotation configs/rotations/destruction-default.yaml` – validates syntax, known spells/buffs/resources, and imports.
+- `debug_apl: true` (CLI flag) – **TODO** debug logging of the first N decisions to help iterate quickly.
 
 ## Iteration Plan (Tracking)
 
 1. **Loader** ✅ – `internal/apl/loader.go`, used by `cmd/simulator`.
 2. **Compiler/Executor** ✅ – `internal/apl/compiler.go` + `internal/engine/rotation_runner.go` now drive the sim via `configs/rotations/destruction-default.yaml`.
-3. **Validator** ⏳ – CLI + runtime checks still pending.
-4. **Extensions** ⏳ – add remaining predicates (`buff_active`, `charges`, `cooldown_remaining`, etc.), implement `use_item`, `wait`, rune helpers.
+3. **Validator** ✅ – `cmd/aplvalidate` runs compile-time checks and catches unknown names.
+4. **Extensions** ⏳ – add remaining predicates (`time_elapsed`, rune helpers), implement `use_item`, richer debug tooling.
 
 Everything in this document is a contract for the implementation tasks. We update it after each milestone to keep future sessions aligned.

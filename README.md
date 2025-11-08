@@ -94,11 +94,21 @@ Edit the YAML files in `configs/`:
 - `constants.yaml` - Server constants (stat conversions, GCD, hit caps)
 - `spells.yaml` - All spell data (damage, costs, coefficients)
 - `talents.yaml` - Talent modifiers
- - `rotations/destruction-default.yaml` - Default YAML APL (editable priority list)
+- `rotations/destruction-default.yaml` - Default YAML APL (editable priority list)
 
 No recompilation needed after editing YAML files!
 
 > Tip: set `points: 0` (or `enabled: false`) on a talent such as `improved_soul_leech` to disable it entirely if your current build doesn't use it.
+
+### Validating APL Rotations
+
+Run the validator whenever you change a rotation file:
+
+```bash
+go run ./cmd/aplvalidate -rotation configs/rotations/destruction-default.yaml
+```
+
+This catches syntax errors and unknown spells/buffs before running the simulator.
 
 ## Example Output
 

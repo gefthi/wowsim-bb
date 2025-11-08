@@ -77,14 +77,19 @@ func compileAction(def *ActionDefinition, vars map[string]any) (*Action, error) 
 		if def.Spell == "" {
 			return nil, fmt.Errorf("cast_spell action requires 'spell'")
 		}
+		spellName, err := validateSpellName(def.Spell)
+		if err != nil {
+			return nil, err
+		}
 		action.Type = ActionCastSpell
-		action.Spell = strings.ToLower(def.Spell)
+		action.Spell = spellName
 	case "use_item":
 		if def.Item == "" {
 			return nil, fmt.Errorf("use_item action requires 'item'")
 		}
+		// TODO: validate item names once we support them
 		action.Type = ActionUseItem
-		action.Item = strings.ToLower(def.Item)
+		action.Item = normalizeName(def.Item)
 	case "wait":
 		if def.DurationSeconds <= 0 {
 			return nil, fmt.Errorf("wait action requires duration_seconds > 0")
@@ -178,7 +183,11 @@ func parseConditionMapping(node *yaml.Node, vars map[string]any) (Condition, err
 		if err != nil {
 			return nil, err
 		}
-		name, err := stringField(params, "debuff", true, vars)
+		nameRaw, err := stringField(params, "debuff", true, vars)
+		if err != nil {
+			return nil, err
+		}
+		name, err := validateDebuffName(nameRaw)
 		if err != nil {
 			return nil, err
 		}
@@ -196,11 +205,15 @@ func parseConditionMapping(node *yaml.Node, vars map[string]any) (Condition, err
 		if err != nil {
 			return nil, err
 		}
-		spell, err := stringField(params, "spell", true, vars)
+		spellRaw, err := stringField(params, "spell", true, vars)
 		if err != nil {
 			return nil, err
 		}
-		cond := dotRemainingCondition{spell: strings.ToLower(spell)}
+		spell, err := validateDebuffName(spellRaw)
+		if err != nil {
+			return nil, err
+		}
+		cond := dotRemainingCondition{spell: spell}
 		if cond.lt, err = durationField(params, "lt_seconds", vars); err != nil {
 			return nil, err
 		}
@@ -214,16 +227,41 @@ func parseConditionMapping(node *yaml.Node, vars map[string]any) (Condition, err
 			return nil, err
 		}
 		return cond, nil
+	case "buff_active":
+		params, err := nodeToMap(val)
+		if err != nil {
+			return nil, err
+		}
+		rawName, err := stringField(params, "buff", true, vars)
+		if err != nil {
+			return nil, err
+		}
+		name, err := validateBuffName(rawName)
+		if err != nil {
+			return nil, err
+		}
+		cond := buffActiveCondition{name: name}
+		if cond.minRemaining, err = durationField(params, "min_remaining", vars); err != nil {
+			return nil, err
+		}
+		if cond.maxRemaining, err = durationField(params, "max_remaining", vars); err != nil {
+			return nil, err
+		}
+		return cond, nil
 	case "resource_percent":
 		params, err := nodeToMap(val)
 		if err != nil {
 			return nil, err
 		}
-		res, err := stringField(params, "resource", true, vars)
+		resRaw, err := stringField(params, "resource", true, vars)
 		if err != nil {
 			return nil, err
 		}
-		cond := resourcePercentCondition{resource: strings.ToLower(res)}
+		res, err := validateResourceName(resRaw)
+		if err != nil {
+			return nil, err
+		}
+		cond := resourcePercentCondition{resource: res}
 		if cond.lt, err = floatField(params, "lt", vars); err != nil {
 			return nil, err
 		}
@@ -246,13 +284,85 @@ func parseConditionMapping(node *yaml.Node, vars map[string]any) (Condition, err
 		if err != nil {
 			return nil, err
 		}
+		isItem := false
 		if name == "" {
 			name, err = stringField(params, "item", true, vars)
 			if err != nil {
 				return nil, err
 			}
+			isItem = true
 		}
-		return cooldownReadyCondition{name: strings.ToLower(name)}, nil
+		name = normalizeName(name)
+		if !isItem {
+			if name, err = validateCooldownName(name); err != nil {
+				return nil, err
+			}
+		}
+		return cooldownReadyCondition{name: name}, nil
+	case "cooldown_remaining":
+		params, err := nodeToMap(val)
+		if err != nil {
+			return nil, err
+		}
+		name, err := stringField(params, "spell", false, vars)
+		if err != nil {
+			return nil, err
+		}
+		isItem := false
+		if name == "" {
+			name, err = stringField(params, "item", true, vars)
+			if err != nil {
+				return nil, err
+			}
+			isItem = true
+		}
+		name = normalizeName(name)
+		if !isItem {
+			if name, err = validateCooldownName(name); err != nil {
+				return nil, err
+			}
+		}
+		cond := cooldownRemainingCondition{name: name}
+		if cond.lt, err = durationField(params, "lt_seconds", vars); err != nil {
+			return nil, err
+		}
+		if cond.lte, err = durationField(params, "lte_seconds", vars); err != nil {
+			return nil, err
+		}
+		if cond.gt, err = durationField(params, "gt_seconds", vars); err != nil {
+			return nil, err
+		}
+		if cond.gte, err = durationField(params, "gte_seconds", vars); err != nil {
+			return nil, err
+		}
+		return cond, nil
+	case "charges":
+		params, err := nodeToMap(val)
+		if err != nil {
+			return nil, err
+		}
+		buffRaw, err := stringField(params, "buff", true, vars)
+		if err != nil {
+			return nil, err
+		}
+		buff, err := validateBuffName(buffRaw)
+		if err != nil {
+			return nil, err
+		}
+		cond := chargesCondition{buff: buff}
+		if cond.lt, err = intField(params, "lt", vars); err != nil {
+			return nil, err
+		}
+		if cond.lte, err = intField(params, "lte", vars); err != nil {
+			return nil, err
+		}
+		if cond.gt, err = intField(params, "gt", vars); err != nil {
+			return nil, err
+		}
+		if cond.gte, err = intField(params, "gte", vars); err != nil {
+			return nil, err
+		}
+		return cond, nil
 	default:
 		return nil, fmt.Errorf("unknown condition '%s'", key)
 	}
@@ -345,6 +455,38 @@ func floatField(fields map[string]*yaml.Node, key string, vars map[string]any) (
 		return &parsed, nil
 	default:
 		return nil, fmt.Errorf("cannot convert %T to float for key '%s'", v, key)
+	}
+}
+
+func intField(fields map[string]*yaml.Node, key string, vars map[string]any) (*int, error) {
+	node, ok := fields[key]
+	if !ok {
+		return nil, nil
+	}
+	val, err := resolveScalar(node, vars)
+	if err != nil {
+		return nil, err
+	}
+	switch v := val.(type) {
+	case int:
+		return &v, nil
+	case int64:
+		c := int(v)
+		return &c, nil
+	case uint64:
+		c := int(v)
+		return &c, nil
+	case float64:
+		c := int(v)
+		return &c, nil
+	case string:
+		parsed, err := strconv.Atoi(strings.TrimSpace(v))
+		if err != nil {
+			return nil, err
+		}
+		return &parsed, nil
+	default:
+		return nil, fmt.Errorf("cannot convert %T to int for key '%s'", v, key)
 	}
 }
 
