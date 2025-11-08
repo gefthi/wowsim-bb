@@ -29,6 +29,7 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - Buff uptime tracking for Pyroclasm, Backdraft, and Improved Soul Leech (with Backdraft avg charges)
 - Accurate Soul Leech HoT ticks (1% max mana every 5s)
 - External YAML configuration for player stats (`configs/player.yaml`), spells, talents, and server constants
+- **New** YAML Action Priority Lists (`configs/rotations/`) compiled at runtime so you can edit the rotation without rebuilding
 - Unique RNG seed per iteration for varied results
 
 ## Not Yet Implemented
@@ -37,7 +38,7 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - ❌ Stat weights calculation (Phase 5)
 - ❌ Haste mechanics (Phase 6)
 - ❌ Web UI + APL tools (Phase 7+)
-- ❌ User-editable rotation APL (design drafted in `doc/apl-schema.md`)
+ - ❌ APL validator + extended predicates/actions (design + first implementation in `doc/apl-schema.md`)
 
 ## Requirements
 
@@ -93,7 +94,7 @@ Edit the YAML files in `configs/`:
 - `constants.yaml` - Server constants (stat conversions, GCD, hit caps)
 - `spells.yaml` - All spell data (damage, costs, coefficients)
 - `talents.yaml` - Talent modifiers
-- `rotations/destruction-default.yaml` - Draft YAML APL (priority list) definitions
+ - `rotations/destruction-default.yaml` - Default YAML APL (editable priority list)
 
 No recompilation needed after editing YAML files!
 

@@ -381,21 +381,11 @@ The **ORIGINAL** simulation tool that pioneered combat simulation for WoW. Writt
 - Calculate marginal DPS gain
 - Output stat weight table
 
-### Phase 5: Advanced Features
-**Goal**: Polish and analysis tools
-
-**Adds**:
-- Haste implementation
-- Rotation strategy toggle (sync CB with Backdraft vs. on CD)
-- Detailed cast timeline log
-- Spell breakdown (damage % per spell)
-- Empowered Imp proc modeling (optional)
-
 ---
 
 ## Rotation DSL / APL Plan (Pre-Implementation)
 
-We do **not** want to hardcode priorities once Mystic Enchants arrive. The Action Priority Language (APL) will be:
+We no longer hardcode priorities – rotations now live in YAML (`internal/apl` + `configs/rotations/destruction-default.yaml`). Remaining APL roadmap items:
 
 1. **YAML-driven** – users edit `configs/rotations/*.yaml`.
 2. **Condition-based** – predicates like `buff_active`, `dot_remaining`, `resource_percent`, `cooldown_ready`, `charges`, `time_elapsed`. Nest via `all` / `any`.
