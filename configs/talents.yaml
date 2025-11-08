@@ -28,6 +28,14 @@ backlash:
   points: 1  # 1/3 points (user configurable)
   crit_bonus_per_point: 0.01  # 1% per point
 
+backdraft:
+  points: 3  # 3/3 points
+  enabled: true
+  charges: 3
+  duration: 15.0  # seconds
+  cast_time_reduction: 0.30  # 30% faster casts
+  gcd_reduction: 0.30  # 30% shorter GCD (to 1.05s)
+
 pyroclasm:
   points: 3  # 3/3 points
   enabled: true

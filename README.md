@@ -2,7 +2,7 @@
 
 A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a custom WotLK private server.
 
-## Phase 1 MVP - Current Features
+## Phase 3 - Current Features
 
 ✅ **Core Simulation Engine**
 - Hit/miss system (boss vs equal level targets)
@@ -13,33 +13,30 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - Basic rotation priority system
 - 1000 iterations for statistical accuracy
 
-✅ **Spells Implemented**
+✅ **Spells & Talents**
 - Immolate (direct + DoT damage)
-- Incinerate (with Immolate bonus)
-- Chaos Bolt (12s cooldown)
-- Conflagrate (10s cooldown, 25% bonus crit)
-- Life Tap (mana generation)
+- Incinerate (with Immolate bonus + Fire and Brimstone gating)
+- Chaos Bolt (12s cooldown + Fire and Brimstone gating)
+- Conflagrate (Pyroclasm proc source, bonus crit)
+- Life Tap (mana generation, fewer casts thanks to Soul Leech)
+- Pyroclasm (Conflagrate crit → +6% fire/shadow damage, uptime tracked)
+- Improved Soul Leech (instant mana + HoT ticks processed every 5s)
+- Devastation & Backlash now point-based and configurable
+- **Backdraft** (Conflagrate → 3 charges, -30% cast time/GCD, uptime + avg charges tracked)
 
-✅ **Talents Included**
-- Emberstorm (+15% fire/shadow damage)
-- Improved Immolate (+30% damage)
-- Aftermath (+6% DoT damage)
-- Fire and Brimstone (+10% on Immolated targets, +25% Conflag crit)
-- Ruin (2.0x crit multiplier)
-- Devastation (+5% crit)
-- Backlash (+1% crit)
-
-✅ **External YAML Configuration**
-- All spell data, talents, and constants in editable YAML files
-- No recompilation needed for balance changes
+✅ **Enhanced Reporting & Tooling**
+- Per-spell min/avg/max damage plus crit & miss percentages
+- Buff uptime tracking for Pyroclasm, Backdraft, and Improved Soul Leech (with Backdraft avg charges)
+- Accurate Soul Leech HoT ticks (1% max mana every 5s)
+- External YAML configuration for player stats (`configs/player.yaml`), spells, talents, and server constants
+- Unique RNG seed per iteration for varied results
 
 ## Not Yet Implemented
 
-- ❌ Backdraft system (Phase 2)
-- ❌ Mystic Enchants (Phase 3)
-- ❌ Haste mechanics (Phase 5)
-- ❌ Stat weights calculation (Phase 4)
-- ❌ Web UI (Phase 2+)
+- ❌ Mystic Enchants (Phase 4)
+- ❌ Stat weights calculation (Phase 5)
+- ❌ Haste mechanics (Phase 6)
+- ❌ Web UI + APL tools (Phase 7+)
 
 ## Requirements
 
@@ -64,30 +61,30 @@ go run cmd/simulator/main.go
 
 ## Configuration
 
-### Character Stats
+### Character & Simulation Settings
 
-Edit `cmd/simulator/main.go` to modify character stats:
+Edit `configs/player.yaml` to change stats, targets, and runtime parameters:
 
-```go
-charStats := character.Stats{
-    SpellPower: 800,
-    CritPct:    25.0,  // 25% crit
-    HastePct:   0.0,   // No haste in Phase 1
-    Spirit:     200,
-    HitPct:     17.0,  // Hit capped for boss
-    MaxMana:    8000,
-}
+```yaml
+character:
+  name: "Destruction Warlock"
+  level: 60
+stats:
+  spell_power: 800
+  crit_percent: 25.0
+  haste_percent: 0.0
+  spirit: 200
+  hit_percent: 17.0
+  max_mana: 8000
+target:
+  type: boss        # or equal_level
+  level: 83
+simulation:
+  duration_seconds: 300
+  iterations: 1000
 ```
 
-### Simulation Parameters
-
-```go
-simConfig := engine.SimulationConfig{
-    Duration:   5 * time.Minute, // Fight duration
-    Iterations: 1000,             // Number of iterations
-    IsBoss:     true,             // Boss (17% hit cap) vs Equal Level (4% miss)
-}
-```
+Changes to any YAML file take effect immediately — no recompilation required.
 
 ### Spell Data & Talents
 
@@ -98,6 +95,8 @@ Edit the YAML files in `configs/`:
 
 No recompilation needed after editing YAML files!
 
+> Tip: set `points: 0` (or `enabled: false`) on a talent such as `improved_soul_leech` to disable it entirely if your current build doesn't use it.
+
 ## Example Output
 
 ```
@@ -107,22 +106,31 @@ Simulation Results
 Duration: 300s
 Iterations: 1000
 
-Total DPS: 2,456.78
-Total Damage: 737,034
+Total DPS: 1,226.80
+Total Damage: 368,041
 
-Spell Breakdown:
+Spell Breakdown (average per iteration):
+--------------------------------------------------------------------------
+Spell         |       Damage |  Share |     Avg |     Min |     Max |   Crit% |   Miss%
+--------------------------------------------------------------------------
+Immolate      |       106,892 |  29.0% |    4,454 |    3,331 |    7,062 |   30.9% |    0.0%
+Incinerate    |        90,623 |  24.6% |    1,944 |    1,381 |    3,175 |   30.6% |    0.0%
+Chaos Bolt    |        80,238 |  21.8% |    3,345 |    2,304 |    5,576 |   31.1% |    0.0%
+Conflagrate   |        90,288 |  24.5% |    3,762 |    2,403 |    4,807 |   56.5% |    0.0%
+--------------------------------------------------------------------------
+Life Tap casts (avg): 8.3
+
+Buff Uptimes:
 ----------------------------------------
-Immolate:      1 casts  |  12,543 damage (1.7%)  |  12,543 avg
-Incinerate:   72 casts  |  524,123 damage (71.1%)  |  7,279 avg
-Chaos Bolt:   25 casts  |  145,678 damage (19.8%)  |  5,827 avg
-Conflagrate:  30 casts  |  54,690 damage (7.4%)  |  1,823 avg
-Life Tap:     12 casts
+Pyroclasm:           133.6s (44.5%)
+Improved Soul Leech: 259.6s (86.5%)
+Backdraft:           169.2s (56.4%) | avg charges 1.83
 
 Statistics:
 ----------------------------------------
-Total Casts: 140
-Misses:      0 (0.0%)
-Crits:       35 (25.0%)
+Total Casts: 126.9
+Misses:      0.0 (0.0%)
+Crits:       42.7 (33.7%)
 ========================================
 ```
 
@@ -140,12 +148,13 @@ wotlk-destro-sim/
 ├── configs/            # YAML configuration files
 │   ├── constants.yaml
 │   ├── spells.yaml
-│   └── talents.yaml
+│   ├── talents.yaml
+│   └── player.yaml
 ├── go.mod
 └── README.md
 ```
 
-## Rotation Priority (Phase 1)
+## Rotation Priority (Phase 3)
 
 1. Maintain Immolate (recast if < 3s remaining)
 2. Conflagrate on CD
@@ -156,13 +165,14 @@ wotlk-destro-sim/
 
 ## Development Roadmap
 
-- **Phase 1 (CURRENT)**: Core simulation engine ✅
-- **Phase 2**: Backdraft system
-- **Phase 3**: Mystic Enchants (ME) system
-- **Phase 4**: Stat weights calculation
-- **Phase 5**: Haste implementation
-- **Phase 6**: Polish & React UI
-- **Phase 7**: Action Priority Lists (APL) for user-configurable rotations
+- **Phase 1 (DONE)**: Core simulation engine ✅
+- **Phase 2 (DONE)**: Pyroclasm, Improved Soul Leech, hit/RNG fixes ✅
+- **Phase 2.5 (DONE)**: Enhanced statistics, buff uptimes, Soul Leech HoT ✅
+- **Phase 3 (DONE)**: Backdraft system ✅
+- **Phase 4**: Mystic Enchants (ME) system
+- **Phase 5**: Stat weights calculation
+- **Phase 6**: Haste implementation
+- **Phase 7**: Polish & React UI + Action Priority Lists (APL)
 
 ## Design Document
 

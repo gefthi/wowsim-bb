@@ -106,6 +106,14 @@ type Talents struct {
 		Points            int     `yaml:"points"`
 		CritBonusPerPoint float64 `yaml:"crit_bonus_per_point"`
 	} `yaml:"backlash"`
+	Backdraft struct {
+		Points            int     `yaml:"points"`
+		Enabled           bool    `yaml:"enabled"`
+		Charges           int     `yaml:"charges"`
+		Duration          float64 `yaml:"duration"`
+		CastTimeReduction float64 `yaml:"cast_time_reduction"`
+		GCDReduction      float64 `yaml:"gcd_reduction"`
+	} `yaml:"backdraft"`
 	Pyroclasm struct {
 		Points           int      `yaml:"points"`
 		Enabled          bool     `yaml:"enabled"`
