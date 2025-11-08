@@ -61,6 +61,16 @@ go mod download
 go run cmd/simulator/main.go
 ```
 
+### Debug Combat Log
+
+Need to audit a single fight? Run:
+
+```bash
+go run cmd/simulator -log-combat
+```
+
+This forces a 60-second, single-iteration run and prints a WoW-style combat log (casts, damage, DoT ticks, buff gains/expirations) to stdout for easier verification.
+
 ## Configuration
 
 ### Character & Simulation Settings

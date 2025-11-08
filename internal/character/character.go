@@ -28,6 +28,9 @@ type Buff struct {
 type Debuff struct {
 	Active    bool
 	ExpiresAt time.Duration
+	TickInterval time.Duration
+	LastTick     time.Duration
+	TickDamage   float64
 }
 
 // Cooldown tracks spell cooldowns

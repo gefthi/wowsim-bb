@@ -246,7 +246,18 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	// Apply Immolate debuff
 	char.Immolate.Active = true
 	char.Immolate.ExpiresAt = char.CurrentTime + time.Duration(spellData.DotDuration*float64(time.Second))
-
+	if spellData.DotTicks > 0 {
+		char.Immolate.TickInterval = time.Duration(spellData.DotDuration*float64(time.Second)) / time.Duration(spellData.DotTicks)
+	} else {
+		char.Immolate.TickInterval = 0
+	}
+	char.Immolate.LastTick = char.CurrentTime
+	if spellData.DotTicks > 0 {
+		char.Immolate.TickDamage = dotDamage / float64(spellData.DotTicks)
+	} else {
+		char.Immolate.TickDamage = dotDamage
+	}
+	
 	return result
 }
 

@@ -14,6 +14,14 @@ type rotationContext struct {
 	char *character.Character
 }
 
+type buffState struct {
+	pyroActive       bool
+	pyroExpires      time.Duration
+	backdraftActive  bool
+	backdraftCharges int
+	soulActive       bool
+}
+
 func (c *rotationContext) BuffActive(name string) bool {
 	buff := c.getBuff(name)
 	if buff == nil {
@@ -133,6 +141,33 @@ func spellFromName(name string) (spells.SpellType, bool) {
 		return spells.SpellLifeTap, true
 	default:
 		return 0, false
+	}
+}
+
+func spellTypeName(spell spells.SpellType) string {
+	switch spell {
+	case spells.SpellImmolate:
+		return "Immolate"
+	case spells.SpellConflagrate:
+		return "Conflagrate"
+	case spells.SpellChaosBolt:
+		return "Chaos Bolt"
+	case spells.SpellIncinerate:
+		return "Incinerate"
+	case spells.SpellLifeTap:
+		return "Life Tap"
+	default:
+		return "Unknown"
+	}
+}
+
+func captureBuffState(char *character.Character) buffState {
+	return buffState{
+		pyroActive:       char.Pyroclasm.Active,
+		pyroExpires:      char.Pyroclasm.ExpiresAt,
+		backdraftActive:  char.Backdraft.Active,
+		backdraftCharges: char.Backdraft.Charges,
+		soulActive:       char.ImprovedSoulLeech.Active,
 	}
 }
 

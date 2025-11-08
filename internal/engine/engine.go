@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"time"
 	"wotlk-destro-sim/internal/apl"
@@ -120,19 +121,23 @@ func (r *SimulationResult) recordSpellCast(spell spells.SpellType, castResult sp
 
 // Simulator runs the combat simulation
 type Simulator struct {
-	Config    *config.Config
-	SimConfig SimulationConfig
-	Rotation  *apl.CompiledRotation
-	BaseSeed  int64
+	Config     *config.Config
+	SimConfig  SimulationConfig
+	Rotation   *apl.CompiledRotation
+	LogEnabled bool
+	LogWriter  io.Writer
+	BaseSeed   int64
 }
 
 // NewSimulator creates a new simulator
-func NewSimulator(cfg *config.Config, simCfg SimulationConfig, rotation *apl.CompiledRotation, seed int64) *Simulator {
+func NewSimulator(cfg *config.Config, simCfg SimulationConfig, rotation *apl.CompiledRotation, seed int64, logEnabled bool, logWriter io.Writer) *Simulator {
 	return &Simulator{
-		Config:    cfg,
-		SimConfig: simCfg,
-		Rotation:  rotation,
-		BaseSeed:  seed,
+		Config:     cfg,
+		SimConfig:  simCfg,
+		Rotation:   rotation,
+		LogEnabled: logEnabled,
+		LogWriter:  logWriter,
+		BaseSeed:   seed,
 	}
 }
 
@@ -142,6 +147,9 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 		Duration:       s.SimConfig.Duration,
 		Iterations:     s.SimConfig.Iterations,
 		SpellBreakdown: newSpellStatsMap(),
+	}
+	if s.LogEnabled {
+		s.logStaticf("=== Combat Log Start (duration %.0fs, iterations %d) ===", s.SimConfig.Duration.Seconds(), s.SimConfig.Iterations)
 	}
 
 	// Run multiple iterations with unique seed each
@@ -161,6 +169,9 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 func (s *Simulator) runSingleIteration(originalChar *character.Character, iteration int) *SimulationResult {
 	// Create a fresh copy of character for this iteration
 	char := character.NewCharacter(originalChar.Stats)
+	if s.LogEnabled {
+		s.logStaticf("--- Iteration %d Start ---", iteration+1)
+	}
 
 	// Create spell engine with unique seed for this iteration
 	spellEngine := spells.NewEngine(s.Config, s.BaseSeed+int64(iteration), s.SimConfig.IsBoss)
@@ -247,6 +258,9 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		return false
 	}
 
+	spellName := spellTypeName(spell)
+	startTime := char.CurrentTime
+
 	// Check mana cost
 	var manaCost float64
 	switch spell {
@@ -263,8 +277,14 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 	}
 
 	if manaCost > 0 && !char.HasMana(manaCost) {
+		if s.LogEnabled {
+			s.logf(char, "CAST_FAIL %s (OOM)", spellName)
+		}
 		return false
 	}
+
+	prevBuffs := captureBuffState(char)
+	startMana := char.Resources.CurrentMana
 
 	// Cast the spell
 	var castResult spells.CastResult
@@ -282,6 +302,33 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		result.LifeTapCount++
 	}
 
+	if s.LogEnabled && castResult.CastTime > 0 {
+		s.logAt(startTime, "CAST_START %s (mana=%.0f)", spellName, startMana)
+	}
+
+	var pendingLog *castResultLog
+	if s.LogEnabled {
+		pendingLog = &castResultLog{
+			spell:   spellName,
+			didHit:  castResult.DidHit,
+			didCrit: castResult.DidCrit,
+			damage:  castResult.Damage,
+			instant: castResult.CastTime == 0,
+			start:   startTime,
+		}
+		if pendingLog.instant {
+			s.emitCastResult(pendingLog, startTime)
+			pendingLog = nil
+		}
+		if castResult.ManaSpent > 0 {
+			s.logf(char, "RESOURCE Mana -%.0f => %.0f", castResult.ManaSpent, char.Resources.CurrentMana)
+		}
+		if castResult.ManaGained > 0 {
+			s.logf(char, "RESOURCE Mana +%.0f => %.0f", castResult.ManaGained, char.Resources.CurrentMana)
+		}
+		s.logBuffChanges(prevBuffs, char)
+	}
+
 	result.recordSpellCast(spell, castResult)
 
 	// Track statistics
@@ -293,11 +340,27 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		result.CritCount++
 	}
 
-	// Advance time by cast time + GCD
-	totalTime := castResult.CastTime + castResult.GCDTime
+	// Advance time by cast time, respecting GCD
+	totalTime := castResult.CastTime
+	if castResult.GCDTime > totalTime {
+		totalTime = castResult.GCDTime
+	}
 	s.advanceTime(char, totalTime, result)
 
+	if pendingLog != nil {
+		s.emitCastResult(pendingLog, char.CurrentTime)
+	}
+
 	return true
+}
+
+type castResultLog struct {
+	spell   string
+	didHit  bool
+	didCrit bool
+	damage  float64
+	instant bool
+	start   time.Duration
 }
 
 func (s *Simulator) advanceTime(char *character.Character, duration time.Duration, result *SimulationResult) {
@@ -319,6 +382,7 @@ func (s *Simulator) advanceTime(char *character.Character, duration time.Duratio
 	}
 
 	char.AdvanceTime(duration)
+	s.processDotTicks(char, start, char.CurrentTime)
 	s.processSoulLeechHoT(char, start, end)
 	s.expireBuffs(char)
 	char.GCDReadyAt = char.CurrentTime
@@ -367,20 +431,49 @@ func (s *Simulator) processSoulLeechHoT(char *character.Character, start, end ti
 	}
 }
 
+func (s *Simulator) processDotTicks(char *character.Character, start, end time.Duration) {
+	if !s.LogEnabled {
+		return
+	}
+	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 {
+		return
+	}
+	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
+	for nextTick <= end && nextTick < char.Immolate.ExpiresAt {
+		if nextTick > start {
+			s.logAt(nextTick, "DOT_TICK Immolate damage=%.0f", char.Immolate.TickDamage)
+		}
+		char.Immolate.LastTick = nextTick
+		nextTick += char.Immolate.TickInterval
+	}
+}
+
 func (s *Simulator) expireBuffs(char *character.Character) {
 	now := char.CurrentTime
 	if char.Pyroclasm.Active && now >= char.Pyroclasm.ExpiresAt {
 		char.Pyroclasm.Active = false
+		if s.LogEnabled {
+			s.logf(char, "BUFF_EXPIRE Pyroclasm")
+		}
 	}
 	if char.ImprovedSoulLeech.Active && now >= char.ImprovedSoulLeech.ExpiresAt {
 		char.ImprovedSoulLeech.Active = false
+		if s.LogEnabled {
+			s.logf(char, "BUFF_EXPIRE Improved Soul Leech")
+		}
 	}
 	if char.Backdraft.Active && (now >= char.Backdraft.ExpiresAt || char.Backdraft.Charges <= 0) {
 		char.Backdraft.Active = false
 		char.Backdraft.Charges = 0
+		if s.LogEnabled {
+			s.logf(char, "BUFF_EXPIRE Backdraft")
+		}
 	}
 	if char.Immolate.Active && now >= char.Immolate.ExpiresAt {
 		char.Immolate.Active = false
+		if s.LogEnabled {
+			s.logf(char, "DOT_EXPIRE Immolate")
+		}
 	}
 }
 
@@ -510,4 +603,66 @@ func (r *SimulationResult) PrintResults() {
 		fmt.Printf("OOM Events:  %.1f\n", float64(r.OOMEvents)/float64(r.Iterations))
 	}
 	fmt.Println("========================================")
+}
+
+func (s *Simulator) logf(char *character.Character, format string, args ...interface{}) {
+	if !s.LogEnabled || s.LogWriter == nil {
+		return
+	}
+	ts := 0.0
+	if char != nil {
+		ts = char.CurrentTime.Round(time.Millisecond).Seconds()
+	}
+	prefix := fmt.Sprintf("[%6.2fs] ", ts)
+	fmt.Fprintf(s.LogWriter, prefix+format+"\n", args...)
+}
+
+func (s *Simulator) logAt(timeStamp time.Duration, format string, args ...interface{}) {
+	if !s.LogEnabled || s.LogWriter == nil {
+		return
+	}
+	ts := timeStamp.Round(time.Millisecond).Seconds()
+	prefix := fmt.Sprintf("[%6.2fs] ", ts)
+	fmt.Fprintf(s.LogWriter, prefix+format+"\n", args...)
+}
+
+func (s *Simulator) logStaticf(format string, args ...interface{}) {
+	if !s.LogEnabled || s.LogWriter == nil {
+		return
+	}
+	fmt.Fprintf(s.LogWriter, format+"\n", args...)
+}
+
+func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
+	if !s.LogEnabled {
+		return
+	}
+	if !prev.pyroActive && char.Pyroclasm.Active {
+		s.logf(char, "BUFF_GAIN Pyroclasm (duration %.1fs)", char.Pyroclasm.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
+	}
+	if prev.backdraftCharges != char.Backdraft.Charges && char.Backdraft.Active {
+		if !prev.backdraftActive && char.Backdraft.Active {
+			s.logf(char, "BUFF_GAIN Backdraft (charges %d)", char.Backdraft.Charges)
+		} else {
+			s.logf(char, "BUFF_UPDATE Backdraft charges -> %d", char.Backdraft.Charges)
+		}
+	}
+	if !prev.soulActive && char.ImprovedSoulLeech.Active {
+		s.logf(char, "BUFF_GAIN Improved Soul Leech (duration %.1fs)", char.ImprovedSoulLeech.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
+	}
+}
+
+func (s *Simulator) emitCastResult(log *castResultLog, ts time.Duration) {
+	if log == nil || !s.LogEnabled {
+		return
+	}
+	if !log.didHit {
+		s.logAt(ts, "CAST_RESULT %s MISS", log.spell)
+		return
+	}
+	outcome := "HIT"
+	if log.didCrit {
+		outcome = "CRIT"
+	}
+	s.logAt(ts, "CAST_RESULT %s %s damage=%.0f", log.spell, outcome, log.damage)
 }

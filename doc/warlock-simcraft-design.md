@@ -432,6 +432,8 @@ rotation:
 - YAML parsed once → compiled into structs with typed predicates/actions for quick runtime evaluation.
 - Each `Condition` implements `Eval(state)`; each `Action` implements `Execute(state)`.
 - CLI helper (`go run ./cmd/aplvalidate -rotation ...`) validates syntax/names before running the sim.
+- Debug combat log (`go run ./cmd/simulator -log-combat`) runs a single 60s iteration and emits a WoW-style log (casts, DoT ticks, buff gains/expirations) for manual verification.
+- TODO: future realism tweaks for combat log (apply configurable latency delay + spell travel time before recording hit events).
 - Debug flag prints the first N decisions to help users tune their list.
 
 This is the working contract for the Phase 4+ implementation. We proceed in small, verifiable iterations (loader → validation → execution) to keep the sim buildable at every step.
