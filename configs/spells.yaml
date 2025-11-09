@@ -25,6 +25,13 @@ chaos_bolt:
   mana_cost: 103
   sp_coefficient: 0.714
 
+soul_fire:
+  base_damage_min: 808
+  base_damage_max: 1014
+  cast_time: 4.0  # After Bane
+  mana_cost: 133
+  sp_coefficient: 1.0
+
 conflagrate:
   immolate_dot_percentage: 0.60  # 60% of Immolate DoT
   conflag_dot_percentage: 0.40  # 40% of hit as DoT

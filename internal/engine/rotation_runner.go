@@ -20,6 +20,10 @@ type buffState struct {
 	backdraftActive  bool
 	backdraftCharges int
 	soulActive       bool
+	heatingStacks    int
+	heatingExpires   time.Duration
+	guldansActive    bool
+	guldansExpires   time.Duration
 }
 
 func (c *rotationContext) BuffActive(name string) bool {
@@ -168,6 +172,10 @@ func captureBuffState(char *character.Character) buffState {
 		backdraftActive:  char.Backdraft.Active,
 		backdraftCharges: char.Backdraft.Charges,
 		soulActive:       char.ImprovedSoulLeech.Active,
+		heatingStacks:    char.HeatingUp.Stacks,
+		heatingExpires:   char.HeatingUp.ExpiresAt,
+		guldansActive:    char.GuldansChosen.Active,
+		guldansExpires:   char.GuldansChosen.ExpiresAt,
 	}
 }
 

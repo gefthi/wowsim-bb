@@ -360,14 +360,32 @@ The **ORIGINAL** simulation tool that pioneered combat simulation for WoW. Writt
 
 ### Phase 3: Configurable Runes
 **Goal**: Let users test different rune combinations
+- We can have max one legendary MEs active
+- We can have max three epic MEs active
+- We can have max six rare MEs active
+These limits should not be hardcoded since they might chance it any time. Below we can find all relevant to destruction dps runes. In the future if we model other spec we will add the relevant runes for other specs
 
-**Adds**:
-- Gul'na's Chosen (4s window of non-consuming Backdraft)
-- Pyroclasm proc system (crit Conflag → 6% damage buff, 16s duration)
-- Life Tap rune (spirit → spell power conversion)
-- Chaos Bolt cooldown reduction rune
-- Immolate extension rune (optional infinite uptime)
-- Toggle each rune on/off in UI
+**Legendary Runes**
+- Destruction Mastery: Increases fire and shadow damage done by 4% and the damage of your immolate by an additional 5%
+- Cataclysmic Burst: Dealing damage with Incinerate extends the duration of your Immolate by 2 seconds and increases the periodic damage of immolate by 8% stacking up to 4 times.This effect is consumed when casting Conflagrate (note: this is a buff on the player, careful of the wording; periodic damage is dot damage)
+**Epic Runes**
+- Inner Flame: Dealing direct damage with Fire or Shadow spells has as 12% chance to cause your next direct damage Fire spell to be a guaranteed critical strike
+- Endless Flames: Increase the duration of Pyroclasm and shadowflame by 6 seconds. Additionally shadowflame deals 15% increased damage
+- Heating Up: Dealing direct damage with Conflagrate applies Heating Up. Heating up is a debuff on target that 2% increased Fire damage to the target. Stacks up to 5 times and lasts for 15 seconds (obvisouly when you confla it refreshes these 15 sec, also obviously if we miss a confla we dont have time to keep up the debuff it will expire)
+- Decisive Decimation: Casting Conflagrate reduces the cast time of your next Soul Fire by 40% and removes the Soul Shard cost
+- Chaos Manifesting: After casting Chaos Bolt you receive a Fire or Shadow empowerment, increasing your damage dealt with that school by 10% for 8 seconds
+- Gul'dan's Chosen: Casting Chaos Bolt causes your Destruction spells to not consume Backdraft charges for 4 seconds
+- Agent of Chaos: Immolate deals half as much direct damage but lasts 3 seconds longer. Periodic damage from Immolate benefits from spell haste and reduces the cooldown of Chaos Bolt by 0.5 second
+**Rare Runes**
+- Glyph of Life Tap: When you use Life Tap you gain 20% of your Spirit as spell power for 40 seconds (this is a buff to the player)
+- Glyph of Conflagrate: Your conflagrate spell no longer consumers immolate (This is a must have obvisouly)
+- Demonic Aegis: Increases the effectiveness of your Fel Armor by 30%
+- Supression: Increases the chance to hit with spells by 3%
+- Glyph of Chaos Bolt: Reduces the cooldown on  chaos bolt by 2 seconds
+- Glyph of incinerate: Increases the damage done by Incinerate by 5% 
+- Glyph of Immolate: Increases the periodic damage of your immolate by 10%  (this affects the snapshot and in result the confla dmg)
+- Improved Imp: Increases the damage of imp's firebolt by 30%
+
 
 **Outputs Add**:
 - Pyroclasm uptime %

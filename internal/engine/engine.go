@@ -8,6 +8,7 @@ import (
 	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
 	"wotlk-destro-sim/internal/config"
+	"wotlk-destro-sim/internal/runes"
 	"wotlk-destro-sim/internal/spells"
 )
 
@@ -451,16 +452,19 @@ func (s *Simulator) processSoulLeechHoT(char *character.Character, start, end ti
 }
 
 func (s *Simulator) processDotTicks(char *character.Character, start, end time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
-	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 || char.Immolate.TicksRemaining <= 0 {
+	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 {
 		return
 	}
 	if spellEngine == nil {
 		return
 	}
+	heatingEnabled := s.Config.Player.HasRune(runes.RuneHeatingUp)
+	agentEnabled := s.Config.Player.HasRune(runes.RuneAgentOfChaos)
 	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
-	for nextTick <= end && nextTick < char.Immolate.ExpiresAt && char.Immolate.TicksRemaining > 0 {
+	for nextTick <= end && nextTick < char.Immolate.ExpiresAt {
 		if nextTick > start {
-			damage := char.Immolate.TickDamage
+			damage := char.Immolate.TickDamage * s.cataclysmicBurstMultiplier(char)
+			damage *= runes.HeatingUpMultiplier(heatingEnabled, char.HeatingUp.Stacks, char.HeatingUp.ExpiresAt, nextTick)
 			didCrit := false
 			chance := char.Immolate.TickCritChance
 			if chance >= 1 {
@@ -479,15 +483,12 @@ func (s *Simulator) processDotTicks(char *character.Character, start, end time.D
 				}
 				s.logAt(nextTick, "DOT_TICK Immolate damage=%.0f%s", damage, critTag)
 			}
-			char.Immolate.TicksRemaining--
-			char.Immolate.LastTick = nextTick
-			if char.Immolate.TicksRemaining <= 0 {
-				s.clearImmolateDebuff(char)
-				break
+			if agentEnabled {
+				reduction := time.Duration(runes.AgentOfChaosChaosBoltReduceSec * float64(time.Second))
+				s.reduceChaosBoltCooldown(char, reduction)
 			}
-		} else {
-			char.Immolate.LastTick = nextTick
 		}
+		char.Immolate.LastTick = nextTick
 		nextTick += char.Immolate.TickInterval
 	}
 }
@@ -498,6 +499,28 @@ func (s *Simulator) clearImmolateDebuff(char *character.Character) {
 	char.Immolate.TickCritChance = 0
 	char.Immolate.TicksRemaining = 0
 	char.Immolate.SnapshotDotDamage = 0
+	char.CataclysmicBurst.Stacks = 0
+}
+
+func (s *Simulator) cataclysmicBurstMultiplier(char *character.Character) float64 {
+	if !s.Config.Player.HasRune(runes.RuneCataclysmicBurst) {
+		return 1
+	}
+	stacks := char.CataclysmicBurst.Stacks
+	if stacks <= 0 {
+		return 1
+	}
+	return 1 + runes.CataclysmicBurstStackBonus*float64(stacks)
+}
+
+func (s *Simulator) reduceChaosBoltCooldown(char *character.Character, amount time.Duration) {
+	if amount <= 0 {
+		return
+	}
+	char.ChaosBolt.ReadyAt -= amount
+	if char.ChaosBolt.ReadyAt < 0 {
+		char.ChaosBolt.ReadyAt = 0
+	}
 }
 
 func (s *Simulator) expireBuffs(char *character.Character) {
@@ -505,26 +528,54 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 	if char.Pyroclasm.Active && now >= char.Pyroclasm.ExpiresAt {
 		char.Pyroclasm.Active = false
 		if s.LogEnabled {
-			s.logf(char, "BUFF_EXPIRE Pyroclasm")
+			s.logAt(char.Pyroclasm.ExpiresAt, "BUFF_EXPIRE Pyroclasm")
 		}
 	}
 	if char.ImprovedSoulLeech.Active && now >= char.ImprovedSoulLeech.ExpiresAt {
 		char.ImprovedSoulLeech.Active = false
 		if s.LogEnabled {
-			s.logf(char, "BUFF_EXPIRE Improved Soul Leech")
+			s.logAt(char.ImprovedSoulLeech.ExpiresAt, "BUFF_EXPIRE Improved Soul Leech")
 		}
 	}
 	if char.Backdraft.Active && (now >= char.Backdraft.ExpiresAt || char.Backdraft.Charges <= 0) {
 		char.Backdraft.Active = false
 		char.Backdraft.Charges = 0
 		if s.LogEnabled {
-			s.logf(char, "BUFF_EXPIRE Backdraft")
+			ts := char.Backdraft.ExpiresAt
+			if char.Backdraft.Charges <= 0 && now >= char.Backdraft.ExpiresAt {
+				ts = now
+			}
+			s.logAt(ts, "BUFF_EXPIRE Backdraft")
 		}
 	}
 	if char.Immolate.Active && now >= char.Immolate.ExpiresAt {
 		s.clearImmolateDebuff(char)
 		if s.LogEnabled {
-			s.logf(char, "DOT_EXPIRE Immolate")
+			s.logAt(char.Immolate.ExpiresAt, "DOT_EXPIRE Immolate")
+		}
+	}
+	if char.HeatingUp.Stacks > 0 && now >= char.HeatingUp.ExpiresAt {
+		char.HeatingUp.Stacks = 0
+		if s.LogEnabled {
+			s.logAt(char.HeatingUp.ExpiresAt, "DEBUFF_EXPIRE Heating Up")
+		}
+	}
+	if char.ChaosManifesting.FireExpiresAt > 0 && now >= char.ChaosManifesting.FireExpiresAt {
+		char.ChaosManifesting.FireExpiresAt = 0
+		if s.LogEnabled {
+			s.logAt(char.ChaosManifesting.FireExpiresAt, "BUFF_EXPIRE Chaos Manifesting (Fire)")
+		}
+	}
+	if char.ChaosManifesting.ShadowExpiresAt > 0 && now >= char.ChaosManifesting.ShadowExpiresAt {
+		char.ChaosManifesting.ShadowExpiresAt = 0
+		if s.LogEnabled {
+			s.logAt(char.ChaosManifesting.ShadowExpiresAt, "BUFF_EXPIRE Chaos Manifesting (Shadow)")
+		}
+	}
+	if char.GuldansChosen.Active && now >= char.GuldansChosen.ExpiresAt {
+		char.GuldansChosen.Active = false
+		if s.LogEnabled {
+			s.logAt(char.GuldansChosen.ExpiresAt, "BUFF_EXPIRE Gul'dan's Chosen")
 		}
 	}
 }
@@ -701,6 +752,19 @@ func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
 	}
 	if !prev.soulActive && char.ImprovedSoulLeech.Active {
 		s.logf(char, "BUFF_GAIN Improved Soul Leech (duration %.1fs)", char.ImprovedSoulLeech.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
+	}
+	if char.HeatingUp.Stacks > 0 && char.HeatingUp.Stacks != prev.heatingStacks {
+		change := "UPDATE"
+		if prev.heatingStacks == 0 {
+			change = "GAIN"
+		} else if char.HeatingUp.Stacks < prev.heatingStacks {
+			change = "DOWN"
+		}
+		remain := char.HeatingUp.ExpiresAt - char.CurrentTime
+		s.logf(char, "DEBUFF_%s Heating Up stacks=%d (%.1fs remaining)", change, char.HeatingUp.Stacks, remain.Seconds())
+	}
+	if !prev.guldansActive && char.GuldansChosen.Active {
+		s.logf(char, "BUFF_GAIN Gul'dan's Chosen (%.1fs window)", char.GuldansChosen.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
 	}
 }
 

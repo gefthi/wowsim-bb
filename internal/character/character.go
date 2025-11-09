@@ -50,6 +50,27 @@ type Character struct {
 	Backdraft         Buff // Not implemented in Phase 1
 	Pyroclasm         Buff // Phase 2: +6% fire/shadow damage
 	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
+	CataclysmicBurst  struct {
+		Stacks int
+	}
+	InnerFlame struct {
+		Active bool
+	}
+	HeatingUp struct {
+		Stacks    int
+		ExpiresAt time.Duration
+	}
+	DecisiveDecimation struct {
+		Active bool
+	}
+	ChaosManifesting struct {
+		FireExpiresAt   time.Duration
+		ShadowExpiresAt time.Duration
+	}
+	GuldansChosen struct {
+		Active    bool
+		ExpiresAt time.Duration
+	}
 
 	// Debuffs on target
 	Immolate Debuff

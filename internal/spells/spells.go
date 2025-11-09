@@ -5,6 +5,7 @@ import (
 	"time"
 	"wotlk-destro-sim/internal/character"
 	"wotlk-destro-sim/internal/config"
+	"wotlk-destro-sim/internal/runes"
 )
 
 // SpellType identifies different spells
@@ -116,6 +117,10 @@ func (e *Engine) CalculateSpellDamage(baseDamage, spCoefficient float64, char *c
 		damage *= e.Config.Talents.Pyroclasm.DamageMultiplier
 	}
 
+	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
+		damage *= runes.DestructionMasteryGlobalBonus
+	}
+
 	return damage
 }
 
@@ -134,6 +139,67 @@ func (e *Engine) ApplyFireAndBrimstone(damage float64, char *character.Character
 	}
 
 	return damage
+}
+
+func (e *Engine) fireTargetMultiplier(char *character.Character) float64 {
+	mult := 1.0
+	if e.Config.Player.HasRune(runes.RuneHeatingUp) {
+		mult *= runes.HeatingUpMultiplier(true, char.HeatingUp.Stacks, char.HeatingUp.ExpiresAt, char.CurrentTime)
+	}
+	return mult
+}
+
+func (e *Engine) applyFireTargetModifiers(damage float64, char *character.Character) float64 {
+	if damage <= 0 {
+		return damage
+	}
+	return damage * e.fireTargetMultiplier(char)
+}
+
+func (e *Engine) applyHeatingUpStack(char *character.Character) {
+	if !e.Config.Player.HasRune(runes.RuneHeatingUp) {
+		return
+	}
+	if char.HeatingUp.Stacks < runes.HeatingUpMaxStacks {
+		char.HeatingUp.Stacks++
+	}
+	duration := time.Duration(runes.HeatingUpDurationSec * float64(time.Second))
+	char.HeatingUp.ExpiresAt = char.CurrentTime + duration
+}
+
+func (e *Engine) agentOfChaosHasteMultiplier(char *character.Character) float64 {
+	if !e.Config.Player.HasRune(runes.RuneAgentOfChaos) {
+		return 1
+	}
+	mult := 1.0 + (char.Stats.HastePct / 100.0)
+	if mult <= 0 {
+		return 1
+	}
+	return mult
+}
+
+func (e *Engine) cataclysmicBurstMultiplier(char *character.Character) float64 {
+	if !e.Config.Player.HasRune(runes.RuneCataclysmicBurst) {
+		return 1
+	}
+	stacks := char.CataclysmicBurst.Stacks
+	if stacks <= 0 {
+		return 1
+	}
+	return 1 + runes.CataclysmicBurstStackBonus*float64(stacks)
+}
+
+func (e *Engine) handleCataclysmicBurstIncinerate(char *character.Character) {
+	if !e.Config.Player.HasRune(runes.RuneCataclysmicBurst) {
+		return
+	}
+	if !char.Immolate.Active {
+		return
+	}
+	if char.CataclysmicBurst.Stacks < runes.CataclysmicBurstMaxStacks {
+		char.CataclysmicBurst.Stacks++
+	}
+	char.Immolate.ExpiresAt += time.Duration(runes.CataclysmicBurstExtendSec * float64(time.Second))
 }
 
 func (e *Engine) backdraftEnabled() bool {
@@ -177,7 +243,7 @@ func (e *Engine) applyBackdraft(char *character.Character, result *CastResult, c
 			result.GCDTime = minGCD
 		}
 	}
-	if consumesCharge {
+	if consumesCharge && !e.shouldSkipBackdraftConsumption(char) {
 		char.Backdraft.Charges--
 		if char.Backdraft.Charges <= 0 {
 			char.Backdraft.Active = false
@@ -193,6 +259,28 @@ func (e *Engine) activateBackdraft(char *character.Character) {
 	char.Backdraft.Active = true
 	char.Backdraft.Charges = e.Config.Talents.Backdraft.Charges
 	char.Backdraft.ExpiresAt = char.CurrentTime + time.Duration(e.Config.Talents.Backdraft.Duration*float64(time.Second))
+}
+
+func (e *Engine) shouldSkipBackdraftConsumption(char *character.Character) bool {
+	if !e.Config.Player.HasRune(runes.RuneGuldansChosen) {
+		return false
+	}
+	if !char.GuldansChosen.Active {
+		return false
+	}
+	if char.CurrentTime >= char.GuldansChosen.ExpiresAt {
+		char.GuldansChosen.Active = false
+		return false
+	}
+	return true
+}
+
+func (e *Engine) activateGuldansChosen(char *character.Character) {
+	if !e.Config.Player.HasRune(runes.RuneGuldansChosen) {
+		return
+	}
+	char.GuldansChosen.Active = true
+	char.GuldansChosen.ExpiresAt = char.CurrentTime + time.Duration(runes.GuldansChosenDurationSec*float64(time.Second))
 }
 
 // CheckSoulLeechProc checks for Soul Leech proc (30% chance on fire/shadow damage)
@@ -224,6 +312,22 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 		ManaSpent: spellData.ManaCost,
 	}
 
+	baseTickCount := spellData.DotTicks
+	if baseTickCount <= 0 {
+		baseTickCount = 1
+	}
+	dotDuration := spellData.DotDuration
+	tickCount := baseTickCount
+	if e.Config.Player.HasRune(runes.RuneAgentOfChaos) {
+		dotDuration += runes.AgentOfChaosExtraDurationSec
+		tickCount += runes.AgentOfChaosExtraTicks
+	}
+	agentHasteMult := e.agentOfChaosHasteMultiplier(char)
+	effectiveDuration := dotDuration
+	if agentHasteMult != 1 {
+		effectiveDuration = dotDuration / agentHasteMult
+	}
+
 	e.applyBackdraft(char, &result, true)
 
 	// Spend mana
@@ -239,21 +343,35 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	// Calculate direct damage
 	directDamage := e.CalculateSpellDamage(spellData.DirectDamage, spellData.SPCoefficientDirect, char)
 	directDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
+	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
+		directDamage *= runes.DestructionMasteryImmolateBonus
+	}
+	if e.Config.Player.HasRune(runes.RuneAgentOfChaos) {
+		directDamage *= runes.AgentOfChaosDirectDamagePenalty
+	}
 
 	directCrit := e.RollCrit(char, 0)
 	if directCrit {
 		directDamage *= e.Config.Talents.Ruin.CritMultiplier
 	}
+	directDamage = e.applyFireTargetModifiers(directDamage, char)
 
 	// Calculate DoT snapshot (ticks handled separately)
 	dotSnapshot := e.CalculateSpellDamage(spellData.DotDamage, spellData.SPCoefficientDot, char)
 	dotSnapshot *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
 	dotSnapshot *= e.Config.Talents.Aftermath.DotDamageMultiplier
+	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
+		dotSnapshot *= runes.DestructionMasteryImmolateBonus
+	}
+	if e.Config.Player.HasRune(runes.RuneAgentOfChaos) && baseTickCount > 0 {
+		dotSnapshot *= float64(tickCount) / float64(baseTickCount)
+	}
 
-	tickCount := spellData.DotTicks
 	baseTickDamage := 0.0
 	if tickCount > 0 {
 		baseTickDamage = dotSnapshot / float64(tickCount)
+	} else {
+		baseTickDamage = dotSnapshot
 	}
 	tickCritChance := e.snapshotCritChance(char, 0)
 
@@ -265,20 +383,24 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 
 	// Apply Immolate debuff
 	char.Immolate.Active = true
-	char.Immolate.ExpiresAt = char.CurrentTime + time.Duration(spellData.DotDuration*float64(time.Second))
-	if spellData.DotTicks > 0 {
-		char.Immolate.TickInterval = time.Duration(spellData.DotDuration*float64(time.Second)) / time.Duration(spellData.DotTicks)
+	char.Immolate.ExpiresAt = char.CurrentTime + time.Duration(effectiveDuration*float64(time.Second))
+	if tickCount > 0 {
+		intervalSeconds := dotDuration / float64(tickCount)
+		if agentHasteMult != 1 {
+			intervalSeconds /= agentHasteMult
+		}
+		char.Immolate.TickInterval = time.Duration(intervalSeconds * float64(time.Second))
 	} else {
 		char.Immolate.TickInterval = 0
 	}
 	char.Immolate.LastTick = char.CurrentTime
-	if spellData.DotTicks > 0 {
+	if tickCount > 0 {
 		char.Immolate.TickDamage = baseTickDamage
 	} else {
 		char.Immolate.TickDamage = dotSnapshot
 	}
 	char.Immolate.TickCritChance = tickCritChance
-	char.Immolate.TicksRemaining = spellData.DotTicks
+	char.Immolate.TicksRemaining = tickCount
 	char.Immolate.SnapshotDotDamage = dotSnapshot
 
 	return result
@@ -318,6 +440,7 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 
 	// Apply Fire and Brimstone if Immolate is up (affects Incinerate)
 	damage = e.ApplyFireAndBrimstone(damage, char, SpellIncinerate)
+	damage = e.applyFireTargetModifiers(damage, char)
 
 	// Roll crit
 	if e.RollCrit(char, 0) {
@@ -326,6 +449,10 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 	}
 
 	result.Damage = damage
+
+	if result.DidHit {
+		e.handleCataclysmicBurstIncinerate(char)
+	}
 
 	// Check for Soul Leech proc (30% chance on fire damage)
 	e.CheckSoulLeechProc(char)
@@ -345,6 +472,7 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 	}
 
 	e.applyBackdraft(char, &result, true)
+	e.activateGuldansChosen(char)
 
 	char.SpendMana(spellData.ManaCost)
 
@@ -361,6 +489,7 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 
 	// Apply Fire and Brimstone (affects Chaos Bolt)
 	damage = e.ApplyFireAndBrimstone(damage, char, SpellChaosBolt)
+	damage = e.applyFireTargetModifiers(damage, char)
 
 	// Roll crit
 	if e.RollCrit(char, 0) {
@@ -408,11 +537,13 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 		immolateDotDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
 		immolateDotDamage *= e.Config.Talents.Aftermath.DotDamageMultiplier
 	}
+	immolateDotDamage *= e.cataclysmicBurstMultiplier(char)
 
 	baseDamage := immolateDotDamage * spellData.ImmolateDotPercentage
 
 	// Apply Emberstorm
 	baseDamage *= e.Config.Talents.Emberstorm.DamageMultiplier
+	baseDamage = e.applyFireTargetModifiers(baseDamage, char)
 
 	// Conflagrate has +25% crit from Fire and Brimstone
 	bonusCrit := e.Config.Talents.FireAndBrimstone.ConflagrateCritBonus
@@ -435,8 +566,14 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 
 	result.Damage = totalDamage
 
+	e.applyHeatingUpStack(char)
+
 	// Check for Soul Leech proc (30% chance on fire damage)
 	e.CheckSoulLeechProc(char)
+
+	if e.Config.Player.HasRune(runes.RuneCataclysmicBurst) {
+		char.CataclysmicBurst.Stacks = 0
+	}
 
 	// Activate Backdraft (3 charges, 15s duration) on hit
 	if result.DidHit {

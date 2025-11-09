@@ -2,7 +2,7 @@ package config
 
 import (
 	"os"
-	
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -17,7 +17,7 @@ type Constants struct {
 		HasteRatingPerPercent int `yaml:"haste_rating_per_percent"`
 	} `yaml:"stat_conversions"`
 	HitMechanics struct {
-		BossHitCap          int `yaml:"boss_hit_cap"`
+		BossHitCap           int `yaml:"boss_hit_cap"`
 		EqualLevelMissChance int `yaml:"equal_level_miss_chance"`
 	} `yaml:"hit_mechanics"`
 	GCD struct {
@@ -29,23 +29,23 @@ type Constants struct {
 // Spells holds all spell data
 type Spells struct {
 	Immolate struct {
-		DirectDamage       float64 `yaml:"direct_damage"`
-		DotDamage          float64 `yaml:"dot_damage"`
-		DotDuration        float64 `yaml:"dot_duration"`
-		DotTicks           int     `yaml:"dot_ticks"`
-		CastTime           float64 `yaml:"cast_time"`
-		ManaCost           float64 `yaml:"mana_cost"`
+		DirectDamage        float64 `yaml:"direct_damage"`
+		DotDamage           float64 `yaml:"dot_damage"`
+		DotDuration         float64 `yaml:"dot_duration"`
+		DotTicks            int     `yaml:"dot_ticks"`
+		CastTime            float64 `yaml:"cast_time"`
+		ManaCost            float64 `yaml:"mana_cost"`
 		SPCoefficientDirect float64 `yaml:"sp_coefficient_direct"`
-		SPCoefficientDot   float64 `yaml:"sp_coefficient_dot"`
+		SPCoefficientDot    float64 `yaml:"sp_coefficient_dot"`
 	} `yaml:"immolate"`
 	Incinerate struct {
-		BaseDamageMin      float64 `yaml:"base_damage_min"`
-		BaseDamageMax      float64 `yaml:"base_damage_max"`
-		ImmolateBonusMin   float64 `yaml:"immolate_bonus_min"`
-		ImmolateBonusMax   float64 `yaml:"immolate_bonus_max"`
-		CastTime           float64 `yaml:"cast_time"`
-		ManaCost           float64 `yaml:"mana_cost"`
-		SPCoefficient      float64 `yaml:"sp_coefficient"`
+		BaseDamageMin    float64 `yaml:"base_damage_min"`
+		BaseDamageMax    float64 `yaml:"base_damage_max"`
+		ImmolateBonusMin float64 `yaml:"immolate_bonus_min"`
+		ImmolateBonusMax float64 `yaml:"immolate_bonus_max"`
+		CastTime         float64 `yaml:"cast_time"`
+		ManaCost         float64 `yaml:"mana_cost"`
+		SPCoefficient    float64 `yaml:"sp_coefficient"`
 	} `yaml:"incinerate"`
 	ChaosBolt struct {
 		BaseDamageMin float64 `yaml:"base_damage_min"`
@@ -56,22 +56,22 @@ type Spells struct {
 		SPCoefficient float64 `yaml:"sp_coefficient"`
 	} `yaml:"chaos_bolt"`
 	Conflagrate struct {
-		ImmolateDotPercentage   float64 `yaml:"immolate_dot_percentage"`
-		ConflagDotPercentage    float64 `yaml:"conflag_dot_percentage"`
-		CastTime                float64 `yaml:"cast_time"`
-		Cooldown                float64 `yaml:"cooldown"`
-		ManaCost                float64 `yaml:"mana_cost"`
-		SPCoefficient           float64 `yaml:"sp_coefficient"`
+		ImmolateDotPercentage float64 `yaml:"immolate_dot_percentage"`
+		ConflagDotPercentage  float64 `yaml:"conflag_dot_percentage"`
+		CastTime              float64 `yaml:"cast_time"`
+		Cooldown              float64 `yaml:"cooldown"`
+		ManaCost              float64 `yaml:"mana_cost"`
+		SPCoefficient         float64 `yaml:"sp_coefficient"`
 	} `yaml:"conflagrate"`
 	LifeTap struct {
-		CastTime                float64 `yaml:"cast_time"`
-		Cooldown                float64 `yaml:"cooldown"`
-		ManaCost                float64 `yaml:"mana_cost"`
-		HealthBase              float64 `yaml:"health_base"`
-		SpiritMultiplier        float64 `yaml:"spirit_multiplier"`
-		ManaBase                float64 `yaml:"mana_base"`
-		SpellpowerCoefficient   float64 `yaml:"spellpower_coefficient"`
-		ImprovedLifetapPerRank  float64 `yaml:"improved_lifetap_per_rank"`
+		CastTime               float64 `yaml:"cast_time"`
+		Cooldown               float64 `yaml:"cooldown"`
+		ManaCost               float64 `yaml:"mana_cost"`
+		HealthBase             float64 `yaml:"health_base"`
+		SpiritMultiplier       float64 `yaml:"spirit_multiplier"`
+		ManaBase               float64 `yaml:"mana_base"`
+		SpellpowerCoefficient  float64 `yaml:"spellpower_coefficient"`
+		ImprovedLifetapPerRank float64 `yaml:"improved_lifetap_per_rank"`
 	} `yaml:"life_tap"`
 }
 
@@ -87,10 +87,10 @@ type Talents struct {
 		DotDamageMultiplier float64 `yaml:"dot_damage_multiplier"`
 	} `yaml:"aftermath"`
 	FireAndBrimstone struct {
-		DamageMultiplier       float64 `yaml:"damage_multiplier"`
-		ConflagrateCritBonus   float64 `yaml:"conflagrate_crit_bonus"`
-		AppliesToIncinerate    bool    `yaml:"applies_to_incinerate"`
-		AppliesToChaosBolt     bool    `yaml:"applies_to_chaos_bolt"`
+		DamageMultiplier     float64 `yaml:"damage_multiplier"`
+		ConflagrateCritBonus float64 `yaml:"conflagrate_crit_bonus"`
+		AppliesToIncinerate  bool    `yaml:"applies_to_incinerate"`
+		AppliesToChaosBolt   bool    `yaml:"applies_to_chaos_bolt"`
 	} `yaml:"fire_and_brimstone"`
 	Ruin struct {
 		CritMultiplier float64 `yaml:"crit_multiplier"`
@@ -122,12 +122,12 @@ type Talents struct {
 		ProcSpells       []string `yaml:"proc_spells"`
 	} `yaml:"pyroclasm"`
 	ImprovedSoulLeech struct {
-		Points             int     `yaml:"points"`
-		Enabled            bool    `yaml:"enabled"`
-		InstantManaReturn  float64 `yaml:"instant_mana_return"`
-		HotManaPerTick     float64 `yaml:"hot_mana_per_tick"`
-		HotDuration        float64 `yaml:"hot_duration"`
-		HotTickInterval    float64 `yaml:"hot_tick_interval"`
+		Points            int     `yaml:"points"`
+		Enabled           bool    `yaml:"enabled"`
+		InstantManaReturn float64 `yaml:"instant_mana_return"`
+		HotManaPerTick    float64 `yaml:"hot_mana_per_tick"`
+		HotDuration       float64 `yaml:"hot_duration"`
+		HotTickInterval   float64 `yaml:"hot_tick_interval"`
 	} `yaml:"improved_soul_leech"`
 }
 
@@ -153,6 +153,22 @@ type Player struct {
 		DurationSeconds int `yaml:"duration_seconds"`
 		Iterations      int `yaml:"iterations"`
 	} `yaml:"simulation"`
+	MysticEnchants MysticEnchantConfig `yaml:"mystic_enchants"`
+}
+
+// MysticEnchantConfig captures rune/ME selection and slot limits.
+type MysticEnchantConfig struct {
+	Limits struct {
+		Legendary int `yaml:"legendary"`
+		Epic      int `yaml:"epic"`
+		Rare      int `yaml:"rare"`
+	} `yaml:"limits"`
+	Equipped struct {
+		Legendary []string `yaml:"legendary"`
+		Epic      []string `yaml:"epic"`
+		Rare      []string `yaml:"rare"`
+	} `yaml:"equipped"`
+	active map[string]struct{} `yaml:"-"`
 }
 
 // Config holds all configuration
@@ -166,7 +182,7 @@ type Config struct {
 // LoadConfig loads all YAML configuration files
 func LoadConfig(configDir string) (*Config, error) {
 	cfg := &Config{}
-	
+
 	// Load constants
 	data, err := os.ReadFile(configDir + "/constants.yaml")
 	if err != nil {
@@ -175,7 +191,7 @@ func LoadConfig(configDir string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg.Constants); err != nil {
 		return nil, err
 	}
-	
+
 	// Load spells
 	data, err = os.ReadFile(configDir + "/spells.yaml")
 	if err != nil {
@@ -184,7 +200,7 @@ func LoadConfig(configDir string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg.Spells); err != nil {
 		return nil, err
 	}
-	
+
 	// Load talents
 	data, err = os.ReadFile(configDir + "/talents.yaml")
 	if err != nil {
@@ -193,7 +209,7 @@ func LoadConfig(configDir string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg.Talents); err != nil {
 		return nil, err
 	}
-	
+
 	// Load player
 	data, err = os.ReadFile(configDir + "/player.yaml")
 	if err != nil {
@@ -202,6 +218,10 @@ func LoadConfig(configDir string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg.Player); err != nil {
 		return nil, err
 	}
-	
+
+	if err := cfg.validate(); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
 }

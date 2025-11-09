@@ -14,7 +14,7 @@ rotation:
               debuff: immolate
         - dot_remaining:
             spell: immolate
-            lt_seconds: 3
+            lt_seconds: 2
   - action: cast_spell
     spell: conflagrate
     when:
