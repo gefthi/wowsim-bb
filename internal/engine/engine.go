@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"sort"
 	"time"
 	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
@@ -52,6 +53,123 @@ func newSpellStatsMap() map[spells.SpellType]*SpellStats {
 		stats[spell.Type] = newSpellStats()
 	}
 	return stats
+}
+
+func (s *Simulator) scheduleEvent(at time.Duration, action func()) *scheduledEvent {
+	if action == nil {
+		return nil
+	}
+	ev := &scheduledEvent{
+		executeAt: at,
+		action:    action,
+	}
+	s.events.add(ev)
+	return ev
+}
+
+func (s *Simulator) runDueEvents(now time.Duration) {
+	for {
+		ev := s.events.popReady(now)
+		if ev == nil {
+			break
+		}
+		if ev.action != nil {
+			ev.action()
+		}
+	}
+}
+
+func (s *Simulator) nextEventDelta(now time.Duration) (time.Duration, bool) {
+	return s.events.nextDelta(now)
+}
+
+func (s *Simulator) wait(char *character.Character, duration time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
+	if duration <= 0 {
+		s.runDueEvents(char.CurrentTime)
+		return
+	}
+	remaining := duration
+	for remaining > 0 {
+		s.runDueEvents(char.CurrentTime)
+		delta := remaining
+		if next, ok := s.nextEventDelta(char.CurrentTime); ok && next < delta {
+			delta = next
+		}
+		if delta <= 0 {
+			// If an event is due now, process it before continuing.
+			s.runDueEvents(char.CurrentTime)
+			continue
+		}
+		s.advanceTime(char, delta, result, spellEngine)
+		remaining -= delta
+	}
+	s.runDueEvents(char.CurrentTime)
+}
+
+func (s *Simulator) cancelImmolateTicks(char *character.Character) {
+	if char.Immolate.TickHandle != nil {
+		char.Immolate.TickHandle.Cancel()
+		char.Immolate.TickHandle = nil
+	}
+}
+
+func (s *Simulator) scheduleNextImmolateTick(char *character.Character, result *SimulationResult, spellEngine *spells.Engine) {
+	if char.Immolate.TickInterval <= 0 {
+		return
+	}
+	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
+	if char.Immolate.ExpiresAt > 0 && nextTick >= char.Immolate.ExpiresAt {
+		return
+	}
+	handle := s.scheduleEvent(nextTick, func() {
+		s.executeImmolateTick(char, nextTick, result, spellEngine)
+	})
+	char.Immolate.TickHandle = handle
+}
+
+func (s *Simulator) executeImmolateTick(char *character.Character, tickTime time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
+	char.Immolate.TickHandle = nil
+	if !char.Immolate.Active {
+		return
+	}
+
+	damage := char.Immolate.TickDamage * s.cataclysmicBurstMultiplier(char)
+	if s.Config.Player.HasRune(runes.RuneHeatingUp) && char.HeatingUp != nil {
+		stacks := char.HeatingUp.Stacks()
+		expires := char.HeatingUp.ExpiresAt()
+		damage *= runes.HeatingUpMultiplier(char.HeatingUp.ActiveAt(tickTime), stacks, expires, tickTime)
+	}
+
+	didCrit := false
+	chance := char.Immolate.TickCritChance
+	if chance >= 1 {
+		didCrit = true
+	} else if chance > 0 && spellEngine.Rng.Float64() < chance {
+		didCrit = true
+	}
+	if didCrit {
+		damage *= s.Config.Talents.Ruin.CritMultiplier
+	}
+
+	result.recordDotTick(spells.SpellImmolate, damage, didCrit)
+	if s.LogEnabled {
+		critTag := ""
+		if didCrit {
+			critTag = " (CRIT)"
+		}
+		s.logAt(tickTime, "DOT_TICK Immolate damage=%.0f%s", damage, critTag)
+	}
+
+	char.Immolate.LastTick = tickTime
+	char.Immolate.TicksRemaining--
+
+	agentEnabled := s.Config.Player.HasRune(runes.RuneAgentOfChaos)
+	if agentEnabled {
+		reduction := time.Duration(runes.AgentOfChaosChaosBoltReduceSec * float64(time.Second))
+		s.reduceChaosBoltCooldown(char, reduction)
+	}
+
+	s.scheduleNextImmolateTick(char, result, spellEngine)
 }
 
 func (s *SpellStats) add(other *SpellStats) {
@@ -147,6 +265,7 @@ type Simulator struct {
 	LogEnabled bool
 	LogWriter  io.Writer
 	BaseSeed   int64
+	events     eventQueue
 }
 
 // NewSimulator creates a new simulator
@@ -189,6 +308,7 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 func (s *Simulator) runSingleIteration(originalChar *character.Character, iteration int) *SimulationResult {
 	// Create a fresh copy of character for this iteration
 	char := character.NewCharacter(originalChar.Stats)
+	s.events = s.events[:0]
 	if s.LogEnabled {
 		s.logStaticf("--- Iteration %d Start ---", iteration+1)
 	}
@@ -203,13 +323,14 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 
 	// Combat loop
 	for char.CurrentTime < s.SimConfig.Duration {
+		s.runDueEvents(char.CurrentTime)
 		if !hasImmolate && char.Immolate.Active {
 			hasImmolate = true
 		}
 
-		if char.CurrentTime < char.GCDReadyAt {
-			wait := char.GCDReadyAt - char.CurrentTime
-			s.advanceTime(char, wait, result, spellEngine)
+		if !char.GCD.Ready(char.CurrentTime) {
+			wait := char.GCD.Remaining(char.CurrentTime)
+			s.wait(char, wait, result, spellEngine)
 			continue
 		}
 
@@ -265,7 +386,7 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 		}
 
 		// If we somehow can't do anything, advance time by GCD
-		s.advanceTime(char, time.Duration(s.Config.Constants.GCD.Base*float64(time.Second)), result, spellEngine)
+		s.wait(char, time.Duration(s.Config.Constants.GCD.Base*float64(time.Second)), result, spellEngine)
 	}
 
 	return result
@@ -311,6 +432,12 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 	switch spell {
 	case spells.SpellImmolate:
 		castResult = spellEngine.CastImmolate(char)
+		if castResult.DidHit {
+			s.cancelImmolateTicks(char)
+			s.scheduleNextImmolateTick(char, result, spellEngine)
+		} else {
+			s.cancelImmolateTicks(char)
+		}
 	case spells.SpellIncinerate:
 		castResult = spellEngine.CastIncinerate(char)
 	case spells.SpellChaosBolt:
@@ -365,7 +492,10 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 	if castResult.GCDTime > totalTime {
 		totalTime = castResult.GCDTime
 	}
-	s.advanceTime(char, totalTime, result, spellEngine)
+	if castResult.GCDTime > 0 {
+		char.GCD.Reset(char.CurrentTime, castResult.GCDTime)
+	}
+	s.wait(char, totalTime, result, spellEngine)
 
 	if pendingLog != nil {
 		s.emitCastResult(pendingLog, char.CurrentTime)
@@ -402,10 +532,8 @@ func (s *Simulator) advanceTime(char *character.Character, duration time.Duratio
 	}
 
 	char.AdvanceTime(duration)
-	s.processDotTicks(char, start, char.CurrentTime, result, spellEngine)
 	s.processSoulLeechHoT(char, start, end)
 	s.expireBuffs(char)
-	char.GCDReadyAt = char.CurrentTime
 }
 
 func (s *Simulator) buffOverlapSeconds(buff *character.Buff, start, end time.Duration) float64 {
@@ -451,62 +579,23 @@ func (s *Simulator) processSoulLeechHoT(char *character.Character, start, end ti
 	}
 }
 
-func (s *Simulator) processDotTicks(char *character.Character, start, end time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
-	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 {
-		return
-	}
-	if spellEngine == nil {
-		return
-	}
-	heatingEnabled := s.Config.Player.HasRune(runes.RuneHeatingUp)
-	agentEnabled := s.Config.Player.HasRune(runes.RuneAgentOfChaos)
-	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
-	for nextTick <= end && nextTick < char.Immolate.ExpiresAt {
-		if nextTick > start {
-			damage := char.Immolate.TickDamage * s.cataclysmicBurstMultiplier(char)
-			damage *= runes.HeatingUpMultiplier(heatingEnabled, char.HeatingUp.Stacks, char.HeatingUp.ExpiresAt, nextTick)
-			didCrit := false
-			chance := char.Immolate.TickCritChance
-			if chance >= 1 {
-				didCrit = true
-			} else if chance > 0 && spellEngine.Rng.Float64() < chance {
-				didCrit = true
-			}
-			if didCrit {
-				damage *= s.Config.Talents.Ruin.CritMultiplier
-			}
-			result.recordDotTick(spells.SpellImmolate, damage, didCrit)
-			if s.LogEnabled {
-				critTag := ""
-				if didCrit {
-					critTag = " (CRIT)"
-				}
-				s.logAt(nextTick, "DOT_TICK Immolate damage=%.0f%s", damage, critTag)
-			}
-			if agentEnabled {
-				reduction := time.Duration(runes.AgentOfChaosChaosBoltReduceSec * float64(time.Second))
-				s.reduceChaosBoltCooldown(char, reduction)
-			}
-		}
-		char.Immolate.LastTick = nextTick
-		nextTick += char.Immolate.TickInterval
-	}
-}
-
 func (s *Simulator) clearImmolateDebuff(char *character.Character) {
+	s.cancelImmolateTicks(char)
 	char.Immolate.Active = false
 	char.Immolate.TickDamage = 0
 	char.Immolate.TickCritChance = 0
 	char.Immolate.TicksRemaining = 0
 	char.Immolate.SnapshotDotDamage = 0
-	char.CataclysmicBurst.Stacks = 0
+	if char.CataclysmicBurst != nil {
+		char.CataclysmicBurst.Clear(char.CurrentTime)
+	}
 }
 
 func (s *Simulator) cataclysmicBurstMultiplier(char *character.Character) float64 {
-	if !s.Config.Player.HasRune(runes.RuneCataclysmicBurst) {
+	if !s.Config.Player.HasRune(runes.RuneCataclysmicBurst) || char.CataclysmicBurst == nil {
 		return 1
 	}
-	stacks := char.CataclysmicBurst.Stacks
+	stacks := char.CataclysmicBurst.Stacks()
 	if stacks <= 0 {
 		return 1
 	}
@@ -554,10 +643,14 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.Immolate.ExpiresAt, "DOT_EXPIRE Immolate")
 		}
 	}
-	if char.HeatingUp.Stacks > 0 && now >= char.HeatingUp.ExpiresAt {
-		char.HeatingUp.Stacks = 0
-		if s.LogEnabled {
-			s.logAt(char.HeatingUp.ExpiresAt, "DEBUFF_EXPIRE Heating Up")
+	if char.HeatingUp != nil && char.HeatingUp.Stacks() > 0 {
+		expireAt := char.HeatingUp.ExpiresAt()
+		if char.HeatingUp.CheckExpiration(now) && s.LogEnabled {
+			ts := expireAt
+			if ts == 0 {
+				ts = now
+			}
+			s.logAt(ts, "DEBUFF_EXPIRE Heating Up")
 		}
 	}
 	if char.ChaosManifesting.FireExpiresAt > 0 && now >= char.ChaosManifesting.FireExpiresAt {
@@ -572,10 +665,14 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.ChaosManifesting.ShadowExpiresAt, "BUFF_EXPIRE Chaos Manifesting (Shadow)")
 		}
 	}
-	if char.GuldansChosen.Active && now >= char.GuldansChosen.ExpiresAt {
-		char.GuldansChosen.Active = false
-		if s.LogEnabled {
-			s.logAt(char.GuldansChosen.ExpiresAt, "BUFF_EXPIRE Gul'dan's Chosen")
+	if char.GuldansChosen != nil && char.GuldansChosen.Active() {
+		expireAt := char.GuldansChosen.ExpiresAt()
+		if char.GuldansChosen.CheckExpiration(now) && s.LogEnabled {
+			ts := expireAt
+			if ts == 0 {
+				ts = now
+			}
+			s.logAt(ts, "BUFF_EXPIRE Gul'dan's Chosen")
 		}
 	}
 }
@@ -624,11 +721,26 @@ func (r *SimulationResult) PrintResults() {
 	for _, stats := range r.SpellBreakdown {
 		totalDamage += stats.Damage
 	}
+	type spellRow struct {
+		label string
+		stats *SpellStats
+	}
+	rows := make([]spellRow, 0, len(spellPrintOrder))
 	for _, entry := range spellPrintOrder {
-		stats := r.SpellBreakdown[entry.Type]
-		if stats == nil || stats.Casts == 0 {
-			continue
+		if stats := r.SpellBreakdown[entry.Type]; stats != nil && stats.Casts > 0 {
+			rows = append(rows, spellRow{label: entry.Label, stats: stats})
 		}
+	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		di := rows[i].stats.Damage
+		dj := rows[j].stats.Damage
+		if di == dj {
+			return rows[i].label < rows[j].label
+		}
+		return di > dj
+	})
+	for _, row := range rows {
+		stats := row.stats
 		avgDamagePerIter := stats.Damage / float64(r.Iterations)
 		damagePct := 0.0
 		if totalDamage > 0 {
@@ -652,7 +764,7 @@ func (r *SimulationResult) PrintResults() {
 			missPct = float64(stats.Misses) / float64(stats.Casts) * 100.0
 		}
 		fmt.Printf("%-13s | %12.0f | %5.1f%% | %7.0f | %7.0f | %7.0f | %6.1f%% | %6.1f%%\n",
-			entry.Label, avgDamagePerIter, damagePct, avgHit, minHit, maxHit, critPct, missPct)
+			row.label, avgDamagePerIter, damagePct, avgHit, minHit, maxHit, critPct, missPct)
 	}
 	fmt.Println("--------------------------------------------------------------------------")
 	if r.LifeTapCount > 0 {
@@ -753,18 +865,36 @@ func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
 	if !prev.soulActive && char.ImprovedSoulLeech.Active {
 		s.logf(char, "BUFF_GAIN Improved Soul Leech (duration %.1fs)", char.ImprovedSoulLeech.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
 	}
-	if char.HeatingUp.Stacks > 0 && char.HeatingUp.Stacks != prev.heatingStacks {
+	if char.HeatingUp != nil && char.HeatingUp.Stacks() > 0 && char.HeatingUp.Stacks() != prev.heatingStacks {
 		change := "UPDATE"
 		if prev.heatingStacks == 0 {
 			change = "GAIN"
-		} else if char.HeatingUp.Stacks < prev.heatingStacks {
+		} else if char.HeatingUp.Stacks() < prev.heatingStacks {
 			change = "DOWN"
 		}
-		remain := char.HeatingUp.ExpiresAt - char.CurrentTime
-		s.logf(char, "DEBUFF_%s Heating Up stacks=%d (%.1fs remaining)", change, char.HeatingUp.Stacks, remain.Seconds())
+		remain := char.HeatingUp.Remaining(char.CurrentTime)
+		s.logf(char, "DEBUFF_%s Heating Up stacks=%d (%.1fs remaining)", change, char.HeatingUp.Stacks(), remain.Seconds())
 	}
-	if !prev.guldansActive && char.GuldansChosen.Active {
-		s.logf(char, "BUFF_GAIN Gul'dan's Chosen (%.1fs window)", char.GuldansChosen.ExpiresAt.Seconds()-char.CurrentTime.Seconds())
+	if char.CataclysmicBurst != nil {
+		stacks := char.CataclysmicBurst.Stacks()
+		if stacks != prev.catBurstStacks {
+			change := "UPDATE"
+			if prev.catBurstStacks == 0 && stacks > 0 {
+				change = "GAIN"
+			} else if stacks == 0 {
+				change = "EXPIRE"
+			} else if stacks < prev.catBurstStacks {
+				change = "DOWN"
+			}
+			s.logf(char, "BUFF_%s Cataclysmic Burst stacks=%d", change, stacks)
+		}
+	}
+	if char.GuldansChosen != nil {
+		active := char.GuldansChosen.ActiveAt(char.CurrentTime)
+		if !prev.guldansActive && active {
+			remain := char.GuldansChosen.Remaining(char.CurrentTime)
+			s.logf(char, "BUFF_GAIN Gul'dan's Chosen (%.1fs window)", remain.Seconds())
+		}
 	}
 }
 

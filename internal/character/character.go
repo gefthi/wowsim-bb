@@ -1,6 +1,11 @@
 package character
 
-import "time"
+import (
+	"time"
+
+	"wotlk-destro-sim/internal/effects"
+	"wotlk-destro-sim/internal/runes"
+)
 
 // Stats represents character statistics
 type Stats struct {
@@ -34,6 +39,13 @@ type Debuff struct {
 	TickCritChance    float64
 	TicksRemaining    int
 	SnapshotDotDamage float64
+	TickHandle        EventHandle
+}
+
+// EventHandle allows simulation systems to cancel scheduled events without
+// depending on the underlying scheduler implementation.
+type EventHandle interface {
+	Cancel()
 }
 
 // Cooldown tracks spell cooldowns
@@ -50,16 +62,11 @@ type Character struct {
 	Backdraft         Buff // Not implemented in Phase 1
 	Pyroclasm         Buff // Phase 2: +6% fire/shadow damage
 	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
-	CataclysmicBurst  struct {
-		Stacks int
-	}
-	InnerFlame struct {
+	CataclysmicBurst  *effects.Aura
+	InnerFlame        struct {
 		Active bool
 	}
-	HeatingUp struct {
-		Stacks    int
-		ExpiresAt time.Duration
-	}
+	HeatingUp          *effects.Aura
 	DecisiveDecimation struct {
 		Active bool
 	}
@@ -67,10 +74,7 @@ type Character struct {
 		FireExpiresAt   time.Duration
 		ShadowExpiresAt time.Duration
 	}
-	GuldansChosen struct {
-		Active    bool
-		ExpiresAt time.Duration
-	}
+	GuldansChosen *effects.Aura
 
 	// Debuffs on target
 	Immolate Debuff
@@ -80,7 +84,7 @@ type Character struct {
 	Conflagrate Cooldown
 
 	// GCD
-	GCDReadyAt time.Duration
+	GCD effects.Timer
 
 	// Combat state
 	CurrentTime time.Duration
@@ -93,17 +97,24 @@ type Character struct {
 
 // NewCharacter creates a new character with given stats
 func NewCharacter(stats Stats) *Character {
-	return &Character{
+	char := &Character{
 		Stats: stats,
 		Resources: Resources{
 			CurrentMana: stats.MaxMana,
 		},
 	}
+	heatingDuration := time.Duration(runes.HeatingUpDurationSec * float64(time.Second))
+	char.HeatingUp = effects.NewAura("Heating Up", heatingDuration, runes.HeatingUpMaxStacks)
+	gcDuration := time.Duration(runes.GuldansChosenDurationSec * float64(time.Second))
+	char.GuldansChosen = effects.NewAura("Gul'dan's Chosen", gcDuration, 1)
+	char.CataclysmicBurst = effects.NewAura("Cataclysmic Burst", 0, runes.CataclysmicBurstMaxStacks)
+	char.GCD.ForceReady(0)
+	return char
 }
 
 // IsGCDReady checks if GCD is ready
 func (c *Character) IsGCDReady() bool {
-	return c.CurrentTime >= c.GCDReadyAt
+	return c.GCD.Ready(c.CurrentTime)
 }
 
 // IsCooldownReady checks if a specific cooldown is ready

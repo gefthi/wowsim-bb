@@ -22,6 +22,7 @@ type buffState struct {
 	soulActive       bool
 	heatingStacks    int
 	heatingExpires   time.Duration
+	catBurstStacks   int
 	guldansActive    bool
 	guldansExpires   time.Duration
 }
@@ -166,16 +167,33 @@ func spellTypeName(spell spells.SpellType) string {
 }
 
 func captureBuffState(char *character.Character) buffState {
+	catStacks := 0
+	if char.CataclysmicBurst != nil {
+		catStacks = char.CataclysmicBurst.Stacks()
+	}
+	heatStacks := 0
+	heatExpires := time.Duration(0)
+	if char.HeatingUp != nil {
+		heatStacks = char.HeatingUp.Stacks()
+		heatExpires = char.HeatingUp.ExpiresAt()
+	}
+	guldansActive := false
+	guldansExpires := time.Duration(0)
+	if char.GuldansChosen != nil {
+		guldansActive = char.GuldansChosen.ActiveAt(char.CurrentTime)
+		guldansExpires = char.GuldansChosen.ExpiresAt()
+	}
 	return buffState{
 		pyroActive:       char.Pyroclasm.Active,
 		pyroExpires:      char.Pyroclasm.ExpiresAt,
 		backdraftActive:  char.Backdraft.Active,
 		backdraftCharges: char.Backdraft.Charges,
 		soulActive:       char.ImprovedSoulLeech.Active,
-		heatingStacks:    char.HeatingUp.Stacks,
-		heatingExpires:   char.HeatingUp.ExpiresAt,
-		guldansActive:    char.GuldansChosen.Active,
-		guldansExpires:   char.GuldansChosen.ExpiresAt,
+		heatingStacks:    heatStacks,
+		heatingExpires:   heatExpires,
+		catBurstStacks:   catStacks,
+		guldansActive:    guldansActive,
+		guldansExpires:   guldansExpires,
 	}
 }
 
@@ -221,7 +239,7 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 					if step.Duration <= 0 {
 						continue
 					}
-					s.advanceTime(char, step.Duration, result, spellEngine)
+					s.wait(char, step.Duration, result, spellEngine)
 					return true
 				default:
 					continue
@@ -231,7 +249,7 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 			if action.Duration <= 0 {
 				continue
 			}
-			s.advanceTime(char, action.Duration, result, spellEngine)
+			s.wait(char, action.Duration, result, spellEngine)
 			return true
 		default:
 			// use_item not implemented yet
