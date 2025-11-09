@@ -119,6 +119,25 @@ func (r *SimulationResult) recordSpellCast(spell spells.SpellType, castResult sp
 	}
 }
 
+func (r *SimulationResult) recordDotTick(spell spells.SpellType, damage float64, didCrit bool) {
+	stats, ok := r.SpellBreakdown[spell]
+	if !ok {
+		return
+	}
+	stats.Hits++
+	stats.Damage += damage
+	if stats.MinDamage == math.MaxFloat64 || damage < stats.MinDamage {
+		stats.MinDamage = damage
+	}
+	if damage > stats.MaxDamage {
+		stats.MaxDamage = damage
+	}
+	if didCrit {
+		stats.Crits++
+	}
+	r.TotalDamage += damage
+}
+
 // Simulator runs the combat simulation
 type Simulator struct {
 	Config     *config.Config
@@ -189,7 +208,7 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 
 		if char.CurrentTime < char.GCDReadyAt {
 			wait := char.GCDReadyAt - char.CurrentTime
-			s.advanceTime(char, wait, result)
+			s.advanceTime(char, wait, result, spellEngine)
 			continue
 		}
 
@@ -245,7 +264,7 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 		}
 
 		// If we somehow can't do anything, advance time by GCD
-		s.advanceTime(char, time.Duration(s.Config.Constants.GCD.Base*float64(time.Second)), result)
+		s.advanceTime(char, time.Duration(s.Config.Constants.GCD.Base*float64(time.Second)), result, spellEngine)
 	}
 
 	return result
@@ -345,7 +364,7 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 	if castResult.GCDTime > totalTime {
 		totalTime = castResult.GCDTime
 	}
-	s.advanceTime(char, totalTime, result)
+	s.advanceTime(char, totalTime, result, spellEngine)
 
 	if pendingLog != nil {
 		s.emitCastResult(pendingLog, char.CurrentTime)
@@ -363,7 +382,7 @@ type castResultLog struct {
 	start   time.Duration
 }
 
-func (s *Simulator) advanceTime(char *character.Character, duration time.Duration, result *SimulationResult) {
+func (s *Simulator) advanceTime(char *character.Character, duration time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
 	if duration <= 0 {
 		return
 	}
@@ -382,7 +401,7 @@ func (s *Simulator) advanceTime(char *character.Character, duration time.Duratio
 	}
 
 	char.AdvanceTime(duration)
-	s.processDotTicks(char, start, char.CurrentTime)
+	s.processDotTicks(char, start, char.CurrentTime, result, spellEngine)
 	s.processSoulLeechHoT(char, start, end)
 	s.expireBuffs(char)
 	char.GCDReadyAt = char.CurrentTime
@@ -431,21 +450,54 @@ func (s *Simulator) processSoulLeechHoT(char *character.Character, start, end ti
 	}
 }
 
-func (s *Simulator) processDotTicks(char *character.Character, start, end time.Duration) {
-	if !s.LogEnabled {
+func (s *Simulator) processDotTicks(char *character.Character, start, end time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
+	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 || char.Immolate.TicksRemaining <= 0 {
 		return
 	}
-	if !char.Immolate.Active || char.Immolate.TickInterval <= 0 {
+	if spellEngine == nil {
 		return
 	}
 	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
-	for nextTick <= end && nextTick < char.Immolate.ExpiresAt {
+	for nextTick <= end && nextTick < char.Immolate.ExpiresAt && char.Immolate.TicksRemaining > 0 {
 		if nextTick > start {
-			s.logAt(nextTick, "DOT_TICK Immolate damage=%.0f", char.Immolate.TickDamage)
+			damage := char.Immolate.TickDamage
+			didCrit := false
+			chance := char.Immolate.TickCritChance
+			if chance >= 1 {
+				didCrit = true
+			} else if chance > 0 && spellEngine.Rng.Float64() < chance {
+				didCrit = true
+			}
+			if didCrit {
+				damage *= s.Config.Talents.Ruin.CritMultiplier
+			}
+			result.recordDotTick(spells.SpellImmolate, damage, didCrit)
+			if s.LogEnabled {
+				critTag := ""
+				if didCrit {
+					critTag = " (CRIT)"
+				}
+				s.logAt(nextTick, "DOT_TICK Immolate damage=%.0f%s", damage, critTag)
+			}
+			char.Immolate.TicksRemaining--
+			char.Immolate.LastTick = nextTick
+			if char.Immolate.TicksRemaining <= 0 {
+				s.clearImmolateDebuff(char)
+				break
+			}
+		} else {
+			char.Immolate.LastTick = nextTick
 		}
-		char.Immolate.LastTick = nextTick
 		nextTick += char.Immolate.TickInterval
 	}
+}
+
+func (s *Simulator) clearImmolateDebuff(char *character.Character) {
+	char.Immolate.Active = false
+	char.Immolate.TickDamage = 0
+	char.Immolate.TickCritChance = 0
+	char.Immolate.TicksRemaining = 0
+	char.Immolate.SnapshotDotDamage = 0
 }
 
 func (s *Simulator) expireBuffs(char *character.Character) {
@@ -470,7 +522,7 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 		}
 	}
 	if char.Immolate.Active && now >= char.Immolate.ExpiresAt {
-		char.Immolate.Active = false
+		s.clearImmolateDebuff(char)
 		if s.LogEnabled {
 			s.logf(char, "DOT_EXPIRE Immolate")
 		}

@@ -213,7 +213,7 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 					if step.Duration <= 0 {
 						continue
 					}
-					s.advanceTime(char, step.Duration, result)
+					s.advanceTime(char, step.Duration, result, spellEngine)
 					return true
 				default:
 					continue
@@ -223,7 +223,7 @@ func (s *Simulator) executeRotation(char *character.Character, result *Simulatio
 			if action.Duration <= 0 {
 				continue
 			}
-			s.advanceTime(char, action.Duration, result)
+			s.advanceTime(char, action.Duration, result, spellEngine)
 			return true
 		default:
 			// use_item not implemented yet

@@ -66,20 +66,41 @@ func (e *Engine) RollHit(char *character.Character) bool {
 	return roll >= missChance // Hit if roll is above miss chance
 }
 
-// RollCrit determines if a spell crits
-func (e *Engine) RollCrit(char *character.Character, bonusCrit float64) bool {
-	// Base crit from stats
+// totalCritChancePercent returns crit chance (0-100) including talents/bonuses.
+func (e *Engine) totalCritChancePercent(char *character.Character, bonusCrit float64) float64 {
 	totalCrit := char.Stats.CritPct
-
-	// Add talent bonuses (Devastation + Backlash) - now point-based
 	totalCrit += float64(e.Config.Talents.Devastation.Points) * e.Config.Talents.Devastation.CritBonusPerPoint * 100.0
 	totalCrit += float64(e.Config.Talents.Backlash.Points) * e.Config.Talents.Backlash.CritBonusPerPoint * 100.0
-
-	// Add any spell-specific bonus (e.g., Conflagrate from Fire and Brimstone)
 	totalCrit += bonusCrit * 100.0
+	if totalCrit < 0 {
+		return 0
+	}
+	return totalCrit
+}
 
+// snapshotCritChance returns crit probability (0-1) locked at cast time.
+func (e *Engine) snapshotCritChance(char *character.Character, bonusCrit float64) float64 {
+	chance := e.totalCritChancePercent(char, bonusCrit)
+	if chance <= 0 {
+		return 0
+	}
+	if chance >= 100 {
+		return 1
+	}
+	return chance / 100.0
+}
+
+// RollCrit determines if a spell crits
+func (e *Engine) RollCrit(char *character.Character, bonusCrit float64) bool {
+	chance := e.totalCritChancePercent(char, bonusCrit)
+	if chance <= 0 {
+		return false
+	}
+	if chance >= 100 {
+		return true
+	}
 	roll := e.Rng.Float64() * 100.0
-	return roll < totalCrit
+	return roll < chance
 }
 
 // CalculateSpellDamage calculates base damage with spell power and buffs
@@ -217,28 +238,27 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 
 	// Calculate direct damage
 	directDamage := e.CalculateSpellDamage(spellData.DirectDamage, spellData.SPCoefficientDirect, char)
-
-	// Apply Improved Immolate (+30% all damage)
 	directDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
 
-	// Calculate DoT damage (full duration)
-	dotDamage := e.CalculateSpellDamage(spellData.DotDamage, spellData.SPCoefficientDot, char)
-
-	// Apply Improved Immolate to DoT
-	dotDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
-
-	// Apply Aftermath (+6% DoT only)
-	dotDamage *= e.Config.Talents.Aftermath.DotDamageMultiplier
-
-	totalDamage := directDamage + dotDamage
-
-	// Roll crit
-	if e.RollCrit(char, 0) {
-		result.DidCrit = true
-		totalDamage *= e.Config.Talents.Ruin.CritMultiplier
+	directCrit := e.RollCrit(char, 0)
+	if directCrit {
+		directDamage *= e.Config.Talents.Ruin.CritMultiplier
 	}
 
-	result.Damage = totalDamage
+	// Calculate DoT snapshot (ticks handled separately)
+	dotSnapshot := e.CalculateSpellDamage(spellData.DotDamage, spellData.SPCoefficientDot, char)
+	dotSnapshot *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
+	dotSnapshot *= e.Config.Talents.Aftermath.DotDamageMultiplier
+
+	tickCount := spellData.DotTicks
+	baseTickDamage := 0.0
+	if tickCount > 0 {
+		baseTickDamage = dotSnapshot / float64(tickCount)
+	}
+	tickCritChance := e.snapshotCritChance(char, 0)
+
+	result.DidCrit = directCrit
+	result.Damage = directDamage
 
 	// Check for Soul Leech proc (30% chance on fire damage)
 	e.CheckSoulLeechProc(char)
@@ -253,11 +273,14 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	}
 	char.Immolate.LastTick = char.CurrentTime
 	if spellData.DotTicks > 0 {
-		char.Immolate.TickDamage = dotDamage / float64(spellData.DotTicks)
+		char.Immolate.TickDamage = baseTickDamage
 	} else {
-		char.Immolate.TickDamage = dotDamage
+		char.Immolate.TickDamage = dotSnapshot
 	}
-	
+	char.Immolate.TickCritChance = tickCritChance
+	char.Immolate.TicksRemaining = spellData.DotTicks
+	char.Immolate.SnapshotDotDamage = dotSnapshot
+
 	return result
 }
 
@@ -377,11 +400,14 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 	}
 	result.DidHit = true
 
-	// Base damage is 60% of Immolate's DoT
-	immolateSpellData := e.Config.Spells.Immolate
-	immolateDotDamage := e.CalculateSpellDamage(immolateSpellData.DotDamage, immolateSpellData.SPCoefficientDot, char)
-	immolateDotDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
-	immolateDotDamage *= e.Config.Talents.Aftermath.DotDamageMultiplier
+	// Base damage is 60% of Immolate's DoT snapshot
+	immolateDotDamage := char.Immolate.SnapshotDotDamage
+	if !(char.Immolate.Active && immolateDotDamage > 0) {
+		immolateSpellData := e.Config.Spells.Immolate
+		immolateDotDamage = e.CalculateSpellDamage(immolateSpellData.DotDamage, immolateSpellData.SPCoefficientDot, char)
+		immolateDotDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
+		immolateDotDamage *= e.Config.Talents.Aftermath.DotDamageMultiplier
+	}
 
 	baseDamage := immolateDotDamage * spellData.ImmolateDotPercentage
 

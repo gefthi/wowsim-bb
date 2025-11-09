@@ -26,11 +26,14 @@ type Buff struct {
 
 // Debuff represents an active debuff on target
 type Debuff struct {
-	Active    bool
-	ExpiresAt time.Duration
-	TickInterval time.Duration
-	LastTick     time.Duration
-	TickDamage   float64
+	Active            bool
+	ExpiresAt         time.Duration
+	TickInterval      time.Duration
+	LastTick          time.Duration
+	TickDamage        float64
+	TickCritChance    float64
+	TicksRemaining    int
+	SnapshotDotDamage float64
 }
 
 // Cooldown tracks spell cooldowns
@@ -42,27 +45,27 @@ type Cooldown struct {
 type Character struct {
 	Stats     Stats
 	Resources Resources
-	
+
 	// Buffs
-	Backdraft         Buff  // Not implemented in Phase 1
-	Pyroclasm         Buff  // Phase 2: +6% fire/shadow damage
-	ImprovedSoulLeech Buff  // Phase 2: Mana regen over time
-	
+	Backdraft         Buff // Not implemented in Phase 1
+	Pyroclasm         Buff // Phase 2: +6% fire/shadow damage
+	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
+
 	// Debuffs on target
 	Immolate Debuff
-	
+
 	// Cooldowns
 	ChaosBolt   Cooldown
 	Conflagrate Cooldown
-	
+
 	// GCD
 	GCDReadyAt time.Duration
-	
+
 	// Combat state
 	CurrentTime time.Duration
 	IsCasting   bool
 	CastEndsAt  time.Duration
-	
+
 	// Soul Leech tracking (for HoT ticks)
 	SoulLeechLastTick time.Duration
 }
