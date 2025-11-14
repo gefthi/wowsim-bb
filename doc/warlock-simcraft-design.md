@@ -211,6 +211,8 @@ shadow_and_flame:
   bonus_sp_percentage: 0.20  # Gains +20% of bonus SP
 ```
 
+`shadow_and_flame.bonus_sp_percentage` is now applied directly inside `internal/spells/core.go` whenever we convert spell power into damage, so any change here immediately affects every spell.
+
 **Example: constants.yaml**
 ```yaml
 server:
@@ -378,6 +380,7 @@ These limits should not be hardcoded since they might chance it any time. Below 
 - Agent of Chaos: Immolate deals half as much direct damage but lasts 3 seconds longer. Periodic damage from Immolate benefits from spell haste and reduces the cooldown of Chaos Bolt by 0.5 second
 **Rare Runes**
 - Glyph of Life Tap: When you use Life Tap you gain 20% of your Spirit as spell power for 40 seconds (this is a buff to the player)
+- Rotation now keeps this buff up whenever the rune is equipped. The bonus shows up in combat logs and the spell power math.
 - Glyph of Conflagrate: Your conflagrate spell no longer consumers immolate (This is a must have obvisouly)
 - Demonic Aegis: Increases the effectiveness of your Fel Armor by 30%
 - Supression: Increases the chance to hit with spells by 3%
@@ -409,17 +412,34 @@ We no longer hardcode priorities – rotations now live in YAML (`internal/apl` 
 2. **Condition-based** – predicates like `buff_active`, `dot_remaining`, `resource_percent`, `cooldown_ready`, `charges`, `time_elapsed`. Nest via `all` / `any`.
 3. **Action-rich** – `cast_spell`, `use_item`, `wait`, `macro` (chain multiple actions), future `channel`.
 4. **Top-to-bottom evaluation** – loop through the list each decision, execute the first entry whose condition is true, then restart at the top.
-5. **Extensible** – rotations may define `variables` (e.g., `life_tap_threshold`) and `imports` to extend a base list for rune-specific tweaks.
+5. **Extensible** – rotations may define `variables` (e.g., `life_tap_buff_refresh`, `life_tap_threshold`) and `imports` to extend a base list for rune-specific tweaks.
 
 ### YAML Skeleton
 
 ```yaml
 variables:
   life_tap_threshold: 0.30
+  life_tap_buff_refresh: 5.0
 imports:
   - rotations/base.yaml
 
 rotation:
+  - action: cast_spell
+    spell: life_tap
+    when:
+      any:
+        - not:
+            buff_active:
+              buff: life_tap_buff
+        - buff_active:
+            buff: life_tap_buff
+            max_remaining: ${life_tap_buff_refresh}
+  - action: cast_spell
+    spell: life_tap
+    when:
+      resource_percent:
+        resource: mana
+        lt: ${life_tap_threshold}
   - action: cast_spell
     spell: immolate
     when:
@@ -764,7 +784,7 @@ These are baked into character stats:
 
 #### Epic MEs (3 slots):
 
-**Gul'na's Chosen** (moved from Legendary)
+**Gul'dan's Chosen** (moved from Legendary)
 - Casting Chaos Bolt → 4s window where Backdraft charges NOT consumed
 
 **Endless Flames** (Pyroclasm enhancement)
@@ -799,7 +819,7 @@ These are baked into character stats:
 
 #### Rare MEs (6 slots):
 
-**Life Tap ME** (moved from Epic)
+**Glyph of Life Tap** (moved from Epic)
 - When you Life Tap: gain 20% of spirit as spell power for 40 seconds
 - Must cast Life Tap every 40s to maintain buff
 
@@ -846,7 +866,7 @@ Preset = {
     mystic_enchants: {
         legendary: string | null  // Choose 1: "destruction_mastery", "cataclysmic_burst", null
         epic: string[]  // Choose 3 from: "guldans_chosen", "endless_flames", "heating_up", "decisive_decimation", "inner_flame", "agent_of_chaos"
-        rare: string[]  // Choose 6 from: "life_tap", "glyph_cb", "glyph_conflag", "demonic_aegis", "suppression", "glyph_incinerate"
+        rare: string[]  // Choose up to 6 from: "glyph_of_life_tap", "glyph_of_chaos_bolt", "glyph_of_conflagrate", "demonic_aegis", "suppression", "glyph_of_incinerate"
     }
     rotation: {
         syncChaosBoltWithBackdraft: bool

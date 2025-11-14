@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"wotlk-destro-sim/internal/character"
+	"wotlk-destro-sim/internal/runes"
 )
 
 // CastChaosBolt casts Chaos Bolt.
@@ -42,7 +43,14 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 	result.Damage = damage
 	e.CheckSoulLeechProc(char)
 
-	char.ChaosBolt.ReadyAt = char.CurrentTime + time.Duration(spellData.Cooldown*float64(time.Second))
+	cooldown := spellData.Cooldown
+	if e.Config.Player.HasRune(runes.RuneGlyphOfChaosBolt) {
+		cooldown -= runes.GlyphOfChaosBoltCooldownReduction
+		if cooldown < 0 {
+			cooldown = 0
+		}
+	}
+	char.ChaosBolt.ReadyAt = char.CurrentTime + time.Duration(cooldown*float64(time.Second))
 
 	return result
 }

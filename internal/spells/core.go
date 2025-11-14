@@ -57,7 +57,12 @@ func (e *Engine) RollHit(char *character.Character) bool {
 		hitCap = float64(e.Config.Constants.HitMechanics.BossHitCap)
 	}
 
-	missChance := hitCap - char.Stats.HitPct
+	hitPct := char.Stats.HitPct
+	if e.Config.Player.HasRune(runes.RuneSuppression) {
+		hitPct += runes.SuppressionHitBonus
+	}
+
+	missChance := hitCap - hitPct
 	if missChance <= 0 {
 		return true
 	}
@@ -105,7 +110,7 @@ func (e *Engine) RollCrit(char *character.Character, bonusCrit float64) bool {
 
 // CalculateSpellDamage calculates base damage with spell power and buffs.
 func (e *Engine) CalculateSpellDamage(baseDamage, spCoefficient float64, char *character.Character) float64 {
-	damage := baseDamage + (char.Stats.SpellPower * spCoefficient)
+	damage := baseDamage + (e.effectiveSpellPower(char) * spCoefficient)
 	damage *= e.Config.Talents.Emberstorm.DamageMultiplier
 	if e.Config.Talents.Pyroclasm.Enabled && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
 		damage *= e.Config.Talents.Pyroclasm.DamageMultiplier
@@ -162,4 +167,26 @@ func (e *Engine) agentOfChaosHasteMultiplier(char *character.Character) float64 
 		return 1
 	}
 	return mult
+}
+
+func (e *Engine) effectiveSpellPower(char *character.Character) float64 {
+	if char == nil {
+		return 0
+	}
+	sp := char.Stats.SpellPower
+	if e.Config.Player.HasRune(runes.RuneDemonicAegis) {
+		sp += char.Stats.Spirit * runes.DemonicAegisSpiritBonusPerPoint
+	}
+	if bonus := e.Config.Talents.ShadowAndFlame.BonusSPPercentage; bonus > 0 {
+		sp *= 1 + bonus
+	}
+	if char.LifeTapBuff.Active {
+		if char.LifeTapBuff.ExpiresAt > char.CurrentTime {
+			sp += char.LifeTapBuff.Value
+		} else {
+			char.LifeTapBuff.Active = false
+			char.LifeTapBuff.Value = 0
+		}
+	}
+	return sp
 }

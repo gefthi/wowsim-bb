@@ -27,6 +27,7 @@ type Buff struct {
 	Active    bool
 	ExpiresAt time.Duration
 	Charges   int // For Backdraft
+	Value     float64
 }
 
 // Debuff represents an active debuff on target
@@ -62,6 +63,7 @@ type Character struct {
 	Backdraft         Buff // Not implemented in Phase 1
 	Pyroclasm         Buff // Phase 2: +6% fire/shadow damage
 	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
+	LifeTapBuff       Buff // Glyph of Life Tap bonus
 	CataclysmicBurst  *effects.Aura
 	InnerFlame        struct {
 		Active bool

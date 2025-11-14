@@ -60,6 +60,19 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 		char.CataclysmicBurst.Clear(char.CurrentTime)
 	}
 
+	if !e.Config.Player.HasRune(runes.RuneGlyphOfConflagrate) {
+		if char.Immolate.TickHandle != nil {
+			char.Immolate.TickHandle.Cancel()
+			char.Immolate.TickHandle = nil
+		}
+		char.Immolate.Active = false
+		char.Immolate.TicksRemaining = 0
+		char.Immolate.TickDamage = 0
+		char.Immolate.TickCritChance = 0
+		char.Immolate.SnapshotDotDamage = 0
+		char.Immolate.ExpiresAt = char.CurrentTime
+	}
+
 	e.activateBackdraft(char)
 	char.Conflagrate.ReadyAt = char.CurrentTime + time.Duration(spellData.Cooldown*float64(time.Second))
 

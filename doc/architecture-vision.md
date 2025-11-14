@@ -13,7 +13,7 @@ Capture the long-term direction for our Go backend so we can evolve from the cur
 ## Current Pain Points
 | Area | Issue |
 | --- | --- |
-| Spell implementation | `internal/spells/spells.go` is a catch-all; every rune/talent toggle touches shared code, making regressions likely. |
+| Spell implementation | Per-spell files exist under `internal/spells/`, but rune/talent toggles still share helpers—keep isolating effects inside each module. |
 | Buff/debuff state | All state lives on `character.Character`; adding a new ME means adding more fields, manual timers, and duplicated uptime accounting. |
 | Time flow | The loop in `internal/engine/engine.go` advances in fixed steps and re-checks conditions. Concurrency (dots, pets, HoTs) will be fragile. |
 | Extensibility | No clear plug-in points for additional specs, pets, or target debuffs. The MVP is intentionally narrow but hard to extend. |
@@ -50,9 +50,9 @@ Capture the long-term direction for our Go backend so we can evolve from the cur
 1. **Foundation**
    - Add new aura/effect package and migrate one mechanic (Heating Up) as a proof of concept.
    - Introduce a simple timer struct for cooldowns/GCD to replace manual duration tracking.
-2. **Spell Modularization**
-   - Split `internal/spells/spells.go` into per-spell modules that read from the existing YAML.
-   - Move rune/talent modifiers into those modules, backed by the aura framework.
+2. **Spell Modularization (DONE, keep iterating)**
+   - Maintain the per-spell modules (`internal/spells/<spell>.go`) fed by YAML configs.
+   - Continue pushing rune/talent modifiers into those modules, backed by the aura framework.
 3. **Event Queue**
    - Implement a minimal pending-action queue and port dot ticking + life tap GCD handling to it.
    - Once stable, migrate remaining spells/cooldowns to the queue.
@@ -64,4 +64,3 @@ Capture the long-term direction for our Go backend so we can evolve from the cur
 
 ## Vision
 By adopting a modular spell registry, shared aura system, and deterministic event queue, wowsim-bb becomes a sustainable platform for experimenting with custom WotLK mechanics. Designers can adjust YAML data without touching Go code, engineers can add new MEs or talents without fighting global state, and future specs (Affliction, Demonology, pets) plug into the same primitives. The resulting codebase stays lightweight compared to the original wotlk sim but inherits its best architectural ideas, giving us the confidence to iterate rapidly without regressions.
-

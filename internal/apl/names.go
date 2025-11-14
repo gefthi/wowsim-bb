@@ -8,14 +8,14 @@ import (
 // NOTE: keep these lists in sync with talents/spells we expose to the APL.
 var (
 	knownSpells = map[string]struct{}{
-		"immolate":        {},
-		"conflagrate":     {},
-		"chaos_bolt":      {},
-		"incinerate":      {},
-		"life_tap":        {},
-		"inferno":         {},
-		"curse_of_doom":   {},
-		"curse_of_agony":  {},
+		"immolate":              {},
+		"conflagrate":           {},
+		"chaos_bolt":            {},
+		"incinerate":            {},
+		"life_tap":              {},
+		"inferno":               {},
+		"curse_of_doom":         {},
+		"curse_of_agony":        {},
 		"curse_of_the_elements": {},
 	}
 	knownBuffs = map[string]struct{}{
@@ -23,18 +23,19 @@ var (
 		"backdraft":           {},
 		"improved_soul_leech": {},
 		"soul_leech":          {},
+		"life_tap_buff":       {},
 		"shadow_trance":       {},
 		"demonic_soul":        {},
 	}
 	knownDebuffs = map[string]struct{}{
-		"immolate":        {},
-		"curse_of_doom":   {},
-		"curse_of_agony":  {},
+		"immolate":              {},
+		"curse_of_doom":         {},
+		"curse_of_agony":        {},
 		"curse_of_the_elements": {},
 	}
 	knownResources = map[string]struct{}{
-		"mana":   {},
-		"health": {},
+		"mana":        {},
+		"health":      {},
 		"soul_shards": {},
 	}
 )

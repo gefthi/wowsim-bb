@@ -6,6 +6,7 @@ import (
 
 	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
+	"wotlk-destro-sim/internal/runes"
 	"wotlk-destro-sim/internal/spells"
 )
 
@@ -20,6 +21,8 @@ type buffState struct {
 	backdraftActive  bool
 	backdraftCharges int
 	soulActive       bool
+	lifeTapActive    bool
+	lifeTapExpires   time.Duration
 	heatingStacks    int
 	heatingExpires   time.Duration
 	catBurstStacks   int
@@ -28,7 +31,11 @@ type buffState struct {
 }
 
 func (c *rotationContext) BuffActive(name string) bool {
-	buff := c.getBuff(name)
+	lower := strings.ToLower(name)
+	if lower == "life_tap_buff" && !c.sim.Config.Player.HasRune(runes.RuneGlyphOfLifeTap) {
+		return true
+	}
+	buff := c.getBuff(lower)
 	if buff == nil {
 		return false
 	}
@@ -39,7 +46,11 @@ func (c *rotationContext) BuffActive(name string) bool {
 }
 
 func (c *rotationContext) BuffRemaining(name string) time.Duration {
-	buff := c.getBuff(name)
+	lower := strings.ToLower(name)
+	if lower == "life_tap_buff" && !c.sim.Config.Player.HasRune(runes.RuneGlyphOfLifeTap) {
+		return time.Hour
+	}
+	buff := c.getBuff(lower)
 	if buff == nil {
 		return 0
 	}
@@ -127,6 +138,8 @@ func (c *rotationContext) getBuff(name string) *character.Buff {
 		return &c.char.Backdraft
 	case "improved_soul_leech", "soul_leech":
 		return &c.char.ImprovedSoulLeech
+	case "life_tap_buff":
+		return &c.char.LifeTapBuff
 	default:
 		return nil
 	}
@@ -189,6 +202,8 @@ func captureBuffState(char *character.Character) buffState {
 		backdraftActive:  char.Backdraft.Active,
 		backdraftCharges: char.Backdraft.Charges,
 		soulActive:       char.ImprovedSoulLeech.Active,
+		lifeTapActive:    char.LifeTapBuff.Active,
+		lifeTapExpires:   char.LifeTapBuff.ExpiresAt,
 		heatingStacks:    heatStacks,
 		heatingExpires:   heatExpires,
 		catBurstStacks:   catStacks,

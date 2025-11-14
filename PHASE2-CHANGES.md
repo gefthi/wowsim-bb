@@ -18,7 +18,7 @@
 - ✅ Added ImprovedSoulLeech buff tracking
 - ✅ Added SoulLeechLastTick for HoT timing
 
-### 4. internal/spells/spells.go
+### 4. internal/spells/
 - ✅ FIXED RollHit() - correct miss chance calculation
 - ✅ Updated RollCrit() - use talent points system
 - ✅ Updated CalculateSpellDamage() - apply Pyroclasm buff

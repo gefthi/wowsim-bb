@@ -75,6 +75,14 @@ const (
 	AgentOfChaosExtraTicks          = 1
 	AgentOfChaosDirectDamagePenalty = 0.5
 	AgentOfChaosChaosBoltReduceSec  = 0.5
+
+	GlyphOfLifeTapSpiritMultiplier = 0.20
+	GlyphOfLifeTapDurationSec      = 40.0
+
+	GlyphOfChaosBoltCooldownReduction = 2.0
+	GlyphOfIncinerateDamageMultiplier = 1.05
+	DemonicAegisSpiritBonusPerPoint   = 0.09
+	SuppressionHitBonus               = 3.0
 )
 
 // Normalize returns the canonical lowercase snake_case rune name.

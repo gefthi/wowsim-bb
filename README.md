@@ -19,9 +19,17 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - Chaos Bolt (12s cooldown + Fire and Brimstone gating)
 - Conflagrate (Pyroclasm proc source, bonus crit)
 - Life Tap (mana generation, fewer casts thanks to Soul Leech)
+- Rare rune support:
+  - Glyph of Life Tap (Spirit-based spell power buff on tap)
+  - Glyph of Chaos Bolt (-2s cooldown)
+  - Glyph of Conflagrate (Immolate not consumed)
+  - Demonic Aegis (+0.09 Spirit → spell power)
+  - Suppression (+3% spell hit)
+  - Glyph of Incinerate (+5% Incinerate damage)
 - Pyroclasm (Conflagrate crit → +6% fire/shadow damage, uptime tracked)
 - Improved Soul Leech (instant mana + HoT ticks processed every 5s)
 - Devastation & Backlash now point-based and configurable
+- Shadow and Flame bonus spell power baked into every damage calculation
 - **Backdraft** (Conflagrate → 3 charges, -30% cast time/GCD, uptime + avg charges tracked)
 
 ✅ **Enhanced Reporting & Tooling**
@@ -179,12 +187,22 @@ wotlk-destro-sim/
 
 ## Rotation Priority (Phase 3)
 
-1. Maintain Immolate (recast if < 3s remaining)
-2. Conflagrate on CD
-3. Chaos Bolt on CD
-4. Life Tap if mana < 30%
-5. Incinerate (filler)
-6. Life Tap if OOM
+1. Refresh Life Tap glyph buff (when that rune is equipped)
+2. Life Tap if mana < 30%
+3. Maintain Immolate (recast if < 3s remaining)
+4. Conflagrate on CD
+5. Chaos Bolt on CD
+6. Incinerate (filler)
+7. Emergency Life Tap if nothing else is castable
+
+### Rotation Variables
+
+`configs/rotations/destruction-default.yaml` exposes knobs so you can change behavior without code:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `life_tap_buff_refresh` | `5.0` | Seconds remaining before refreshing the buff |
+| `life_tap_threshold` | `0.30` | Fractional mana threshold for resource-based tapping |
 
 ## Development Roadmap
 

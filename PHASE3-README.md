@@ -13,13 +13,13 @@
 - Talent can be disabled by setting `enabled: false` or `points: 0`.
 
 ### ✅ Engine & Reporting
-- New helper logic in `internal/spells/spells.go` applies cast/GCD reductions, refreshes charges after Conflagrate, and consumes charges per spell.
+- New helper logic across `internal/spells/*.go` applies cast/GCD reductions, refreshes charges after Conflagrate, and consumes charges per spell.
 - `internal/engine/engine.go` now tracks Backdraft uptime seconds and charge-weighted seconds, and reports both uptime % and average charges.
 
 ## 📦 Key Files
 - `configs/talents.yaml` – configurable Backdraft parameters.
 - `internal/config/config.go` – Backdraft struct added to the talent config.
-- `internal/spells/spells.go` – Backdraft activation & consumption logic baked into spell casts.
+- `internal/spells/` – Backdraft activation & consumption logic baked into each spell module.
 - `internal/engine/engine.go` – Buff tracking, charge metrics, and output formatting.
 - `README.md` / `cmd/simulator/main.go` – updated to Phase 3 status and sample output.
 

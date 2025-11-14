@@ -626,6 +626,13 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.ImprovedSoulLeech.ExpiresAt, "BUFF_EXPIRE Improved Soul Leech")
 		}
 	}
+	if char.LifeTapBuff.Active && now >= char.LifeTapBuff.ExpiresAt {
+		char.LifeTapBuff.Active = false
+		char.LifeTapBuff.Value = 0
+		if s.LogEnabled {
+			s.logAt(char.LifeTapBuff.ExpiresAt, "BUFF_EXPIRE Life Tap")
+		}
+	}
 	if char.Backdraft.Active && (now >= char.Backdraft.ExpiresAt || char.Backdraft.Charges <= 0) {
 		char.Backdraft.Active = false
 		char.Backdraft.Charges = 0
@@ -895,6 +902,15 @@ func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
 			remain := char.GuldansChosen.Remaining(char.CurrentTime)
 			s.logf(char, "BUFF_GAIN Gul'dan's Chosen (%.1fs window)", remain.Seconds())
 		}
+	}
+	if !prev.lifeTapActive && char.LifeTapBuff.Active {
+		remain := char.LifeTapBuff.ExpiresAt - char.CurrentTime
+		s.logf(char, "BUFF_GAIN Life Tap (+%.0f SP, %.1fs)", char.LifeTapBuff.Value, remain.Seconds())
+	} else if prev.lifeTapActive && !char.LifeTapBuff.Active {
+		s.logf(char, "BUFF_EXPIRE Life Tap")
+	} else if char.LifeTapBuff.Active && prev.lifeTapExpires != char.LifeTapBuff.ExpiresAt {
+		remain := char.LifeTapBuff.ExpiresAt - char.CurrentTime
+		s.logf(char, "BUFF_REFRESH Life Tap (+%.0f SP, %.1fs)", char.LifeTapBuff.Value, remain.Seconds())
 	}
 }
 

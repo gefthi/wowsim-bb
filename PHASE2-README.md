@@ -27,7 +27,7 @@
 - `configs/talents.yaml` - New talents + point system
 - `internal/config/config.go` - Updated talent structs
 - `internal/character/character.go` - Added buff tracking
-- `internal/spells/spells.go` - Fixed hit, added procs, fixed Fire and Brimstone
+- `internal/spells/` - Fixed hit, added procs, fixed Fire and Brimstone across the per-spell modules
 - `internal/engine/engine.go` - Fixed RNG seed per iteration
 
 ## 🧪 Testing

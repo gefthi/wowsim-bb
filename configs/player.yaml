@@ -6,11 +6,11 @@ character:
   level: 60
 
 stats:
-  spell_power: 800.0
+  spell_power: 700.0
   crit_percent: 11.24    # Total crit % (base + gear + talents: Devastation 5% + Backlash 3%)
   haste_percent: 3.40    # Not implemented yet (Phase 5)
   spirit: 177.0
-  hit_percent: 17.0     # Hit capped for boss (17% for +3 level difference)
+  hit_percent: 14.0     # Hit capped for boss (17% for +3 level difference)
   max_mana: 6000.0
 
 target:
@@ -29,4 +29,4 @@ mystic_enchants:
   equipped:
     legendary: ["destruction_mastery"]        # e.g., ["destruction_mastery"]
     epic: ["heating_up","guldans_chosen","agent_of_chaos"]             # e.g., ["inner_flame", "heating_up"]
-    rare: []             # Rare runes handled later
+    rare: ["glyph_of_life_tap","glyph_of_chaos_bolt","glyph_of_conflagrate","demonic_aegis","suppression"]

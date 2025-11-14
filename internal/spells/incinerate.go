@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"wotlk-destro-sim/internal/character"
+	"wotlk-destro-sim/internal/runes"
 )
 
 // CastIncinerate casts Incinerate.
@@ -40,6 +41,9 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 	if e.RollCrit(char, 0) {
 		result.DidCrit = true
 		damage *= e.Config.Talents.Ruin.CritMultiplier
+	}
+	if e.Config.Player.HasRune(runes.RuneGlyphOfIncinerate) {
+		damage *= runes.GlyphOfIncinerateDamageMultiplier
 	}
 
 	result.Damage = damage
