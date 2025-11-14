@@ -7,7 +7,7 @@ import (
 )
 
 func (e *Engine) CheckSoulLeechProc(char *character.Character) {
-	if !e.Config.Talents.ImprovedSoulLeech.Enabled || e.Config.Talents.ImprovedSoulLeech.Points <= 0 {
+	if e.Config.Talents.ImprovedSoulLeech.Points <= 0 {
 		return
 	}
 

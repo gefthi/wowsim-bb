@@ -30,7 +30,6 @@ backlash:
 
 backdraft:
   points: 3  # 3/3 points
-  enabled: true
   charges: 3
   duration: 15.0  # seconds
   cast_time_reduction: 0.30  # 30% faster casts
@@ -38,7 +37,6 @@ backdraft:
 
 pyroclasm:
   points: 3  # 3/3 points
-  enabled: true
   damage_multiplier: 1.06  # +6% fire/shadow damage when active
   duration: 10.0  # 10 seconds base (16s with Endless Flames ME)
   proc_spells:
@@ -46,9 +44,18 @@ pyroclasm:
     - searing_pain  # Not implemented yet
 
 improved_soul_leech:
-  points: 2  # 2/2 points
-  enabled: true
+  points: 0
   instant_mana_return: 0.02  # 2% of max mana instantly
   hot_mana_per_tick: 0.01  # 1% of max mana per 5 seconds
   hot_duration: 15.0  # 15 seconds
   hot_tick_interval: 5.0  # Every 5 seconds
+
+demonic_power:
+  points: 2
+  firebolt_cast_reduction: 0.25  # seconds per point
+
+empowered_imp:
+  points: 3
+  damage_per_point: 0.10
+  proc_chance_per_point: 0.33
+  buff_duration: 8.0

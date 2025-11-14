@@ -42,6 +42,7 @@ func main() {
 
 	// Create character from config
 	charStats := character.Stats{
+		Intellect:  cfg.Player.Stats.Intellect,
 		SpellPower: cfg.Player.Stats.SpellPower,
 		CritPct:    cfg.Player.Stats.CritPercent,
 		HastePct:   cfg.Player.Stats.HastePercent,
@@ -54,12 +55,18 @@ func main() {
 
 	fmt.Printf("Character: %s (Level %d)\n", cfg.Player.Character.Name, cfg.Player.Character.Level)
 	fmt.Println("Character Stats:")
+	fmt.Printf("  Intellect: %.0f\n", char.Stats.Intellect)
 	fmt.Printf("  Spell Power: %.0f\n", char.Stats.SpellPower)
 	fmt.Printf("  Crit: %.1f%%\n", char.Stats.CritPct)
 	fmt.Printf("  Haste: %.1f%%\n", char.Stats.HastePct)
 	fmt.Printf("  Spirit: %.0f\n", char.Stats.Spirit)
 	fmt.Printf("  Hit: %.1f%%\n", char.Stats.HitPct)
 	fmt.Printf("  Max Mana: %.0f\n", char.Stats.MaxMana)
+	if cfg.Player.Pet.Summon != "" {
+		fmt.Printf("  Pet: %s\n", cfg.Player.Pet.Summon)
+	} else {
+		fmt.Println("  Pet: none")
+	}
 	fmt.Println()
 
 	// Configure simulation from YAML

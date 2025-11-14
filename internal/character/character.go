@@ -9,6 +9,7 @@ import (
 
 // Stats represents character statistics
 type Stats struct {
+	Intellect  float64
 	SpellPower float64
 	CritPct    float64 // Percentage (e.g., 25.5 for 25.5%)
 	HastePct   float64 // Percentage
@@ -63,6 +64,7 @@ type Character struct {
 	Backdraft         Buff // Not implemented in Phase 1
 	Pyroclasm         Buff // Phase 2: +6% fire/shadow damage
 	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
+	EmpoweredImp      Buff
 	LifeTapBuff       Buff // Glyph of Life Tap bonus
 	CataclysmicBurst  *effects.Aura
 	InnerFlame        struct {

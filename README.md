@@ -19,6 +19,8 @@ A fast, accurate, cast-by-cast combat simulator for Destruction Warlock on a cus
 - Chaos Bolt (12s cooldown + Fire and Brimstone gating)
 - Conflagrate (Pyroclasm proc source, bonus crit)
 - Life Tap (mana generation, fewer casts thanks to Soul Leech)
+- Imp pet (independent Firebolt casts contributing to DPS)
+- Demonic Power & Empowered Imp talent effects wired into pet cast speed, damage, and crit procs
 - Rare rune support:
   - Glyph of Life Tap (Spirit-based spell power buff on tap)
   - Glyph of Chaos Bolt (-2s cooldown)
@@ -89,6 +91,10 @@ Edit `configs/player.yaml` to change stats, targets, and runtime parameters:
 character:
   name: "Destruction Warlock"
   level: 60
+
+pet:
+  summon: "imp"        # Options: "imp" or "none"
+
 stats:
   spell_power: 800
   crit_percent: 25.0
@@ -112,6 +118,7 @@ Edit the YAML files in `configs/`:
 - `constants.yaml` - Server constants (stat conversions, GCD, hit caps)
 - `spells.yaml` - All spell data (damage, costs, coefficients)
 - `talents.yaml` - Talent modifiers
+- `player.yaml` - Character stats, pet selection, targets, and sim runtime
 - `rotations/destruction-default.yaml` - Default YAML APL (editable priority list)
 
 No recompilation needed after editing YAML files!

@@ -21,6 +21,7 @@ type buffState struct {
 	backdraftActive  bool
 	backdraftCharges int
 	soulActive       bool
+	empImpActive     bool
 	lifeTapActive    bool
 	lifeTapExpires   time.Duration
 	heatingStacks    int
@@ -202,6 +203,7 @@ func captureBuffState(char *character.Character) buffState {
 		backdraftActive:  char.Backdraft.Active,
 		backdraftCharges: char.Backdraft.Charges,
 		soulActive:       char.ImprovedSoulLeech.Active,
+		empImpActive:     char.EmpoweredImp.Active,
 		lifeTapActive:    char.LifeTapBuff.Active,
 		lifeTapExpires:   char.LifeTapBuff.ExpiresAt,
 		heatingStacks:    heatStacks,

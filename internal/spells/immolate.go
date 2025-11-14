@@ -44,6 +44,7 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	}
 	result.DidHit = true
 
+	forceCrit := e.consumeEmpoweredImp(char)
 	directDamage := e.CalculateSpellDamage(spellData.DirectDamage, spellData.SPCoefficientDirect, char)
 	directDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
 	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
@@ -53,7 +54,7 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 		directDamage *= runes.AgentOfChaosDirectDamagePenalty
 	}
 
-	directCrit := e.RollCrit(char, 0)
+	directCrit := forceCrit || e.RollCrit(char, 0)
 	if directCrit {
 		directDamage *= e.Config.Talents.Ruin.CritMultiplier
 	}

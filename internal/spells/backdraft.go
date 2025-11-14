@@ -8,8 +8,7 @@ import (
 )
 
 func (e *Engine) backdraftEnabled() bool {
-	return e.Config.Talents.Backdraft.Enabled &&
-		e.Config.Talents.Backdraft.Points > 0 &&
+	return e.Config.Talents.Backdraft.Points > 0 &&
 		e.Config.Talents.Backdraft.Charges > 0
 }
 

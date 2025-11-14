@@ -5,7 +5,11 @@ character:
   name: "Destruction Warlock"
   level: 60
 
+pet:
+  summon: "imp"        # Options: "imp" (default), "none"
+
 stats:
+  intellect: 0.0
   spell_power: 700.0
   crit_percent: 11.24    # Total crit % (base + gear + talents: Devastation 5% + Backlash 3%)
   haste_percent: 3.40    # Not implemented yet (Phase 5)

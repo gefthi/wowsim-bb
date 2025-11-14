@@ -478,6 +478,21 @@ This is the working contract for the Phase 4+ implementation. We proceed in smal
 
 ---
 
+## Pet System (Initial MVP)
+
+- Configuration lives in `player.yaml` under `pet.summon` (currently `imp` or `none`).
+- Each pet implements a small controller that schedules its own actions using the shared simulator event queue, so summons never block the player's rotation.
+- The Imp inherits a fraction of the warlock's spell power (~15%) and crit (~30%) and fires `Firebolt` every 2.5 seconds by default. Results are tracked via a dedicated spell entry (“Firebolt (Imp)”).
+- **Server-specific stat tuning**: On our progressive realm, Intellect grants ~0.0167% spell crit per point (≈60 Int → 1% crit) and the Imp inherits 30% of the player's Intellect (matching in-game tooltips: 116 Int → +3.61% crit and +34 pet Int; 212 Int → +5.20% crit and +63 pet Int). We keep the default WotLK values in config but note this variance for future parameterization.
+- **Paper-doll crit caveat**: the server's character sheet already bakes Backlash crit into the displayed value. For now we expect users to include that in `crit_percent`, but once talents become configurable we must subtract talent bonuses before applying them in code.
+- This mirrors the structure in the upstream wotlk simulator (`core.Pet` + per-demon modules) and gives us a hook for future demons/guardians.
+- Talents and glyph hooks (Improved/Empowered Imp, Demonic Power) are staged for a later iteration; the interfaces are in place so we can bolt them on when ready.
+
+### Imp-specific Talents (current iteration)
+
+- **Demonic Power**: new YAML knobs (`talents.demonic_power`) control Firebolt cast-time reductions (0.25s per point). The pet controller now reads these values and shortens its event cadence accordingly.
+- **Empowered Imp**: `talents.empowered_imp` exposes damage multipliers and proc chances. Imp Firebolt damage scales by +10% per point, and critical hits have a 33%/66%/100% chance to grant an 8s buff that forces the player's next eligible spell to crit. The buff is tracked on the character (`EmpoweredImp`).
+
 ## 📊 Simulation Core Design
 
 ### Core Concepts (from wowsims reference)

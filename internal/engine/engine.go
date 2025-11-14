@@ -28,6 +28,7 @@ var spellPrintOrder = []struct {
 	{spells.SpellIncinerate, "Incinerate"},
 	{spells.SpellChaosBolt, "Chaos Bolt"},
 	{spells.SpellConflagrate, "Conflagrate"},
+	{spells.SpellImpFirebolt, "Firebolt (Imp)"},
 }
 
 // SpellStats keeps per-spell performance details
@@ -266,11 +267,12 @@ type Simulator struct {
 	LogWriter  io.Writer
 	BaseSeed   int64
 	events     eventQueue
+	pets       []petController
 }
 
 // NewSimulator creates a new simulator
 func NewSimulator(cfg *config.Config, simCfg SimulationConfig, rotation *apl.CompiledRotation, seed int64, logEnabled bool, logWriter io.Writer) *Simulator {
-	return &Simulator{
+	sim := &Simulator{
 		Config:     cfg,
 		SimConfig:  simCfg,
 		Rotation:   rotation,
@@ -278,6 +280,8 @@ func NewSimulator(cfg *config.Config, simCfg SimulationConfig, rotation *apl.Com
 		LogWriter:  logWriter,
 		BaseSeed:   seed,
 	}
+	sim.initializePets()
+	return sim
 }
 
 // Run executes the simulation for configured iterations
@@ -308,6 +312,7 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 func (s *Simulator) runSingleIteration(originalChar *character.Character, iteration int) *SimulationResult {
 	// Create a fresh copy of character for this iteration
 	char := character.NewCharacter(originalChar.Stats)
+	s.resetPets(char)
 	s.events = s.events[:0]
 	if s.LogEnabled {
 		s.logStaticf("--- Iteration %d Start ---", iteration+1)
@@ -319,6 +324,7 @@ func (s *Simulator) runSingleIteration(originalChar *character.Character, iterat
 	result := &SimulationResult{
 		SpellBreakdown: newSpellStatsMap(),
 	}
+	s.startPets(char, result, spellEngine)
 	hasImmolate := false
 
 	// Combat loop
@@ -558,7 +564,7 @@ func (s *Simulator) buffOverlapSeconds(buff *character.Buff, start, end time.Dur
 }
 
 func (s *Simulator) processSoulLeechHoT(char *character.Character, start, end time.Duration) {
-	if !s.Config.Talents.ImprovedSoulLeech.Enabled || s.Config.Talents.ImprovedSoulLeech.Points <= 0 {
+	if s.Config.Talents.ImprovedSoulLeech.Points <= 0 {
 		return
 	}
 	if !char.ImprovedSoulLeech.Active {
@@ -631,6 +637,12 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 		char.LifeTapBuff.Value = 0
 		if s.LogEnabled {
 			s.logAt(char.LifeTapBuff.ExpiresAt, "BUFF_EXPIRE Life Tap")
+		}
+	}
+	if char.EmpoweredImp.Active && now >= char.EmpoweredImp.ExpiresAt {
+		char.EmpoweredImp.Active = false
+		if s.LogEnabled {
+			s.logAt(char.EmpoweredImp.ExpiresAt, "BUFF_EXPIRE Empowered Imp")
 		}
 	}
 	if char.Backdraft.Active && (now >= char.Backdraft.ExpiresAt || char.Backdraft.Charges <= 0) {
@@ -911,6 +923,12 @@ func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
 	} else if char.LifeTapBuff.Active && prev.lifeTapExpires != char.LifeTapBuff.ExpiresAt {
 		remain := char.LifeTapBuff.ExpiresAt - char.CurrentTime
 		s.logf(char, "BUFF_REFRESH Life Tap (+%.0f SP, %.1fs)", char.LifeTapBuff.Value, remain.Seconds())
+	}
+	if !prev.empImpActive && char.EmpoweredImp.Active {
+		remain := char.EmpoweredImp.ExpiresAt - char.CurrentTime
+		s.logf(char, "BUFF_GAIN Empowered Imp (%.1fs window)", remain.Seconds())
+	} else if prev.empImpActive && !char.EmpoweredImp.Active {
+		s.logf(char, "BUFF_EXPIRE Empowered Imp")
 	}
 }
 

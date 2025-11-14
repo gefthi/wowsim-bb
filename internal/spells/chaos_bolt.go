@@ -35,7 +35,8 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 	damage = e.ApplyFireAndBrimstone(damage, char, SpellChaosBolt)
 	damage = e.applyFireTargetModifiers(damage, char)
 
-	if e.RollCrit(char, 0) {
+	forceCrit := e.consumeEmpoweredImp(char)
+	if forceCrit || e.RollCrit(char, 0) {
 		result.DidCrit = true
 		damage *= e.Config.Talents.Ruin.CritMultiplier
 	}

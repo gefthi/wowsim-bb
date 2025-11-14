@@ -18,6 +18,7 @@ const (
 	SpellChaosBolt
 	SpellConflagrate
 	SpellLifeTap
+	SpellImpFirebolt
 )
 
 // CastResult represents the result of a spell cast.
@@ -112,7 +113,7 @@ func (e *Engine) RollCrit(char *character.Character, bonusCrit float64) bool {
 func (e *Engine) CalculateSpellDamage(baseDamage, spCoefficient float64, char *character.Character) float64 {
 	damage := baseDamage + (e.effectiveSpellPower(char) * spCoefficient)
 	damage *= e.Config.Talents.Emberstorm.DamageMultiplier
-	if e.Config.Talents.Pyroclasm.Enabled && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
+	if e.Config.Talents.Pyroclasm.Points > 0 && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
 		damage *= e.Config.Talents.Pyroclasm.DamageMultiplier
 	}
 	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
@@ -189,4 +190,19 @@ func (e *Engine) effectiveSpellPower(char *character.Character) float64 {
 		}
 	}
 	return sp
+}
+
+func (e *Engine) consumeEmpoweredImp(char *character.Character) bool {
+	if e.Config.Talents.EmpoweredImp.Points <= 0 {
+		return false
+	}
+	if !char.EmpoweredImp.Active {
+		return false
+	}
+	if char.EmpoweredImp.ExpiresAt <= char.CurrentTime {
+		char.EmpoweredImp.Active = false
+		return false
+	}
+	char.EmpoweredImp.Active = false
+	return true
 }

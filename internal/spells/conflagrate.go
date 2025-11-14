@@ -41,10 +41,10 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 	baseDamage = e.applyFireTargetModifiers(baseDamage, char)
 
 	bonusCrit := e.Config.Talents.FireAndBrimstone.ConflagrateCritBonus
-	if e.RollCrit(char, bonusCrit) {
+	if e.consumeEmpoweredImp(char) || e.RollCrit(char, bonusCrit) {
 		result.DidCrit = true
 		baseDamage *= e.Config.Talents.Ruin.CritMultiplier
-		if e.Config.Talents.Pyroclasm.Enabled {
+		if e.Config.Talents.Pyroclasm.Points > 0 {
 			char.Pyroclasm.Active = true
 			char.Pyroclasm.ExpiresAt = char.CurrentTime + time.Duration(e.Config.Talents.Pyroclasm.Duration*float64(time.Second))
 		}

@@ -108,7 +108,6 @@ type Talents struct {
 	} `yaml:"backlash"`
 	Backdraft struct {
 		Points            int     `yaml:"points"`
-		Enabled           bool    `yaml:"enabled"`
 		Charges           int     `yaml:"charges"`
 		Duration          float64 `yaml:"duration"`
 		CastTimeReduction float64 `yaml:"cast_time_reduction"`
@@ -116,19 +115,27 @@ type Talents struct {
 	} `yaml:"backdraft"`
 	Pyroclasm struct {
 		Points           int      `yaml:"points"`
-		Enabled          bool     `yaml:"enabled"`
 		DamageMultiplier float64  `yaml:"damage_multiplier"`
 		Duration         float64  `yaml:"duration"`
 		ProcSpells       []string `yaml:"proc_spells"`
 	} `yaml:"pyroclasm"`
 	ImprovedSoulLeech struct {
 		Points            int     `yaml:"points"`
-		Enabled           bool    `yaml:"enabled"`
 		InstantManaReturn float64 `yaml:"instant_mana_return"`
 		HotManaPerTick    float64 `yaml:"hot_mana_per_tick"`
 		HotDuration       float64 `yaml:"hot_duration"`
 		HotTickInterval   float64 `yaml:"hot_tick_interval"`
 	} `yaml:"improved_soul_leech"`
+	DemonicPower struct {
+		Points                int     `yaml:"points"`
+		FireboltCastReduction float64 `yaml:"firebolt_cast_reduction"`
+	} `yaml:"demonic_power"`
+	EmpoweredImp struct {
+		Points             int     `yaml:"points"`
+		DamagePerPoint     float64 `yaml:"damage_per_point"`
+		ProcChancePerPoint float64 `yaml:"proc_chance_per_point"`
+		BuffDuration       float64 `yaml:"buff_duration"`
+	} `yaml:"empowered_imp"`
 }
 
 // Player holds player character configuration
@@ -137,7 +144,11 @@ type Player struct {
 		Name  string `yaml:"name"`
 		Level int    `yaml:"level"`
 	} `yaml:"character"`
+	Pet struct {
+		Summon string `yaml:"summon"`
+	} `yaml:"pet"`
 	Stats struct {
+		Intellect    float64 `yaml:"intellect"`
 		SpellPower   float64 `yaml:"spell_power"`
 		CritPercent  float64 `yaml:"crit_percent"`
 		HastePercent float64 `yaml:"haste_percent"`
