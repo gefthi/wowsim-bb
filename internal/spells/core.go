@@ -13,11 +13,18 @@ import (
 type SpellType int
 
 const (
-	SpellImmolate SpellType = iota
+	pvePowerMultiplier       = 1.25
+	CurseOfElementsMultiplier = 1.10
+)
+
+const (
+	SpellCurseOfElements SpellType = iota
+	SpellImmolate
 	SpellIncinerate
 	SpellChaosBolt
 	SpellConflagrate
 	SpellLifeTap
+	SpellSoulFire
 	SpellImpFirebolt
 )
 
@@ -112,6 +119,7 @@ func (e *Engine) RollCrit(char *character.Character, bonusCrit float64) bool {
 // CalculateSpellDamage calculates base damage with spell power and buffs.
 func (e *Engine) CalculateSpellDamage(baseDamage, spCoefficient float64, char *character.Character) float64 {
 	damage := baseDamage + (e.effectiveSpellPower(char) * spCoefficient)
+	damage *= pvePowerMultiplier
 	damage *= e.Config.Talents.Emberstorm.DamageMultiplier
 	if e.Config.Talents.Pyroclasm.Points > 0 && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
 		damage *= e.Config.Talents.Pyroclasm.DamageMultiplier
@@ -141,6 +149,9 @@ func (e *Engine) fireTargetMultiplier(char *character.Character) float64 {
 	if e.Config.Player.HasRune(runes.RuneHeatingUp) && char.HeatingUp != nil {
 		active := char.HeatingUp.ActiveAt(char.CurrentTime)
 		mult *= runes.HeatingUpMultiplier(active, char.HeatingUp.Stacks(), char.HeatingUp.ExpiresAt(), char.CurrentTime)
+	}
+	if char.CurseOfElements.Active && char.CurseOfElements.ExpiresAt > char.CurrentTime {
+		mult *= CurseOfElementsMultiplier
 	}
 	return mult
 }

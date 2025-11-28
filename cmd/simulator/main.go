@@ -30,7 +30,10 @@ func main() {
 	}
 
 	rotationDir := "./configs/rotations"
-	rotationFile := "destruction-default.yaml"
+	rotationFile := cfg.Player.Rotation
+	if rotationFile == "" {
+		rotationFile = "destruction-default.yaml"
+	}
 	rotRaw, err := apl.LoadRotation(rotationDir, rotationFile)
 	if err != nil {
 		log.Fatalf("Failed to load rotation %s: %v", filepath.Join(rotationDir, rotationFile), err)

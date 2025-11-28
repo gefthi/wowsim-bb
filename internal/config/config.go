@@ -63,6 +63,13 @@ type Spells struct {
 		ManaCost              float64 `yaml:"mana_cost"`
 		SPCoefficient         float64 `yaml:"sp_coefficient"`
 	} `yaml:"conflagrate"`
+	SoulFire struct {
+		BaseDamageMin float64 `yaml:"base_damage_min"`
+		BaseDamageMax float64 `yaml:"base_damage_max"`
+		CastTime      float64 `yaml:"cast_time"`
+		ManaCost      float64 `yaml:"mana_cost"`
+		SPCoefficient float64 `yaml:"sp_coefficient"`
+	} `yaml:"soul_fire"`
 	LifeTap struct {
 		CastTime               float64 `yaml:"cast_time"`
 		Cooldown               float64 `yaml:"cooldown"`
@@ -160,6 +167,7 @@ type Player struct {
 		Type  string `yaml:"type"`
 		Level int    `yaml:"level"`
 	} `yaml:"target"`
+	Rotation string `yaml:"rotation"`
 	Simulation struct {
 		DurationSeconds int `yaml:"duration_seconds"`
 		Iterations      int `yaml:"iterations"`

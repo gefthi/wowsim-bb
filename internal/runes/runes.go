@@ -83,6 +83,8 @@ const (
 	GlyphOfIncinerateDamageMultiplier = 1.05
 	DemonicAegisSpiritBonusPerPoint   = 0.09
 	SuppressionHitBonus               = 3.0
+
+	DecisiveDecimationCastReduction = 0.30
 )
 
 // Normalize returns the canonical lowercase snake_case rune name.

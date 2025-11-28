@@ -36,6 +36,9 @@ func (c *rotationContext) BuffActive(name string) bool {
 	if lower == "life_tap_buff" && !c.sim.Config.Player.HasRune(runes.RuneGlyphOfLifeTap) {
 		return true
 	}
+	if lower == "decisive_decimation" {
+		return c.char.DecisiveDecimation.Active
+	}
 	buff := c.getBuff(lower)
 	if buff == nil {
 		return false
@@ -50,6 +53,12 @@ func (c *rotationContext) BuffRemaining(name string) time.Duration {
 	lower := strings.ToLower(name)
 	if lower == "life_tap_buff" && !c.sim.Config.Player.HasRune(runes.RuneGlyphOfLifeTap) {
 		return time.Hour
+	}
+	if lower == "decisive_decimation" {
+		if c.char.DecisiveDecimation.Active {
+			return time.Hour
+		}
+		return 0
 	}
 	buff := c.getBuff(lower)
 	if buff == nil {
@@ -73,6 +82,8 @@ func (c *rotationContext) DebuffActive(name string) bool {
 	switch strings.ToLower(name) {
 	case "immolate":
 		return c.char.Immolate.Active && c.char.Immolate.ExpiresAt > c.char.CurrentTime
+	case "curse_of_the_elements":
+		return c.char.CurseOfElements.Active && c.char.CurseOfElements.ExpiresAt > c.char.CurrentTime
 	default:
 		return false
 	}
@@ -83,6 +94,10 @@ func (c *rotationContext) DebuffRemaining(name string) time.Duration {
 	case "immolate":
 		if c.char.Immolate.Active && c.char.Immolate.ExpiresAt > c.char.CurrentTime {
 			return c.char.Immolate.ExpiresAt - c.char.CurrentTime
+		}
+	case "curse_of_the_elements":
+		if c.char.CurseOfElements.Active && c.char.CurseOfElements.ExpiresAt > c.char.CurrentTime {
+			return c.char.CurseOfElements.ExpiresAt - c.char.CurrentTime
 		}
 	}
 	return 0
@@ -158,6 +173,10 @@ func spellFromName(name string) (spells.SpellType, bool) {
 		return spells.SpellIncinerate, true
 	case "life_tap":
 		return spells.SpellLifeTap, true
+	case "soul_fire":
+		return spells.SpellSoulFire, true
+	case "curse_of_the_elements":
+		return spells.SpellCurseOfElements, true
 	default:
 		return 0, false
 	}
@@ -175,6 +194,10 @@ func spellTypeName(spell spells.SpellType) string {
 		return "Incinerate"
 	case spells.SpellLifeTap:
 		return "Life Tap"
+	case spells.SpellSoulFire:
+		return "Soul Fire"
+	case spells.SpellCurseOfElements:
+		return "Curse of the Elements"
 	default:
 		return "Unknown"
 	}

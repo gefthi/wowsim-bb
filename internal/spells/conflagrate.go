@@ -56,6 +56,10 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 	e.applyHeatingUpStack(char)
 	e.CheckSoulLeechProc(char)
 
+	if e.Config.Player.HasRune(runes.RuneDecisiveDecimation) {
+		char.DecisiveDecimation.Active = true
+	}
+
 	if e.Config.Player.HasRune(runes.RuneCataclysmicBurst) && char.CataclysmicBurst != nil {
 		char.CataclysmicBurst.Clear(char.CurrentTime)
 	}

@@ -24,6 +24,7 @@ var spellPrintOrder = []struct {
 	Type  spells.SpellType
 	Label string
 }{
+	{spells.SpellSoulFire, "Soul Fire"},
 	{spells.SpellImmolate, "Immolate"},
 	{spells.SpellIncinerate, "Incinerate"},
 	{spells.SpellChaosBolt, "Chaos Bolt"},
@@ -139,6 +140,9 @@ func (s *Simulator) executeImmolateTick(char *character.Character, tickTime time
 		stacks := char.HeatingUp.Stacks()
 		expires := char.HeatingUp.ExpiresAt()
 		damage *= runes.HeatingUpMultiplier(char.HeatingUp.ActiveAt(tickTime), stacks, expires, tickTime)
+	}
+	if char.CurseOfElements.Active && char.CurseOfElements.ExpiresAt > tickTime {
+		damage *= spells.CurseOfElementsMultiplier
 	}
 
 	didCrit := false
@@ -421,6 +425,10 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		manaCost = s.Config.Spells.Conflagrate.ManaCost
 	case spells.SpellLifeTap:
 		manaCost = 0
+	case spells.SpellCurseOfElements:
+		manaCost = 0
+	case spells.SpellSoulFire:
+		manaCost = s.Config.Spells.SoulFire.ManaCost
 	}
 
 	if manaCost > 0 && !char.HasMana(manaCost) {
@@ -453,6 +461,10 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 	case spells.SpellLifeTap:
 		castResult = spellEngine.CastLifeTap(char)
 		result.LifeTapCount++
+	case spells.SpellCurseOfElements:
+		castResult = spellEngine.CastCurseOfElements(char)
+	case spells.SpellSoulFire:
+		castResult = spellEngine.CastSoulFire(char)
 	}
 
 	if s.LogEnabled && castResult.CastTime > 0 {
@@ -662,6 +674,10 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.Immolate.ExpiresAt, "DOT_EXPIRE Immolate")
 		}
 	}
+	if char.CurseOfElements.Active && now >= char.CurseOfElements.ExpiresAt {
+		char.CurseOfElements.Active = false
+		char.CurseOfElements.ExpiresAt = 0
+	}
 	if char.HeatingUp != nil && char.HeatingUp.Stacks() > 0 {
 		expireAt := char.HeatingUp.ExpiresAt()
 		if char.HeatingUp.CheckExpiration(now) && s.LogEnabled {
@@ -732,10 +748,10 @@ func (r *SimulationResult) PrintResults() {
 	fmt.Println()
 
 	fmt.Println("Spell Breakdown (average per iteration):")
-	fmt.Println("--------------------------------------------------------------------------")
-	fmt.Printf("%-13s | %12s | %6s | %7s | %7s | %7s | %7s | %7s\n",
-		"Spell", "Damage", "Share", "Avg", "Min", "Max", "Crit%", "Miss%")
-	fmt.Println("--------------------------------------------------------------------------")
+	fmt.Println("--------------------------------------------------------------------------------")
+	fmt.Printf("%-13s | %7s | %12s | %6s | %7s | %7s | %7s | %7s | %7s\n",
+		"Spell", "Casts", "Damage", "Share", "Avg", "Min", "Max", "Crit%", "Miss%")
+	fmt.Println("--------------------------------------------------------------------------------")
 	totalDamage := 0.0
 	for _, stats := range r.SpellBreakdown {
 		totalDamage += stats.Damage
@@ -761,6 +777,7 @@ func (r *SimulationResult) PrintResults() {
 	for _, row := range rows {
 		stats := row.stats
 		avgDamagePerIter := stats.Damage / float64(r.Iterations)
+		avgCastsPerIter := float64(stats.Casts) / float64(r.Iterations)
 		damagePct := 0.0
 		if totalDamage > 0 {
 			damagePct = (stats.Damage / totalDamage) * 100.0
@@ -782,10 +799,10 @@ func (r *SimulationResult) PrintResults() {
 		if stats.Casts > 0 {
 			missPct = float64(stats.Misses) / float64(stats.Casts) * 100.0
 		}
-		fmt.Printf("%-13s | %12.0f | %5.1f%% | %7.0f | %7.0f | %7.0f | %6.1f%% | %6.1f%%\n",
-			row.label, avgDamagePerIter, damagePct, avgHit, minHit, maxHit, critPct, missPct)
+		fmt.Printf("%-13s | %7.1f | %12.0f | %5.1f%% | %7.0f | %7.0f | %7.0f | %6.1f%% | %6.1f%%\n",
+			row.label, avgCastsPerIter, avgDamagePerIter, damagePct, avgHit, minHit, maxHit, critPct, missPct)
 	}
-	fmt.Println("--------------------------------------------------------------------------")
+	fmt.Println("--------------------------------------------------------------------------------")
 	if r.LifeTapCount > 0 {
 		fmt.Printf("Life Tap casts (avg): %.1f\n", float64(r.LifeTapCount)/float64(r.Iterations))
 	}

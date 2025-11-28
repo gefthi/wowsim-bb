@@ -82,6 +82,7 @@ type Character struct {
 
 	// Debuffs on target
 	Immolate Debuff
+	CurseOfElements Debuff
 
 	// Cooldowns
 	ChaosBolt   Cooldown

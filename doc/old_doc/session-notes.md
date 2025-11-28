@@ -25,3 +25,6 @@
 
 Keeping this doc up-to-date each session should make it easy to resume work without re-reading the entire repo.
 
+## TODO / Reminders
+- Decide if PvE Power applies to pets; apply multiplier accordingly in `internal/engine/pets.go` if yes.
+- Make PvE Power a configurable stat (e.g., in `configs/player.yaml`) and thread it through damage calculations instead of a constant.

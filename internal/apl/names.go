@@ -13,6 +13,7 @@ var (
 		"chaos_bolt":            {},
 		"incinerate":            {},
 		"life_tap":              {},
+		"soul_fire":             {},
 		"inferno":               {},
 		"curse_of_doom":         {},
 		"curse_of_agony":        {},
@@ -21,6 +22,10 @@ var (
 	knownBuffs = map[string]struct{}{
 		"pyroclasm":           {},
 		"backdraft":           {},
+		"guldans_chosen":      {},
+		"cataclysmic_burst":   {},
+		"heating_up":          {},
+		"decisive_decimation": {},
 		"improved_soul_leech": {},
 		"soul_leech":          {},
 		"life_tap_buff":       {},

@@ -1,0 +1,115 @@
+name: "Destruction - Cataclysmic Burst"
+description: |
+  Cataclysmic Burst rotation
+imports: []
+variables:
+  life_tap_threshold: 0.30
+  life_tap_buff_refresh: 5.0
+rotation:
+  - action: cast_spell
+    spell: curse_of_the_elements
+    when:
+      any:
+        - not:
+            debuff_active:
+              debuff: curse_of_the_elements
+        - debuff_active:
+            debuff: curse_of_the_elements
+            max_remaining: 30.0
+
+  - action: cast_spell
+    spell: life_tap
+    when:
+      any:
+        - not:
+            buff_active:
+              buff: life_tap_buff
+        - buff_active:
+            buff: life_tap_buff
+            max_remaining: ${life_tap_buff_refresh}
+
+  - action: cast_spell
+    spell: life_tap
+    when:
+      resource_percent:
+        resource: mana
+        lt: ${life_tap_threshold}
+
+  - action: cast_spell
+    spell: immolate
+    when:
+      any:
+        - not:
+            debuff_active:
+              debuff: immolate
+
+  # Preferred Conflagrate: only when Cataclysmic Burst is stacked (>=3)
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate
+        - cooldown_ready:
+            spell: conflagrate
+        - charges:
+            buff: cataclysmic_burst
+            gte: 3
+
+  # Fallback Conflagrate: fire immediately when ready (prevents over-delaying at low stacks)
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate
+        - cooldown_ready:
+            spell: conflagrate
+
+  # If Backdraft has 2+ charges and CB is ready, fire CB now (aim for 3–2 stack usage).
+  - action: cast_spell
+    spell: chaos_bolt
+    when:
+      all:
+        - charges:
+            buff: backdraft
+            gte: 2
+        - cooldown_ready:
+            spell: chaos_bolt
+
+  # Buffer with Life Tap (does not consume Backdraft) only if CB is very close (<0.6s) and Life Tap buff is actually expiring soon (<5s).
+  - action: cast_spell
+    spell: life_tap
+    when:
+      all:
+        - charges:
+            buff: backdraft
+            gte: 2
+        - cooldown_remaining:
+            spell: chaos_bolt
+            lt_seconds: 0.6
+        - buff_active:
+            buff: life_tap_buff
+            max_remaining: 5.0
+
+  # Short wait (<=0.4s) to align CB if it is nearly ready and Backdraft has 2+ charges.
+  - action: wait
+    duration_seconds: 0.4
+    when:
+      all:
+        - charges:
+            buff: backdraft
+            gte: 2
+        - cooldown_remaining:
+            spell: chaos_bolt
+            lt_seconds: 0.5
+
+  - action: cast_spell
+    spell: chaos_bolt
+    when:
+      cooldown_ready:
+        spell: chaos_bolt
+
+  - action: cast_spell
+    spell: incinerate
+    when: true
