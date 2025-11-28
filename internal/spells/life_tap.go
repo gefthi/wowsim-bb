@@ -18,6 +18,8 @@ func (e *Engine) CastLifeTap(char *character.Character) CastResult {
 		DidHit:   true,
 	}
 
+	e.applyHasteTimes(char, &result)
+
 	manaGained := spellData.ManaBase + (char.Stats.SpellPower * spellData.SpellpowerCoefficient)
 	char.GainMana(manaGained)
 	result.ManaGained = manaGained

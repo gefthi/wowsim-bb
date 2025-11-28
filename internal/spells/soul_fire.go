@@ -27,6 +27,7 @@ func (e *Engine) CastSoulFire(char *character.Character) CastResult {
 	result.CastTime = castTime
 	result.GCDTime = gcd
 
+	e.applyHasteTimes(char, &result)
 	e.applyBackdraft(char, &result, true)
 
 	char.SpendMana(spellData.ManaCost)

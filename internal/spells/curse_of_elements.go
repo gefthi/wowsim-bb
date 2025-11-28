@@ -16,6 +16,8 @@ func (e *Engine) CastCurseOfElements(char *character.Character) CastResult {
 		DidHit:    true,
 	}
 
+	e.applyHasteTimes(char, &result)
+
 	// Apply a long-duration debuff (covers typical fight lengths).
 	duration := 300 * time.Second
 	char.CurseOfElements.Active = true

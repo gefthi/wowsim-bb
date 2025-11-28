@@ -8,7 +8,7 @@ Last Updated: 2025-11-28
 - Mystic Enchants support: selection in `configs/player.yaml`; implemented effects include Glyph of Life Tap (buff), Glyph of Conflagrate (no consume), Destruction Mastery, Heating Up, Cataclysmic Burst, Gul'dan's Chosen, Agent of Chaos hook, Suppression, Curse of the Elements debuff (10% damage multiplier)
 - Data-driven config: YAML for constants, player stats, spells, talents, runes; rotation via YAML APL with loader/compiler/validator
 - Modular spells, shared aura/timer helpers in `internal/effects`, per-spell files under `internal/spells/`
-- CLI: `go run cmd/simulator` with optional `-log-combat`; APL validator `go run ./cmd/aplvalidate`
+- CLI: `go run cmd/simulator` with optional `-log-combat`; APL validator `go run ./cmd/aplvalidate`; stat weights helper `go run ./cmd/statweights`
 
 ## In Progress
 - Migrate remaining buffs/debuffs to aura framework (Backdraft state, Chaos Manifesting)
@@ -20,7 +20,7 @@ Last Updated: 2025-11-28
 - Phase 5: Stat weights calculation
 - Phase 6: Haste mechanics
 - Phase 7: UI/APL tooling polish
-- Next session: minimal UI to edit `configs/player.yaml`; later, rotation editor (APL operators/conditions)
+- Next session: minimal UI to edit `configs/player.yaml`; rotation editor (APL operators/conditions) with guardrails captured in `doc/UI_REQUIREMENTS.md`
 - Consider pet system expansion (affects PvE Power decision)
 
 ## Known Issues / TODO

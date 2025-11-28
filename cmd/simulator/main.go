@@ -17,6 +17,7 @@ import (
 
 func main() {
 	logCombat := flag.Bool("log-combat", false, "Enable combat log mode (forces 1 iteration, 60s duration)")
+	seedBase := flag.Int64("seed-base", 0, "Base RNG seed (0 = random)")
 	flag.Parse()
 
 	fmt.Println("WotLK Destruction Warlock Simulator - Phase 3")
@@ -88,19 +89,25 @@ func main() {
 		logWriter = os.Stdout
 	}
 
+	baseSeed := *seedBase
+	if baseSeed == 0 {
+		baseSeed = time.Now().UnixNano()
+	}
+
 	fmt.Printf("Simulation Config:\n")
 	fmt.Printf("  Fight Duration: %.0f seconds\n", simConfig.Duration.Seconds())
 	fmt.Printf("  Iterations: %d\n", simConfig.Iterations)
 	fmt.Printf("  Target: %s (Level %d)\n",
 		map[bool]string{true: "Boss", false: "Equal Level"}[simConfig.IsBoss],
 		cfg.Player.Target.Level)
+	fmt.Printf("  Base Seed: %d\n", baseSeed)
 	fmt.Println()
 
 	fmt.Println("Running simulation...")
 	fmt.Println()
 
 	// Create and run simulator
-	sim := engine.NewSimulator(cfg, simConfig, compiledRotation, time.Now().UnixNano(), *logCombat, logWriter)
+	sim := engine.NewSimulator(cfg, simConfig, compiledRotation, baseSeed, *logCombat, logWriter)
 	result := sim.Run(char)
 
 	// Print results

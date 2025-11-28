@@ -10,10 +10,21 @@ Combat log mode (1 iteration, 60s, prints events):
 go run cmd/simulator/main.go -log-combat
 ```
 
+Deterministic seeds (helpful for comparisons/stat weights):
+```bash
+go run cmd/simulator/main.go -seed-base 12345
+```
+
 ## Validate Rotations (APL)
 ```bash
 go run ./cmd/aplvalidate -rotation configs/rotations/destruction-default.yaml
 ```
+
+## Stat Weights (central diff)
+```bash
+go run ./cmd/statweights -seed-base 12345
+```
+Defaults use `configs/player.yaml` rotation/iterations; override with `-rotation` or `-iterations`.
 
 ## Configure
 - `configs/player.yaml`: stats (spell power, crit, haste, spirit, hit, max mana), target type/level, iterations/duration, pet summon, mystic enchants.

@@ -18,6 +18,7 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 		ManaSpent: spellData.ManaCost,
 	}
 
+	e.applyHasteTimes(char, &result)
 	e.activateGuldansChosen(char)
 	e.applyBackdraft(char, &result, true)
 

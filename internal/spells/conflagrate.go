@@ -18,6 +18,7 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 		ManaSpent: spellData.ManaCost,
 	}
 
+	e.applyHasteTimes(char, &result)
 	e.applyBackdraft(char, &result, true)
 	char.SpendMana(spellData.ManaCost)
 

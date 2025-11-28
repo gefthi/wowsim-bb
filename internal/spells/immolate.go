@@ -18,6 +18,7 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 		ManaSpent: spellData.ManaCost,
 	}
 
+	e.applyHasteTimes(char, &result)
 	baseTickCount := spellData.DotTicks
 	if baseTickCount <= 0 {
 		baseTickCount = 1

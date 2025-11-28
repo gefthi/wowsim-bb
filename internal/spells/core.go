@@ -13,7 +13,7 @@ import (
 type SpellType int
 
 const (
-	pvePowerMultiplier       = 1.25
+	pvePowerMultiplier        = 1.25
 	CurseOfElementsMultiplier = 1.10
 )
 
@@ -174,11 +174,36 @@ func (e *Engine) agentOfChaosHasteMultiplier(char *character.Character) float64 
 	if !e.Config.Player.HasRune(runes.RuneAgentOfChaos) {
 		return 1
 	}
+	return e.hasteMultiplier(char)
+}
+
+// hasteMultiplier converts character haste % into a multiplier for time reductions.
+func (e *Engine) hasteMultiplier(char *character.Character) float64 {
 	mult := 1.0 + (char.Stats.HastePct / 100.0)
 	if mult <= 0 {
 		return 1
 	}
 	return mult
+}
+
+// applyHasteTimes applies spell haste to cast time and GCD, enforcing minimum GCD.
+func (e *Engine) applyHasteTimes(char *character.Character, result *CastResult) {
+	haste := e.hasteMultiplier(char)
+	if haste != 1 {
+		if result.CastTime > 0 {
+			result.CastTime = time.Duration(float64(result.CastTime) / haste)
+		}
+		if result.GCDTime > 0 {
+			result.GCDTime = time.Duration(float64(result.GCDTime) / haste)
+		}
+	}
+
+	if result.GCDTime > 0 {
+		minGCD := time.Duration(e.Config.Constants.GCD.Minimum * float64(time.Second))
+		if minGCD > 0 && result.GCDTime < minGCD {
+			result.GCDTime = minGCD
+		}
+	}
 }
 
 func (e *Engine) effectiveSpellPower(char *character.Character) float64 {
