@@ -1,38 +1,38 @@
-# Player Configuration
-# Edit these values to match your character's stats
-
 character:
-  name: "Destruction Warlock"
-  level: 60
-
+    name: Destruction Warlock
+    level: 60
 pet:
-  summon: "imp"        # Options: "imp" (default), "none"
-
+    summon: imp
 stats:
-  intellect: 0.0
-  spell_power: 700.0
-  crit_percent: 11.24    # Total crit % (base + gear + talents: Devastation 5% + Backlash 3%)
-  haste_percent: 3.40    # Not implemented yet (Phase 5)
-  spirit: 177.0
-  hit_percent: 14.0     # Hit capped for boss (17% for +3 level difference)
-  max_mana: 6000.0
-
+    intellect: 0
+    spell_power: 700
+    crit_percent: 11.2
+    haste_percent: 8
+    spirit: 177
+    hit_percent: 14
+    max_mana: 6000
 target:
-  type: "equal_level"          # "boss" or "equal_level"
-  level: 60             # Boss = player level + 3 (60 + 3 = 63)
-
-rotation: "destruction-decisive.yaml"  # Rotation file name (from configs/rotations/)
-
+    type: equal_level
+    level: 60
+rotation: destruction-cataclysmic.yaml
 simulation:
-  duration_seconds: 300  # Fight duration (5 minutes = 300 seconds)
-  iterations: 1000       # Number of simulation runs for averaging
-
+    duration_seconds: 300
+    iterations: 5000
 mystic_enchants:
-  limits:
-    legendary: 1
-    epic: 3
-    rare: 6
-  equipped:
-    legendary: ["destruction_mastery"]        # e.g., ["destruction_mastery"]
-    epic: ["heating_up","decisive_decimation","guldans_chosen"]             # e.g., ["inner_flame", "heating_up"]
-    rare: ["glyph_of_life_tap","glyph_of_chaos_bolt","glyph_of_conflagrate","demonic_aegis","suppression"]
+    limits:
+        legendary: 1
+        epic: 3
+        rare: 6
+    equipped:
+        legendary:
+            - cataclysmic_burst
+        epic:
+            - agent_of_chaos
+            - guldans_chosen
+            - heating_up
+        rare:
+            - demonic_aegis
+            - glyph_of_chaos_bolt
+            - glyph_of_conflagrate
+            - glyph_of_life_tap
+            - suppression

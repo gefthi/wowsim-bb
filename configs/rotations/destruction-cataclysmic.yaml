@@ -5,6 +5,7 @@ imports: []
 variables:
   life_tap_threshold: 0.30
   life_tap_buff_refresh: 5.0
+  immolate_refresh_buffer: 0.5
 rotation:
   - action: cast_spell
     spell: curse_of_the_elements
@@ -27,13 +28,24 @@ rotation:
         - buff_active:
             buff: life_tap_buff
             max_remaining: ${life_tap_buff_refresh}
+        - all:
+            - buff_active:
+                buff: life_tap_buff
+                max_remaining: ${life_tap_buff_refresh}
+            - not:
+                buff_active:
+                  buff: backdraft
 
   - action: cast_spell
     spell: life_tap
     when:
-      resource_percent:
-        resource: mana
-        lt: ${life_tap_threshold}
+      all:
+        - resource_percent:
+            resource: mana
+            lt: ${life_tap_threshold}
+        - not:
+            buff_active:
+              buff: backdraft
 
   - action: cast_spell
     spell: immolate
@@ -42,6 +54,9 @@ rotation:
         - not:
             debuff_active:
               debuff: immolate
+        - debuff_active:
+            debuff: immolate
+            max_remaining: ${immolate_refresh_buffer}
 
   # Preferred Conflagrate: only when Cataclysmic Burst is stacked (>=3)
   - action: cast_spell
@@ -50,6 +65,7 @@ rotation:
       all:
         - debuff_active:
             debuff: immolate
+          
         - cooldown_ready:
             spell: conflagrate
         - charges:
@@ -63,6 +79,7 @@ rotation:
       all:
         - debuff_active:
             debuff: immolate
+          
         - cooldown_ready:
             spell: conflagrate
 
