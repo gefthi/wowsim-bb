@@ -18,8 +18,8 @@ stats:
   max_mana: 6000.0
 
 target:
-  type: "boss"          # "boss" or "equal_level"
-  level: 63             # Boss = player level + 3 (60 + 3 = 63)
+  type: "equal_level"          # "boss" or "equal_level"
+  level: 60             # Boss = player level + 3 (60 + 3 = 63)
 
 rotation: "destruction-decisive.yaml"  # Rotation file name (from configs/rotations/)
 
