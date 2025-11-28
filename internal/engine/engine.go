@@ -120,9 +120,6 @@ func (s *Simulator) scheduleNextImmolateTick(char *character.Character, result *
 		return
 	}
 	nextTick := char.Immolate.LastTick + char.Immolate.TickInterval
-	if char.Immolate.ExpiresAt > 0 && nextTick >= char.Immolate.ExpiresAt {
-		return
-	}
 	handle := s.scheduleEvent(nextTick, func() {
 		s.executeImmolateTick(char, nextTick, result, spellEngine)
 	})

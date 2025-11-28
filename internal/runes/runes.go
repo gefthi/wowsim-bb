@@ -113,3 +113,12 @@ func HeatingUpMultiplier(active bool, stacks int, expiresAt, now time.Duration) 
 	}
 	return 1 + HeatingUpStackBonus*float64(stacks)
 }
+
+// KnownRunes returns all rune identifiers keyed by name.
+func KnownRunes() map[string]Rarity {
+	out := make(map[string]Rarity, len(runeRarity))
+	for k, v := range runeRarity {
+		out[k] = v
+	}
+	return out
+}

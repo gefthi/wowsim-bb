@@ -9,11 +9,7 @@ Combat log mode (1 iteration, 60s, prints events):
 ```bash
 go run cmd/simulator/main.go -log-combat
 ```
-
-Deterministic seeds (helpful for comparisons/stat weights):
-```bash
-go run cmd/simulator/main.go -seed-base 12345
-```
+Combat log mode forces 1 iteration but uses the configured fight duration; add `-seed-base` to fix RNG.
 
 ## Validate Rotations (APL)
 ```bash

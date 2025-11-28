@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log Timeline Viewer</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { background: #0b1220; color: #e2e8f0; font-family: Inter, system-ui, sans-serif; margin: 0; padding: 16px; }
+    h1 { margin: 0 0 8px; }
+    .panel { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn { background: #38bdf8; color: #0b1220; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    .btn:hover { background: #22d3ee; }
+    textarea { width: 100%; height: 180px; background: #0f172a; color: #e2e8f0; border: 1px solid #1f2937; border-radius: 6px; padding: 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .legend-item { display: flex; gap: 6px; align-items: center; padding: 2px 6px; background: #1f2937; border-radius: 4px; }
+    .swatch { width: 12px; height: 12px; border-radius: 2px; }
+    .row-title { font-size: 12px; fill: #94a3b8; }
+    .tooltip { position: absolute; background: #111827; color: #e2e8f0; padding: 8px; border-radius: 6px; border: 1px solid #1f2937; pointer-events: none; font-size: 12px; }
+    .chart-title { font-size: 13px; fill: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <h1>Combat Log Timeline</h1>
+  <div class="panel">
+    <div class="controls">
+      <input type="file" id="fileInput" accept=".txt" />
+      <button class="btn" id="parseBtn">Parse Log</button>
+      <button class="btn" id="resetZoom">Reset Zoom</button>
+      <div id="status"></div>
+    </div>
+    <p>Paste your combat log below or select a file. Uses the simulator's text log.</p>
+    <textarea id="logText" placeholder="Paste log output here..."></textarea>
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <label>Spells: <select id="spellFilter" multiple size="6"></select></label>
+      <label>Buffs: <select id="buffFilter" multiple size="6"></select></label>
+      <button class="btn" id="applyFilters">Apply Filters</button>
+      <div id="summary"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <svg id="chart" width="1200" height="700"></svg>
+  </div>
+
+  <div class="tooltip" id="tooltip" style="display:none;"></div>
+
+  <script>
+    const state = { events: [], casts: [], ticks: [], buffs: {}, spells: [], buffNames: [], duration: 0, filterSpells: null, filterBuffs: null, zoomTransform: null };
+    const spellColors = d3.scaleOrdinal(d3.schemeTableau10);
+    const buffColors = d3.scaleOrdinal(d3.schemeCategory10);
+    const dpsColors = d3.scaleOrdinal(d3.schemeTableau10);
+    const tooltip = d3.select("#tooltip");
+
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      document.getElementById('logText').value = text;
+    });
+
+    document.getElementById('parseBtn').addEventListener('click', () => {
+      const text = document.getElementById('logText').value;
+      parseLog(text);
+      populateFilters();
+      render();
+    });
+
+    document.getElementById('applyFilters').addEventListener('click', () => {
+      const spellSel = document.getElementById('spellFilter');
+      const buffSel = document.getElementById('buffFilter');
+      state.filterSpells = Array.from(spellSel.selectedOptions).map(o => o.value);
+      state.filterBuffs = Array.from(buffSel.selectedOptions).map(o => o.value);
+      render();
+    });
+
+    document.getElementById('resetZoom').addEventListener('click', () => {
+      state.zoomTransform = null;
+      render();
+    });
+
+    function parseLog(text) {
+      state.events = [];
+      state.casts = [];
+      state.ticks = [];
+      state.buffs = {};
+      state.spells = [];
+      state.buffNames = [];
+      state.duration = 0;
+      const lines = text.split(/\r?\n/);
+      const timeRe = /^\[\s*([\d\.]+)s\]\s+(.*)$/;
+      const startMap = new Map();
+      const activeBuff = new Map();
+      for (const line of lines) {
+        const m = timeRe.exec(line);
+        if (!m) continue;
+        const t = parseFloat(m[1]);
+        state.duration = Math.max(state.duration, t);
+        const rest = m[2];
+        if (rest.includes("CAST_START")) {
+          const parts = rest.split(/\s+/);
+          const spell = parts[1] || "";
+          startMap.set(spell + "|" + t, { spell, start: t });
+          state.spells.push(spell);
+        } else if (rest.includes("CAST_RESULT")) {
+          const parts = rest.split(/\s+/);
+          const spell = parts[1] || "";
+          // find nearest unmatched start of same spell
+          let startEntry = null;
+          for (const [k, v] of startMap.entries()) {
+            if (v.spell === spell) { startEntry = v; startMap.delete(k); break; }
+          }
+          const start = startEntry ? startEntry.start : t;
+          state.casts.push({ spell, start, end: t, line: rest });
+          state.spells.push(spell);
+        } else if (rest.includes("DOT_TICK")) {
+          const parts = rest.split(/\s+/);
+          const spell = parts[1] || "";
+          const dmgMatch = /damage=(\d+)/.exec(rest);
+          const damage = dmgMatch ? parseInt(dmgMatch[1], 10) : null;
+          const crit = rest.includes("CRIT");
+          state.ticks.push({ spell, time: t, damage, crit });
+          state.spells.push(spell);
+        } else if (rest.includes("BUFF_GAIN") || rest.includes("BUFF_REFRESH")) {
+          const parts = rest.split(/\s+/);
+          const buff = parts[1] || parts[2] || "";
+          if (!state.buffs[buff]) state.buffs[buff] = [];
+          // close previous interval if active
+          if (activeBuff.has(buff)) {
+            const last = activeBuff.get(buff);
+            if (last && last.end === null) last.end = t;
+          }
+          const interval = { start: t, end: null };
+          state.buffs[buff].push(interval);
+          activeBuff.set(buff, interval);
+          state.buffNames.push(buff);
+        } else if (rest.includes("BUFF_EXPIRE") || rest.includes("DEBUFF_EXPIRE")) {
+          const parts = rest.split(/\s+/);
+          const buff = parts[1] || parts[2] || "";
+          const arr = state.buffs[buff];
+          if (arr && arr.length) {
+            const last = activeBuff.get(buff) || arr[arr.length - 1];
+            if (last.end === null) last.end = t;
+          }
+          activeBuff.delete(buff);
+          state.buffNames.push(buff);
+        }
+      }
+      state.spells = Array.from(new Set(state.spells));
+      state.buffNames = Array.from(new Set(state.buffNames));
+    }
+
+    function populateFilters() {
+      const spellSel = document.getElementById('spellFilter');
+      spellSel.innerHTML = '';
+      state.spells.sort().forEach(s => {
+        const opt = document.createElement('option'); opt.value = s; opt.textContent = s; spellSel.appendChild(opt);
+      });
+      const buffSel = document.getElementById('buffFilter');
+      buffSel.innerHTML = '';
+      state.buffNames.sort().forEach(b => {
+        const opt = document.createElement('option'); opt.value = b; opt.textContent = b; buffSel.appendChild(opt);
+      });
+    }
+
+    function render() {
+      const svg = d3.select("#chart");
+      const width = +svg.attr("width") - 40;
+      const height = +svg.attr("height") - 40;
+      svg.selectAll("*").remove();
+
+      if (!state.duration) return;
+
+      const spells = state.filterSpells && state.filterSpells.length ? state.filterSpells : state.spells;
+      const buffs = state.filterBuffs && state.filterBuffs.length ? state.filterBuffs : state.buffNames;
+
+      const castData = state.casts.filter(c => spells.includes(c.spell));
+      const tickData = state.ticks.filter(t => spells.includes(t.spell));
+
+      const spellIndex = new Map(spells.map((s, i) => [s, i]));
+      const buffIndex = new Map(buffs.map((b, i) => [b, i]));
+
+      const castRowHeight = 20;
+      const buffRowHeight = 14;
+      const castAreaHeight = spells.length * castRowHeight + 20;
+      const buffAreaHeight = buffs.length * buffRowHeight + 20;
+      const dpsAreaHeight = 180;
+      const totalHeight = castAreaHeight + buffAreaHeight + dpsAreaHeight + 60;
+      svg.attr("height", totalHeight);
+
+      const baseX = d3.scaleLinear().domain([0, state.duration]).range([80, width]);
+      const t = state.zoomTransform || d3.zoomIdentity;
+      const x = t.rescaleX(baseX);
+      const xAxis = d3.axisBottom(x).ticks(10).tickFormat(d => d + "s");
+      svg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${castAreaHeight})`).call(xAxis).selectAll("text").attr("fill", "#94a3b8");
+      svg.selectAll(".domain, .tick line").attr("stroke", "#475569");
+
+      // Casts
+      const castGroup = svg.append("g");
+      castGroup.selectAll("rect.cast").data(castData).enter().append("rect")
+        .attr("class", "cast")
+        .attr("x", d => x(d.start))
+        .attr("y", d => spellIndex.get(d.spell) * castRowHeight + 4)
+        .attr("width", d => Math.max(2, x(d.end) - x(d.start)))
+        .attr("height", castRowHeight - 6)
+        .attr("rx", 3)
+        .attr("fill", d => spellColors(d.spell))
+        .on("mousemove", (event, d) => showTip(event, `${d.spell}<br>${d.start.toFixed(2)}s → ${d.end.toFixed(2)}s<br>${d.line || ""}`))
+        .on("mouseout", hideTip);
+
+      castGroup.selectAll("text.label").data(spells).enter().append("text")
+        .attr("x", 70)
+        .attr("y", (d, i) => i * castRowHeight + 14)
+        .text(d => d)
+        .attr("fill", "#94a3b8")
+        .attr("font-size", 10)
+        .attr("text-anchor", "end");
+
+      // Ticks
+      castGroup.selectAll("circle.tick").data(tickData).enter().append("circle")
+        .attr("class", "tick")
+        .attr("cx", d => x(d.time))
+        .attr("cy", d => spellIndex.get(d.spell) * castRowHeight + castRowHeight - 6)
+        .attr("r", 3)
+        .attr("fill", d => d.crit ? "#f472b6" : "#cbd5e1")
+        .on("mousemove", (event, d) => showTip(event, `${d.spell} tick<br>${d.time.toFixed(2)}s<br>damage ${d.damage}${d.crit ? " (CRIT)" : ""}`))
+        .on("mouseout", hideTip);
+
+      // Buffs
+      const buffGroup = svg.append("g").attr("transform", `translate(0,${castAreaHeight + 20})`);
+      buffs.forEach((b, i) => {
+        const intervals = state.buffs[b] || [];
+        buffGroup.selectAll(`rect.buff-${i}`).data(intervals).enter().append("rect")
+          .attr("x", d => x(d.start))
+          .attr("y", i * buffRowHeight + 2)
+          .attr("width", d => x(d.end || state.duration) - x(d.start))
+          .attr("height", buffRowHeight - 4)
+          .attr("rx", 2)
+          .attr("fill", buffColors(b))
+          .attr("opacity", 0.6)
+          .on("mousemove", (event, d) => showTip(event, `${b}<br>${d.start.toFixed(2)}s → ${(d.end || state.duration).toFixed(2)}s`))
+          .on("mouseout", hideTip);
+      });
+      buffGroup.selectAll("text.buff-label").data(buffs).enter().append("text")
+        .attr("x", 70)
+        .attr("y", (d, i) => i * buffRowHeight + 12)
+        .text(d => d)
+        .attr("fill", "#94a3b8")
+        .attr("font-size", 10)
+        .attr("text-anchor", "end");
+
+      // DPS area (stacked-ish by spell; simple damage/bin)
+      const dpsGroup = svg.append("g").attr("transform", `translate(0,${castAreaHeight + buffAreaHeight + 30})`);
+      dpsGroup.append("text").attr("x", 20).attr("y", -10).attr("fill", "#cbd5e1").text("DPS over time (per spell)");
+      const bins = 120;
+      const binSize = state.duration / bins;
+      const dpsData = spells.map(sp => ({ spell: sp, values: Array(bins).fill(0) }));
+      state.ticks.forEach(t => {
+        if (!spells.includes(t.spell)) return;
+        const idx = Math.min(bins - 1, Math.floor(t.time / binSize));
+        const entry = dpsData.find(d => d.spell === t.spell);
+        if (entry) entry.values[idx] += t.damage || 0;
+      });
+      dpsData.forEach(d => d.values = d.values.map(v => v / binSize));
+      const yMax = d3.max(dpsData, d => d3.max(d.values)) || 1;
+      const y = d3.scaleLinear().domain([0, yMax]).range([dpsAreaHeight, 0]);
+      const area = d3.area()
+        .x((v, i) => x(i * binSize + binSize / 2))
+        .y0(dpsAreaHeight)
+        .y1((v) => y(v))
+        .curve(d3.curveMonotoneX);
+      dpsData.forEach(d => {
+        dpsGroup.append("path")
+          .attr("fill", dpsColors(d.spell))
+          .attr("opacity", 0.25)
+          .attr("d", area(d.values))
+          .on("mousemove", (event) => showTip(event, `${d.spell} DPS`))
+          .on("mouseout", hideTip);
+        dpsGroup.append("path")
+          .attr("fill", "none")
+          .attr("stroke", dpsColors(d.spell))
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.line()
+            .x((v, i) => x(i * binSize + binSize / 2))
+            .y(v => y(v))
+            .curve(d3.curveMonotoneX)(d.values));
+      });
+      const yAxis = d3.axisLeft(y).ticks(4);
+      dpsGroup.append("g").attr("transform", `translate(70,0)`).call(yAxis).selectAll("text").attr("fill", "#94a3b8");
+      dpsGroup.selectAll(".domain, .tick line").attr("stroke", "#475569");
+
+      // Legend
+      d3.selectAll(".legend").remove();
+      const legend = d3.select("body").append("div").attr("class", "legend");
+      legend.selectAll("div").data(spells).enter().append("div").attr("class", "legend-item")
+        .html(d => `<span class="swatch" style="background:${spellColors(d)}"></span>${d}`);
+
+      document.getElementById('summary').textContent = `Duration: ${state.duration.toFixed(1)}s | Casts: ${state.casts.length} | Ticks: ${state.ticks.length}`;
+
+      const zoom = d3.zoom().scaleExtent([1, 20]).translateExtent([[0, 0], [width, totalHeight]]).on("zoom", (event) => {
+        state.zoomTransform = event.transform;
+        render();
+      });
+      svg.call(zoom).on("wheel.zoom", null).on("dblclick.zoom", null);
+      svg.call(zoom);
+    }
+
+    function showTip(event, html) {
+      tooltip.style("display", "block")
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY + 10) + "px")
+        .html(html);
+    }
+    function hideTip() { tooltip.style("display", "none"); }
+  </script>
+</body>
+</html>

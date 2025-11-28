@@ -17,6 +17,11 @@ func (p *Player) validate() error {
 	return validateMysticEnchants(&p.MysticEnchants)
 }
 
+// Validate exposes player validation for callers outside the config package.
+func (p *Player) Validate() error {
+	return p.validate()
+}
+
 func validateMysticEnchants(me *MysticEnchantConfig) error {
 	if me == nil {
 		return nil

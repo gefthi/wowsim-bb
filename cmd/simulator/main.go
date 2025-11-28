@@ -83,9 +83,8 @@ func main() {
 
 	var logWriter io.Writer
 	if *logCombat {
-		fmt.Println("Combat log mode enabled: forcing 1 iteration, 60-second duration.")
+		fmt.Println("Combat log mode enabled: forcing 1 iteration; using configured duration.")
 		simConfig.Iterations = 1
-		simConfig.Duration = time.Minute
 		logWriter = os.Stdout
 	}
 

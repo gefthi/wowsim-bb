@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>wowsim-bb - Config & Rotations</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background: #0f172a; color: #e2e8f0; }
+    h1 { margin-bottom: 8px; }
+    .card { background: #1e293b; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    label { display: block; margin: 8px 0 4px; font-weight: 600; }
+    input, select { width: 240px; padding: 6px; border-radius: 4px; border: 1px solid #334155; background: #0b1220; color: #e2e8f0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .rune-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rune-group label { display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; }
+    button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    button:hover { background: #22d3ee; }
+    #status { margin-top: 8px; }
+    .flex { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .actions { display: grid; gap: 12px; }
+    .action-row { border: 1px solid #334155; padding: 12px; border-radius: 8px; }
+    .action-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .condition { margin-top: 8px; padding: 8px; background: #0b1220; border-radius: 6px; }
+    .predicate { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+    .small { width: 120px; }
+    .medium { width: 160px; }
+    .tag { padding: 2px 6px; background: #334155; border-radius: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Player Config</h1>
+  <div class="card">
+    <form id="player-form">
+      <div class="grid">
+        <div>
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" />
+
+          <label for="level">Level</label>
+          <input id="level" name="level" type="number" step="1" />
+
+          <label for="pet">Pet</label>
+          <select id="pet" name="pet"></select>
+
+          <label for="rotation">Rotation</label>
+          <select id="rotation" name="rotation"></select>
+
+          <label for="target-type">Target Type</label>
+          <select id="target-type" name="target-type">
+            <option value="boss">Boss</option>
+            <option value="equal_level">Equal Level</option>
+          </select>
+
+          <label for="target-level">Target Level</label>
+          <input id="target-level" name="target-level" type="number" step="1" />
+        </div>
+
+        <div>
+          <label for="spell-power">Spell Power</label>
+          <input id="spell-power" name="spell-power" type="number" step="0.1" />
+
+          <label for="crit">Crit %</label>
+          <input id="crit" name="crit" type="number" step="0.01" />
+
+          <label for="haste">Haste %</label>
+          <input id="haste" name="haste" type="number" step="0.01" />
+
+          <label for="hit">Hit %</label>
+          <input id="hit" name="hit" type="number" step="0.01" />
+
+          <label for="spirit">Spirit</label>
+          <input id="spirit" name="spirit" type="number" step="0.1" />
+
+          <label for="intellect">Intellect</label>
+          <input id="intellect" name="intellect" type="number" step="0.1" />
+
+          <label for="max-mana">Max Mana</label>
+          <input id="max-mana" name="max-mana" type="number" step="1" />
+        </div>
+
+        <div>
+          <label for="duration">Fight Duration (sec)</label>
+          <input id="duration" name="duration" type="number" step="1" />
+
+          <label for="iterations">Iterations</label>
+          <input id="iterations" name="iterations" type="number" step="1" />
+
+          <div id="runes"></div>
+        </div>
+      </div>
+      <button type="submit">Save player.yaml</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <h1>Rotation Editor</h1>
+  <div class="card">
+    <div class="flex">
+      <label for="rotation-select">Rotation</label>
+      <select id="rotation-select"></select>
+      <button id="load-rotation">Load</button>
+      <label for="save-as">Save As</label>
+      <input id="save-as" type="text" placeholder="destruction-new.yaml" class="medium" />
+      <button id="save-rotation">Save Rotation</button>
+      <div id="rotation-status"></div>
+    </div>
+    <div class="actions" id="actions"></div>
+    <button id="add-action">Add Action</button>
+  </div>
+
+  <script>
+    const state = { options: null, player: null, rotations: [], rotation: null, identifiers: null };
+
+    async function loadData() {
+      const res = await fetch('/api/player');
+      if (!res.ok) {
+        document.getElementById('status').textContent = 'Failed to load config';
+        return;
+      }
+      const data = await res.json();
+      state.options = data.options;
+      state.player = data.player;
+      populateForm();
+
+      const ids = await fetch('/api/identifiers');
+      state.identifiers = await ids.json();
+
+      const rotList = await fetch('/api/rotations');
+      state.rotations = await rotList.json();
+      populateRotationSelect();
+    }
+
+    function populateForm() {
+      const p = state.player;
+      document.getElementById('name').value = p.Character.Name || '';
+      document.getElementById('level').value = p.Character.Level || 0;
+
+      const petSel = document.getElementById('pet');
+      petSel.innerHTML = '';
+      state.options.pets.forEach(pet => {
+        const opt = document.createElement('option');
+        opt.value = pet;
+        opt.textContent = pet;
+        petSel.appendChild(opt);
+      });
+      petSel.value = p.Pet.Summon || 'none';
+
+      const rotSel = document.getElementById('rotation');
+      rotSel.innerHTML = '';
+      state.options.rotations.forEach(rot => {
+        const opt = document.createElement('option');
+        opt.value = rot;
+        opt.textContent = rot;
+        rotSel.appendChild(opt);
+      });
+      rotSel.value = p.Rotation || state.options.rotations[0];
+
+      document.getElementById('target-type').value = p.Target.Type || 'boss';
+      document.getElementById('target-level').value = p.Target.Level || 60;
+
+      document.getElementById('spell-power').value = p.Stats.SpellPower || 0;
+      document.getElementById('crit').value = p.Stats.CritPercent || 0;
+      document.getElementById('haste').value = p.Stats.HastePercent || 0;
+      document.getElementById('hit').value = p.Stats.HitPercent || 0;
+      document.getElementById('spirit').value = p.Stats.Spirit || 0;
+      document.getElementById('intellect').value = p.Stats.Intellect || 0;
+      document.getElementById('max-mana').value = p.Stats.MaxMana || 0;
+
+      document.getElementById('duration').value = p.Simulation.DurationSeconds || 0;
+      document.getElementById('iterations').value = p.Simulation.Iterations || 0;
+
+      renderRunes(p.MysticEnchants);
+    }
+
+    function renderRunes(mystic) {
+      const container = document.getElementById('runes');
+      container.innerHTML = '';
+      const rarities = ['legendary','epic','rare'];
+      rarities.forEach(r => {
+        const box = document.createElement('div');
+        box.className = 'card';
+        box.dataset.rarity = r;
+        const title = document.createElement('div');
+        const limitKey = r.charAt(0).toUpperCase() + r.slice(1);
+        title.textContent = `${r.toUpperCase()} (limit ${mystic.Limits[limitKey] || 0})`;
+        box.appendChild(title);
+
+        const group = document.createElement('div');
+        group.className = 'rune-group';
+        const equippedKey = r.charAt(0).toUpperCase() + r.slice(1);
+        const equipped = new Set((mystic.Equipped && mystic.Equipped[equippedKey]) || []);
+
+        (state.options.runes[r] || []).forEach(name => {
+          const lbl = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = name;
+          cb.checked = equipped.has(name);
+          lbl.appendChild(cb);
+          lbl.appendChild(document.createTextNode(name));
+          group.appendChild(lbl);
+        });
+        box.appendChild(group);
+        container.appendChild(box);
+      });
+    }
+
+    function gatherRunes() {
+      const rarities = ['legendary','epic','rare'];
+      const equipped = {Legendary:[], Epic:[], Rare:[]};
+      rarities.forEach(r => {
+        const inputs = document.querySelectorAll(`#runes .card[data-rarity="${r}"] input[type=checkbox]`);
+        inputs.forEach(cb => {
+          if (cb.checked) {
+            const key = r.charAt(0).toUpperCase() + r.slice(1);
+            equipped[key].push(cb.value);
+          }
+        });
+      });
+      return equipped;
+    }
+
+    document.getElementById('player-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('status');
+      status.textContent = 'Saving...';
+
+      const payload = {
+        player: {
+          Character: {
+            Name: document.getElementById('name').value,
+            Level: Number(document.getElementById('level').value),
+          },
+          Pet: { Summon: document.getElementById('pet').value },
+          Stats: {
+            SpellPower: Number(document.getElementById('spell-power').value),
+            CritPercent: Number(document.getElementById('crit').value),
+            HastePercent: Number(document.getElementById('haste').value),
+            HitPercent: Number(document.getElementById('hit').value),
+            Spirit: Number(document.getElementById('spirit').value),
+            Intellect: Number(document.getElementById('intellect').value),
+            MaxMana: Number(document.getElementById('max-mana').value),
+          },
+          Target: {
+            Type: document.getElementById('target-type').value,
+            Level: Number(document.getElementById('target-level').value),
+          },
+          Rotation: document.getElementById('rotation').value,
+          Simulation: {
+            DurationSeconds: Number(document.getElementById('duration').value),
+            Iterations: Number(document.getElementById('iterations').value),
+          },
+          MysticEnchants: {
+            Limits: state.player.MysticEnchants.Limits,
+            Equipped: gatherRunes(),
+          },
+        }
+      };
+
+      const res = await fetch('/api/player', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        status.textContent = 'Saved player.yaml';
+      } else {
+        const text = await res.text();
+        status.textContent = 'Error: ' + text;
+      }
+    });
+
+    loadData();
+
+    // Rotation UI
+    async function loadRotation(name) {
+      const res = await fetch(`/api/rotations/${name}`);
+      if (!res.ok) {
+        document.getElementById('rotation-status').textContent = 'Failed to load rotation';
+        return;
+      }
+      const data = await res.json();
+      // Convert conditions into UI shape
+      data.file.rotation = data.file.rotation.map(a => dtoActionToUi(a));
+      state.rotation = data;
+      document.getElementById('save-as').value = state.rotation.filename || name;
+      renderActions();
+    }
+
+    function dtoActionToUi(a) {
+      const act = {...a};
+      if (a.when) {
+        act.when = dtoConditionToUi(a.when);
+      }
+      if (a.steps) {
+        act.steps = a.steps.map(dtoActionToUi);
+      }
+      return act;
+    }
+
+    function dtoConditionToUi(c) {
+      if (!c) return null;
+      if (c.type === 'all' || c.type === 'any') {
+        return {type: c.type, predicates: (c.children||[]).map(dtoConditionToUi)};
+      }
+      if (c.type === 'not' && c.children && c.children.length) {
+        return {type:'not', child: dtoConditionToUi(c.children[0])};
+      }
+      const pred = {type: c.type};
+      if (c.buff) pred.buff = c.buff;
+      if (c.debuff) pred.debuff = c.debuff;
+      if (c.spell) pred.spell = c.spell;
+      if (c.resource) pred.resource = c.resource;
+      if (c.min_remaining_seconds != null) pred.min = c.min_remaining_seconds;
+      if (c.max_remaining_seconds != null) pred.max = c.max_remaining_seconds;
+      ['lt_seconds','lte_seconds','gt_seconds','gte_seconds','lt_charges','lte_charges','gt_charges','gte_charges'].forEach(key => {
+        if (c[key] != null) {
+          const short = key.replace('_seconds','').replace('_charges','');
+          pred[short] = c[key];
+        }
+      });
+      return pred;
+    }
+
+    function populateRotationSelect() {
+      const sel = document.getElementById('rotation-select');
+      sel.innerHTML = '';
+      state.rotations.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = r;
+        sel.appendChild(opt);
+      });
+      const current = state.player?.Rotation || state.rotations[0];
+      sel.value = current;
+      loadRotation(current);
+    }
+
+    function renderActions() {
+      const container = document.getElementById('actions');
+      container.innerHTML = '';
+      if (!state.rotation) return;
+      state.rotation.file.rotation.forEach((act, idx) => {
+        const row = document.createElement('div');
+        row.className = 'action-row';
+
+        const header = document.createElement('div');
+        header.className = 'action-header';
+
+        const actSel = document.createElement('select');
+        ['cast_spell','wait','macro','use_item'].forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          actSel.appendChild(opt);
+        });
+        actSel.value = act.action || 'cast_spell';
+        actSel.onchange = () => { act.action = actSel.value; renderActions(); };
+        header.appendChild(actSel);
+
+        if (act.action === 'cast_spell') {
+          const spellSel = document.createElement('select');
+          state.identifiers.spells.forEach(sp => {
+            const opt = document.createElement('option'); opt.value = sp; opt.textContent = sp; spellSel.appendChild(opt);
+          });
+          spellSel.value = act.spell || state.identifiers.spells[0];
+          spellSel.onchange = () => { act.spell = spellSel.value; };
+          header.appendChild(spellSel);
+        } else if (act.action === 'wait') {
+          const dur = document.createElement('input'); dur.type='number'; dur.step='0.1'; dur.className='small'; dur.value = act.duration_seconds||0;
+          dur.oninput = () => { act.duration_seconds = Number(dur.value); };
+          header.appendChild(dur);
+          header.appendChild(tag('sec'));
+        }
+
+        const del = document.createElement('button');
+        del.textContent = 'Delete';
+        del.onclick = () => { state.rotation.file.rotation.splice(idx,1); renderActions(); };
+        header.appendChild(del);
+
+        row.appendChild(header);
+
+        const condDiv = document.createElement('div');
+        condDiv.className = 'condition';
+        renderConditionEditor(condDiv, act, () => renderActions());
+        row.appendChild(condDiv);
+
+        container.appendChild(row);
+      });
+    }
+
+    function tag(text) {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = text;
+      return span;
+    }
+
+    function renderConditionEditor(container, act, rerender) {
+      const cond = act.when || { type: 'none', predicates: [] };
+      container.innerHTML = '';
+
+      const typeSel = document.createElement('select');
+      ['none','all','any'].forEach(t => {
+        const opt = document.createElement('option'); opt.value = t; opt.textContent = t.toUpperCase(); typeSel.appendChild(opt);
+      });
+      typeSel.value = cond.type || 'none';
+      typeSel.onchange = () => {
+        cond.type = typeSel.value;
+        cond.predicates = [];
+        act.when = cond.type === 'none' ? null : cond;
+        rerender();
+      };
+      container.appendChild(typeSel);
+
+      if (cond.type !== 'none') {
+        (cond.predicates || []).forEach((pred, i) => {
+          const row = document.createElement('div');
+          row.className = 'predicate';
+
+          const predSel = document.createElement('select');
+          ['buff_active','debuff_active','dot_remaining','cooldown_ready','cooldown_remaining','resource_percent','charges','true','false','not'].forEach(t => {
+            const opt = document.createElement('option'); opt.value = t; opt.textContent = t; predSel.appendChild(opt);
+          });
+          predSel.value = pred.type;
+          predSel.onchange = () => { pred.type = predSel.value; pred.child = null; pred.buff=''; pred.debuff=''; pred.spell=''; pred.resource=''; pred.lt=null; pred.gt=null; pred.lte=null; pred.gte=null; rerender(); };
+          row.appendChild(predSel);
+
+          if (pred.type === 'buff_active' || pred.type === 'charges') {
+            const sel = document.createElement('select');
+            state.identifiers.buffs.forEach(b => { const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+            sel.value = pred.buff || state.identifiers.buffs[0];
+            sel.onchange = () => { pred.buff = sel.value; };
+            row.appendChild(sel);
+          }
+          if (pred.type === 'debuff_active' || pred.type === 'dot_remaining') {
+            const sel = document.createElement('select');
+            state.identifiers.debuffs.forEach(b => { const o=document.createElement('option'); o.value=b; o.textContent=b; sel.appendChild(o); });
+            sel.value = pred.debuff || pred.spell || state.identifiers.debuffs[0];
+            sel.onchange = () => { pred.debuff = sel.value; pred.spell = sel.value; };
+            row.appendChild(sel);
+          }
+          if (pred.type === 'cooldown_ready' || pred.type === 'cooldown_remaining') {
+            const sel = document.createElement('select');
+            state.identifiers.spells.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+            sel.value = pred.spell || state.identifiers.spells[0];
+            sel.onchange = () => { pred.spell = sel.value; };
+            row.appendChild(sel);
+          }
+          if (pred.type === 'resource_percent') {
+            const sel = document.createElement('select');
+            state.identifiers.resources.forEach(r => { const o=document.createElement('option'); o.value=r; o.textContent=r; sel.appendChild(o); });
+            sel.value = pred.resource || state.identifiers.resources[0];
+            sel.onchange = () => { pred.resource = sel.value; };
+            row.appendChild(sel);
+          }
+
+          const comparatorFields = ['lt','lte','gt','gte'];
+          if (['dot_remaining','cooldown_remaining','resource_percent'].includes(pred.type)) {
+            comparatorFields.forEach(cmp => {
+              const input = document.createElement('input');
+              input.type='number'; input.step='0.1'; input.className='small';
+              input.placeholder = cmp;
+              input.value = pred[cmp] ?? '';
+              input.oninput = () => { pred[cmp] = input.value === '' ? null : Number(input.value); };
+              row.appendChild(input);
+            });
+          }
+          if (pred.type === 'charges') {
+            comparatorFields.forEach(cmp => {
+              const input = document.createElement('input');
+              input.type='number'; input.step='1'; input.className='small';
+              input.placeholder = cmp;
+              input.value = pred[cmp] ?? '';
+              input.oninput = () => { pred[cmp] = input.value === '' ? null : Number(input.value); };
+              row.appendChild(input);
+            });
+          }
+          if (pred.type === 'buff_active' || pred.type === 'debuff_active') {
+            ['min','max'].forEach(key => {
+              const input = document.createElement('input');
+              input.type='number'; input.step='0.1'; input.className='small';
+              input.placeholder = key === 'min' ? 'min_rem' : 'max_rem';
+              input.value = pred[key] ?? '';
+              input.oninput = () => { pred[key] = input.value === '' ? null : Number(input.value); };
+              row.appendChild(input);
+            });
+          }
+
+          if (pred.type === 'not') {
+            if (!pred.child) pred.child = {type:'buff_active', buff: state.identifiers.buffs[0]};
+            const childContainer = document.createElement('div');
+            childContainer.className='predicate';
+            const childSel = document.createElement('select');
+            ['buff_active','debuff_active','dot_remaining','cooldown_ready','cooldown_remaining','resource_percent','charges','true','false'].forEach(t => {
+              const opt=document.createElement('option'); opt.value=t; opt.textContent=t; childSel.appendChild(opt);
+            });
+            childSel.value = pred.child.type;
+            childSel.onchange = ()=>{ pred.child.type=childSel.value; rerender(); };
+            childContainer.appendChild(childSel);
+            row.appendChild(childContainer);
+          }
+
+          const del = document.createElement('button');
+          del.textContent = 'Remove';
+          del.type='button';
+          del.onclick = () => { cond.predicates.splice(i,1); rerender(); };
+          row.appendChild(del);
+
+          container.appendChild(row);
+        });
+
+        const addBtn = document.createElement('button');
+        addBtn.type='button';
+        addBtn.textContent='Add Condition';
+        addBtn.onclick = () => {
+          cond.predicates = cond.predicates || [];
+          cond.predicates.push({type:'buff_active', buff: state.identifiers.buffs[0]});
+          act.when = cond;
+          rerender();
+        };
+        container.appendChild(addBtn);
+      }
+
+      act.when = cond.type === 'none' ? null : cond;
+    }
+
+    document.getElementById('load-rotation').addEventListener('click', () => {
+      const name = document.getElementById('rotation-select').value;
+      loadRotation(name);
+    });
+
+    document.getElementById('add-action').addEventListener('click', () => {
+      if (!state.rotation) return;
+      state.rotation.file.rotation.push({action:'cast_spell', spell: state.identifiers.spells[0], when: null});
+      renderActions();
+    });
+
+    document.getElementById('save-rotation').addEventListener('click', async () => {
+      if (!state.rotation) return;
+      const filename = document.getElementById('save-as').value.trim() || state.rotation.filename;
+      const payload = { ...state.rotation.file };
+      // convert UI condition shape to DTO schema
+      payload.rotation = state.rotation.file.rotation.map(a => uiActionToDto(a));
+      const res = await fetch(`/api/rotations/${filename}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        document.getElementById('rotation-status').textContent = 'Saved';
+      } else {
+        document.getElementById('rotation-status').textContent = 'Error saving';
+      }
+    });
+
+    function uiActionToDto(act) {
+      const dto = {
+        action: act.action,
+        spell: act.spell,
+        item: act.item,
+        duration_seconds: act.duration_seconds,
+        tags: act.tags,
+        steps: act.steps ? act.steps.map(s => uiActionToDto(s)) : [],
+      };
+      if (act.when) {
+        dto.when = uiConditionToDto(act.when);
+      }
+      return dto;
+    }
+
+    function uiConditionToDto(cond) {
+      if (!cond || cond.type === 'none') return null;
+      if (cond.type === 'all' || cond.type === 'any') {
+        return {
+          type: cond.type,
+          children: (cond.predicates || []).map(p => uiPredicateToDto(p)),
+        };
+      }
+      return uiPredicateToDto(cond);
+    }
+
+    function uiPredicateToDto(p) {
+      if (p.type === 'true' || p.type === 'false') return {type: p.type};
+      if (p.type === 'not' && p.child) {
+        return {type: 'not', children: [uiPredicateToDto(p.child)]};
+      }
+      const dto = {type: p.type};
+      if (p.buff) dto.buff = p.buff;
+      if (p.debuff) dto.debuff = p.debuff;
+      if (p.spell) dto.spell = p.spell;
+      if (p.resource) dto.resource = p.resource;
+      if (p.min != null) dto.min_remaining_seconds = p.min;
+      if (p.max != null) dto.max_remaining_seconds = p.max;
+      ['lt','lte','gt','gte'].forEach(key => {
+        if (p[key] != null) {
+          dto[`${key}_seconds`] = p[key];
+          if (p.type === 'charges') {
+            dto[`${key}_charges`] = p[key];
+          }
+        }
+      });
+      return dto;
+    }
+  </script>
+</body>
+</html>

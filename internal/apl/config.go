@@ -41,3 +41,8 @@ func (c *ConditionNode) UnmarshalYAML(value *yaml.Node) error {
 	c.raw = value
 	return nil
 }
+
+// NewConditionNode wraps a YAML condition node.
+func NewConditionNode(node *yaml.Node) *ConditionNode {
+	return &ConditionNode{raw: node}
+}

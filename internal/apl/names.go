@@ -45,6 +45,34 @@ var (
 	}
 )
 
+// KnownSpells returns the set of valid spell identifiers.
+func KnownSpells() map[string]struct{} {
+	return copySet(knownSpells)
+}
+
+// KnownBuffs returns the set of valid buff identifiers.
+func KnownBuffs() map[string]struct{} {
+	return copySet(knownBuffs)
+}
+
+// KnownDebuffs returns the set of valid debuff identifiers.
+func KnownDebuffs() map[string]struct{} {
+	return copySet(knownDebuffs)
+}
+
+// KnownResources returns the set of valid resource identifiers.
+func KnownResources() map[string]struct{} {
+	return copySet(knownResources)
+}
+
+func copySet(src map[string]struct{}) map[string]struct{} {
+	out := make(map[string]struct{}, len(src))
+	for k, v := range src {
+		out[k] = v
+	}
+	return out
+}
+
 func normalizeName(name string) string {
 	return strings.ToLower(strings.TrimSpace(name))
 }
