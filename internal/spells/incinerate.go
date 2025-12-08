@@ -39,7 +39,7 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 	damage = e.ApplyFireAndBrimstone(damage, char, SpellIncinerate)
 	damage = e.applyFireTargetModifiers(damage, char)
 
-	forceCrit := e.consumeEmpoweredImp(char)
+	forceCrit := e.consumeEmpoweredImp(char) || e.consumeInnerFlame(char)
 	if forceCrit || e.RollCrit(char, 0) {
 		result.DidCrit = true
 		damage *= e.Config.Talents.Ruin.CritMultiplier
@@ -53,6 +53,8 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 	if result.DidHit {
 		e.handleCataclysmicBurstIncinerate(char)
 		e.CheckSoulLeechProc(char)
+		e.tryProcInnerFlame(char)
+		e.addDuskTillDawnStack(char)
 	}
 
 	return result

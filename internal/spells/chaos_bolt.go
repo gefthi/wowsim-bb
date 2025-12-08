@@ -36,7 +36,7 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 	damage = e.ApplyFireAndBrimstone(damage, char, SpellChaosBolt)
 	damage = e.applyFireTargetModifiers(damage, char)
 
-	forceCrit := e.consumeEmpoweredImp(char)
+	forceCrit := e.consumeEmpoweredImp(char) || e.consumeInnerFlame(char)
 	if forceCrit || e.RollCrit(char, 0) {
 		result.DidCrit = true
 		damage *= e.Config.Talents.Ruin.CritMultiplier
@@ -44,6 +44,9 @@ func (e *Engine) CastChaosBolt(char *character.Character) CastResult {
 
 	result.Damage = damage
 	e.CheckSoulLeechProc(char)
+	e.tryProcInnerFlame(char)
+	e.triggerChaosManifesting(char)
+	e.addDuskTillDawnStack(char)
 
 	cooldown := spellData.Cooldown
 	if e.Config.Player.HasRune(runes.RuneGlyphOfChaosBolt) {

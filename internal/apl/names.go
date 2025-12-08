@@ -14,10 +14,15 @@ var (
 		"incinerate":            {},
 		"life_tap":              {},
 		"soul_fire":             {},
+		"shadow_bolt":           {},
+		"shadowburn":            {},
+		"corruption":            {},
+		"curse_of_agony":        {},
+		"shadowfury":            {},
 		"inferno":               {},
 		"curse_of_doom":         {},
-		"curse_of_agony":        {},
 		"curse_of_the_elements": {},
+		"shadow_crash":          {},
 	}
 	knownBuffs = map[string]struct{}{
 		"pyroclasm":           {},
@@ -28,6 +33,7 @@ var (
 		"decisive_decimation": {},
 		"improved_soul_leech": {},
 		"soul_leech":          {},
+		"dusk_till_dawn":      {},
 		"life_tap_buff":       {},
 		"shadow_trance":       {},
 		"demonic_soul":        {},
@@ -37,6 +43,7 @@ var (
 		"curse_of_doom":         {},
 		"curse_of_agony":        {},
 		"curse_of_the_elements": {},
+		"corruption":            {},
 	}
 	knownResources = map[string]struct{}{
 		"mana":        {},

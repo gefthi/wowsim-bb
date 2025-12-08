@@ -42,12 +42,16 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 	baseDamage = e.applyFireTargetModifiers(baseDamage, char)
 
 	bonusCrit := e.Config.Talents.FireAndBrimstone.ConflagrateCritBonus
-	if e.consumeEmpoweredImp(char) || e.RollCrit(char, bonusCrit) {
+	if e.consumeEmpoweredImp(char) || e.consumeInnerFlame(char) || e.RollCrit(char, bonusCrit) {
 		result.DidCrit = true
 		baseDamage *= e.Config.Talents.Ruin.CritMultiplier
 		if e.Config.Talents.Pyroclasm.Points > 0 {
 			char.Pyroclasm.Active = true
-			char.Pyroclasm.ExpiresAt = char.CurrentTime + time.Duration(e.Config.Talents.Pyroclasm.Duration*float64(time.Second))
+			pyroDuration := e.Config.Talents.Pyroclasm.Duration
+			if e.Config.Player.HasRune(runes.RuneEndlessFlames) {
+				pyroDuration += runes.EndlessFlamesPyroclasmBonusSec
+			}
+			char.Pyroclasm.ExpiresAt = char.CurrentTime + time.Duration(pyroDuration*float64(time.Second))
 		}
 	}
 
@@ -56,6 +60,7 @@ func (e *Engine) CastConflagrate(char *character.Character) CastResult {
 
 	e.applyHeatingUpStack(char)
 	e.CheckSoulLeechProc(char)
+	e.tryProcInnerFlame(char)
 
 	if e.Config.Player.HasRune(runes.RuneDecisiveDecimation) {
 		char.DecisiveDecimation.Active = true

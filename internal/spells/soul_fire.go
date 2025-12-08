@@ -18,19 +18,22 @@ func (e *Engine) CastSoulFire(char *character.Character) CastResult {
 
 	castTime := time.Duration(spellData.CastTime * float64(time.Second))
 	gcd := time.Duration(e.Config.Constants.GCD.Base * float64(time.Second))
+	manaCost := spellData.ManaCost
 
 	if char.DecisiveDecimation.Active {
 		castTime = time.Duration(float64(castTime) * (1.0 - runes.DecisiveDecimationCastReduction))
+		manaCost = 0
 		char.DecisiveDecimation.Active = false
 	}
 
 	result.CastTime = castTime
 	result.GCDTime = gcd
+	result.ManaSpent = manaCost
 
 	e.applyHasteTimes(char, &result)
 	e.applyBackdraft(char, &result, true)
 
-	char.SpendMana(spellData.ManaCost)
+	char.SpendMana(manaCost)
 
 	if !e.RollHit(char) {
 		result.DidHit = false
@@ -46,12 +49,14 @@ func (e *Engine) CastSoulFire(char *character.Character) CastResult {
 	damage := e.CalculateSpellDamage(base, spellData.SPCoefficient, char)
 	damage = e.applyFireTargetModifiers(damage, char)
 
-	if e.consumeEmpoweredImp(char) || e.RollCrit(char, 0) {
+	if e.consumeEmpoweredImp(char) || e.consumeInnerFlame(char) || e.RollCrit(char, 0) {
 		result.DidCrit = true
 		damage *= e.Config.Talents.Ruin.CritMultiplier
 	}
 
 	result.Damage = damage
+	e.tryProcInnerFlame(char)
+	e.addDuskTillDawnStack(char)
 
 	return result
 }

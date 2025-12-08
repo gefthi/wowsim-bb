@@ -7,6 +7,16 @@ variables:
   life_tap_buff_refresh: 5.0
 rotation:
   - action: cast_spell
+    spell: curse_of_the_elements
+    when:
+      any:
+        - not:
+            debuff_active:
+              debuff: curse_of_the_elements
+        - debuff_active:
+            debuff: curse_of_the_elements
+            max_remaining: 30.0
+  - action: cast_spell
     spell: life_tap
     when:
       any:
@@ -38,6 +48,18 @@ rotation:
             debuff: immolate
         - cooldown_ready:
             spell: conflagrate
+  - action: cast_spell
+    spell: shadowburn
+    when:
+      all:
+        - cooldown_ready:
+            spell: shadowburn
+        - buff_active:
+            buff: dusk_till_dawn
+        - charges:
+            buff: dusk_till_dawn
+            gte: 3
+
   - action: cast_spell
     spell: chaos_bolt
     when:

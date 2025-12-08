@@ -7,16 +7,7 @@ variables:
   life_tap_buff_refresh: 5.0
   immolate_refresh_buffer: 0.5
 rotation:
-  - action: cast_spell
-    spell: curse_of_the_elements
-    when:
-      any:
-        - not:
-            debuff_active:
-              debuff: curse_of_the_elements
-        - debuff_active:
-            debuff: curse_of_the_elements
-            max_remaining: 30.0
+
 
   - action: cast_spell
     spell: life_tap
@@ -78,8 +69,7 @@ rotation:
     when:
       all:
         - debuff_active:
-            debuff: immolate
-          
+            debuff: immolate          
         - cooldown_ready:
             spell: conflagrate
 

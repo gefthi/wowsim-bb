@@ -1,0 +1,26 @@
+**Legendary MEs**
+Demonology Mastery: Increases the damage done by your summoned demon by 10% and its attack speed by 10%
+
+Demonic Reoccurence: Reduce the cooldown of Metamorphosis by 75 seconds
+
+**Epic MEs**
+Pure Shadow: Casting offensive shadow spells increases the damage of Shadow boltby 1%, shadow crash by 5% and shadowfury by 10%. Lasts for 15 seconds and stacks up to 6 times
+
+Cursed Shadows: Dealing damage with Curse of Agony has 30% chance to increase the damage of your next Shdaow Bolt by 20% and to reduce its mana cost by 20%. Lasts for 12 seconds
+
+Fire Storm: Calls down a fiery rain dealing 884 fire damage over 6 seconds, 20 sec cooldown
+
+Dusk till Dawn: Casting Shadow Bolt, Incinerate, Soulfire or chaos bolt grants you Dusk till Dawn. This buff increases the damage of your next shadowburn by 10%, stacks up to 3 times and lasts for 15 seconds. When used at 3 stacks, it applies corruption to the target.
+
+Shadow siphon: Your shadowburn deals 25% more damage to targets below 35% hp
+
+Twilight Reaper: Your shadow trance effect from nightfall also reduces the mana cost of your shadow bolt by 100%. shadow trance also makes shadowbolt to heal you for 50% of the damage dealt. 
+
+Fire Attunement: Dealing damage with immolate grants you Fire Attunement. This buff increases the chance to trigger your next Molten Core talent by 1%. Stacks up to 15 and last for 15 sec
+
+Pyroclasmic Shadows: Your Pyroclasm also increases the critical strike chance of your shadow bolt by 10%
+
+Unstable void: Your shadowfury and shadow crash trigger your backdraft talent. Backlash target also triggers
+
+Demonic Influence: While in Metaforphosis your Demon and Wild imps deal 20% more damage 
+

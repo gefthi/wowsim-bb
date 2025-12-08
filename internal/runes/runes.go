@@ -24,6 +24,14 @@ const (
 	RuneChaosManifesting   = "chaos_manifesting"
 	RuneGuldansChosen      = "guldans_chosen"
 	RuneAgentOfChaos       = "agent_of_chaos"
+	RunePureShadow         = "pure_shadow"
+	RuneDuskTillDawn       = "dusk_till_dawn"
+	RunePyroclasmicShadows = "pyroclasmic_shadows"
+	RuneUnstableVoid       = "unstable_void"
+	RuneNightfall          = "nightfall"
+	RuneTwilightReaper     = "twilight_reaper"
+	RuneCursedShadows      = "cursed_shadows"
+	RuneShadowSiphon       = "shadow_siphon"
 
 	RuneGlyphOfLifeTap     = "glyph_of_life_tap"
 	RuneGlyphOfConflagrate = "glyph_of_conflagrate"
@@ -46,6 +54,14 @@ var runeRarity = map[string]Rarity{
 	RuneChaosManifesting:   RarityEpic,
 	RuneGuldansChosen:      RarityEpic,
 	RuneAgentOfChaos:       RarityEpic,
+	RunePureShadow:         RarityEpic,
+	RuneDuskTillDawn:       RarityEpic,
+	RunePyroclasmicShadows: RarityEpic,
+	RuneUnstableVoid:       RarityEpic,
+	RuneTwilightReaper:     RarityEpic,
+	RuneCursedShadows:      RarityEpic,
+	RuneShadowSiphon:       RarityEpic,
+	RuneNightfall:          RarityRare,
 
 	RuneGlyphOfLifeTap:     RarityRare,
 	RuneGlyphOfConflagrate: RarityRare,
@@ -81,10 +97,40 @@ const (
 
 	GlyphOfChaosBoltCooldownReduction = 2.0
 	GlyphOfIncinerateDamageMultiplier = 1.05
-	DemonicAegisSpiritBonusPerPoint   = 0.09
-	SuppressionHitBonus               = 3.0
+	GlyphOfImmolateDotMultiplier      = 1.10
+
+	DemonicAegisSpiritBonusPerPoint = 0.09
+	SuppressionHitBonus             = 3.0
 
 	DecisiveDecimationCastReduction = 0.30
+
+	InnerFlameProcChance = 0.12
+
+	EndlessFlamesPyroclasmBonusSec = 6.0
+
+	ChaosManifestingEmpowerment = 1.10
+	ChaosManifestingDurationSec = 8.0
+
+	ImprovedImpDamageMultiplier = 1.30
+
+	PureShadowDurationSec                 = 15.0
+	PureShadowMaxStacks                   = 6
+	PureShadowShadowBoltBonusPerStack     = 0.01
+	PureShadowShadowfuryBonusPerStack     = 0.10
+	PureShadowShadowCrashBonusPerStack    = 0.05
+	DuskTillDawnDurationSec               = 15.0
+	DuskTillDawnMaxStacks                 = 3
+	DuskTillDawnShadowburnBonusPerStack   = 0.10
+	PyroclasmicShadowsShadowboltCritBonus = 0.10
+	NightfallBaseProcChance               = 0.02
+	NightfallRampBonus                    = 0.02
+	NightfallBuffDurationSec              = 10.0
+	TwilightReaperLeechFraction           = 0.50
+	CursedShadowsProcChance               = 0.30
+	CursedShadowsDamageBonus              = 0.20
+	CursedShadowsManaReduction            = 0.20
+	CursedShadowsDurationSec              = 12.0
+	ShadowSiphonDamageBonus               = 0.25
 )
 
 // Normalize returns the canonical lowercase snake_case rune name.

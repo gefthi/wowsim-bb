@@ -48,6 +48,7 @@ func (e *Engine) applyBackdraft(char *character.Character, result *CastResult, c
 		char.Backdraft.Charges--
 		if char.Backdraft.Charges <= 0 {
 			char.Backdraft.Charges = 0
+			char.Backdraft.Active = false
 			// Let the engine log expiration; mark as expiring now.
 			char.Backdraft.ExpiresAt = char.CurrentTime
 		}

@@ -374,7 +374,7 @@ These limits should not be hardcoded since they might chance it any time. Below 
 - Inner Flame: Dealing direct damage with Fire or Shadow spells has as 12% chance to cause your next direct damage Fire spell to be a guaranteed critical strike
 - Endless Flames: Increase the duration of Pyroclasm and shadowflame by 6 seconds. Additionally shadowflame deals 15% increased damage
 - Heating Up: Dealing direct damage with Conflagrate applies Heating Up. Heating up is a debuff on target that 2% increased Fire damage to the target. Stacks up to 5 times and lasts for 15 seconds (obvisouly when you confla it refreshes these 15 sec, also obviously if we miss a confla we dont have time to keep up the debuff it will expire)
-- Decisive Decimation: Casting Conflagrate reduces the cast time of your next Soul Fire by 40% and removes the Soul Shard cost
+- Decisive Decimation: Casting Conflagrate reduces the cast time of your next Soul Fire by 30% and removes the Soul Shard cost
 - Chaos Manifesting: After casting Chaos Bolt you receive a Fire or Shadow empowerment, increasing your damage dealt with that school by 10% for 8 seconds
 - Gul'dan's Chosen: Casting Chaos Bolt causes your Destruction spells to not consume Backdraft charges for 4 seconds
 - Agent of Chaos: Immolate deals half as much direct damage but lasts 3 seconds longer. Periodic damage from Immolate benefits from spell haste and reduces the cooldown of Chaos Bolt by 0.5 second
@@ -722,7 +722,7 @@ Soul Shard Cost: 1 (removed with Decisive Decimation ME)
 SP Coefficient: 1.15 (115%)
 Notes:
   - Generally ONLY used with Decisive Decimation ME active
-  - With Decisive Decimation: -40% cast time (stacks with other reductions)
+  - With Decisive Decimation: -30% cast time (stacks with other reductions)
   - Example: 4s → 3.91s (2.3% haste) → ~2.73s (with Backdraft) → ~1.64s (with Decisive Decimation)
   - Very powerful when all buffs align
   - Soul Shard cost ignored since we only cast with Decisive Decimation ME

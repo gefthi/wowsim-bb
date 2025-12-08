@@ -80,6 +80,51 @@ type Spells struct {
 		SpellpowerCoefficient  float64 `yaml:"spellpower_coefficient"`
 		ImprovedLifetapPerRank float64 `yaml:"improved_lifetap_per_rank"`
 	} `yaml:"life_tap"`
+	ShadowBolt struct {
+		BaseDamageMin float64 `yaml:"base_damage_min"`
+		BaseDamageMax float64 `yaml:"base_damage_max"`
+		CastTime      float64 `yaml:"cast_time"`
+		ManaCost      float64 `yaml:"mana_cost"`
+		SPCoefficient float64 `yaml:"sp_coefficient"`
+	} `yaml:"shadow_bolt"`
+	Shadowburn struct {
+		BaseDamageMin float64 `yaml:"base_damage_min"`
+		BaseDamageMax float64 `yaml:"base_damage_max"`
+		CastTime      float64 `yaml:"cast_time"`
+		Cooldown      float64 `yaml:"cooldown"`
+		ManaCost      float64 `yaml:"mana_cost"`
+		SPCoefficient float64 `yaml:"sp_coefficient"`
+	} `yaml:"shadowburn"`
+	Corruption struct {
+		DotDamage        float64 `yaml:"dot_damage"`
+		DotDuration      float64 `yaml:"dot_duration"`
+		DotTicks         int     `yaml:"dot_ticks"`
+		ManaCost         float64 `yaml:"mana_cost"`
+		SPCoefficientDot float64 `yaml:"sp_coefficient_dot"`
+	} `yaml:"corruption"`
+	CurseOfAgony struct {
+		DotDamage        float64 `yaml:"dot_damage"`
+		DotDuration      float64 `yaml:"dot_duration"`
+		DotTicks         int     `yaml:"dot_ticks"`
+		ManaCost         float64 `yaml:"mana_cost"`
+		SPCoefficientDot float64 `yaml:"sp_coefficient_dot"`
+	} `yaml:"curse_of_agony"`
+	ShadowFury struct {
+		BaseDamageMin float64 `yaml:"base_damage_min"`
+		BaseDamageMax float64 `yaml:"base_damage_max"`
+		CastTime      float64 `yaml:"cast_time"`
+		Cooldown      float64 `yaml:"cooldown"`
+		ManaCost      float64 `yaml:"mana_cost"`
+		SPCoefficient float64 `yaml:"sp_coefficient"`
+	} `yaml:"shadow_fury"`
+	ShadowCrash struct {
+		BaseDamageMin float64 `yaml:"base_damage_min"`
+		BaseDamageMax float64 `yaml:"base_damage_max"`
+		CastTime      float64 `yaml:"cast_time"`
+		Cooldown      float64 `yaml:"cooldown"`
+		ManaCost      float64 `yaml:"mana_cost"`
+		SPCoefficient float64 `yaml:"sp_coefficient"`
+	} `yaml:"shadow_crash"`
 }
 
 // Talents holds talent modifiers
@@ -126,6 +171,9 @@ type Talents struct {
 		Duration         float64  `yaml:"duration"`
 		ProcSpells       []string `yaml:"proc_spells"`
 	} `yaml:"pyroclasm"`
+	Nightfall struct {
+		Points int `yaml:"points"`
+	} `yaml:"nightfall"`
 	ImprovedSoulLeech struct {
 		Points            int     `yaml:"points"`
 		InstantManaReturn float64 `yaml:"instant_mana_return"`
@@ -164,10 +212,13 @@ type Player struct {
 		MaxMana      float64 `yaml:"max_mana"`
 	} `yaml:"stats"`
 	Target struct {
-		Type  string `yaml:"type"`
-		Level int    `yaml:"level"`
+		Type    string `yaml:"type"`
+		Level   int    `yaml:"level"`
+		Debuffs struct {
+			CurseOfElements bool `yaml:"curse_of_elements"`
+		} `yaml:"debuffs"`
 	} `yaml:"target"`
-	Rotation string `yaml:"rotation"`
+	Rotation   string `yaml:"rotation"`
 	Simulation struct {
 		DurationSeconds int `yaml:"duration_seconds"`
 		Iterations      int `yaml:"iterations"`

@@ -1,0 +1,5 @@
+./compiler.go
+./conditions.go
+./config.go
+./loader.go
+./names.go

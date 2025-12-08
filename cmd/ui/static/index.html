@@ -4,111 +4,419 @@
   <meta charset="UTF-8">
   <title>wowsim-bb - Config & Rotations</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 24px; background: #0f172a; color: #e2e8f0; }
-    h1 { margin-bottom: 8px; }
-    .card { background: #1e293b; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-    label { display: block; margin: 8px 0 4px; font-weight: 600; }
-    input, select { width: 240px; padding: 6px; border-radius: 4px; border: 1px solid #334155; background: #0b1220; color: #e2e8f0; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-    .rune-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .rune-group label { display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; }
-    button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; }
-    button:hover { background: #22d3ee; }
-    #status { margin-top: 8px; }
+    :root {
+      --bg: #0c111b;
+      --panel: #111827;
+      --panel-2: #0f172a;
+      --stroke: #1f2937;
+      --muted: #94a3b8;
+      --accent: #7dd3fc;
+      --accent-2: #f472b6;
+      --text: #e2e8f0;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.12), transparent 32%), radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.14), transparent 30%), var(--bg);
+      color: var(--text);
+      font-family: "Space Grotesk", "DM Sans", "Inter", "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    h1 { margin: 0; letter-spacing: -0.02em; }
+    .page { max-width: 1280px; margin: 0 auto 64px; }
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 4px;
+    }
+    .lede { margin: 6px 0 0; color: var(--muted); max-width: 640px; }
+    .hero-actions { display: flex; gap: 12px; align-items: center; }
+    .status { min-width: 180px; color: var(--muted); font-size: 14px; }
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .panel {
+      background: linear-gradient(145deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(125, 211, 252, 0.12);
+      color: var(--accent);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px 12px;
+      margin-bottom: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 14px;
+      transition: border 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.15);
+      transform: translateY(-1px);
+    }
+    button {
+      background: linear-gradient(120deg, #22d3ee, #f472b6);
+      color: #0b1220;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 14px 30px rgba(34, 211, 238, 0.25);
+    }
+    button:hover { transform: translateY(-1px) scale(1.01); }
+    button:active { transform: translateY(0); }
+    .ghost-btn {
+      background: transparent;
+      border: 1px solid var(--stroke);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .runes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: stretch;
+    }
+    .rune-pane {
+      flex: 1 1 340px;
+      min-width: 300px;
+      max-width: 520px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 10px;
+      background: #0c1322;
+    }
+    .rune-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-size: 13px;
+    }
+    .rune-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+      width: 100%;
+    }
+    @media (min-width: 1200px) {
+      .rune-pane {
+        flex-basis: 45%;
+      }
+      .rune-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+    }
+    @media (min-width: 1600px) {
+      .rune-pane {
+        flex-basis: 30%;
+      }
+      .rune-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+    }
+    .rune-pill {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0f192d;
+      border: 1px solid var(--stroke);
+      cursor: pointer;
+      transition: border 0.15s, transform 0.1s, box-shadow 0.15s;
+    }
+    .rune-pill:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.4);
+    }
+    .rune-pill input {
+      width: auto;
+      accent-color: var(--accent);
+    }
+    .rune-name { font-weight: 600; text-transform: capitalize; }
+    .rune-pill[data-tooltip]:after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 12px;
+      bottom: 105%;
+      min-width: 180px;
+      max-width: 260px;
+      background: #0b1220;
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+      font-size: 12px;
+      line-height: 1.4;
+      z-index: 5;
+    }
+    .rune-pill:hover:after { opacity: 1; transform: translateY(0); }
+    .count {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
     .flex { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .actions { display: grid; gap: 12px; }
-    .action-row { border: 1px solid #334155; padding: 12px; border-radius: 8px; }
+    .action-row { border: 1px solid var(--stroke); padding: 12px; border-radius: 12px; background: #0f172a; }
     .action-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .condition { margin-top: 8px; padding: 8px; background: #0b1220; border-radius: 6px; }
+    .condition { margin-top: 8px; padding: 10px; background: #0b1220; border-radius: 10px; border: 1px solid var(--stroke); }
     .predicate { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
     .small { width: 120px; }
     .medium { width: 160px; }
-    .tag { padding: 2px 6px; background: #334155; border-radius: 4px; font-size: 12px; }
+    .tag { padding: 2px 6px; background: #334155; border-radius: 6px; font-size: 12px; }
+    .divider { height: 1px; background: var(--stroke); margin: 12px 0; }
   </style>
 </head>
 <body>
-  <h1>Player Config</h1>
-  <div class="card">
-    <form id="player-form">
-      <div class="grid">
-        <div>
-          <label for="name">Name</label>
-          <input id="name" name="name" type="text" />
-
-          <label for="level">Level</label>
-          <input id="level" name="level" type="number" step="1" />
-
-          <label for="pet">Pet</label>
-          <select id="pet" name="pet"></select>
-
-          <label for="rotation">Rotation</label>
-          <select id="rotation" name="rotation"></select>
-
-          <label for="target-type">Target Type</label>
-          <select id="target-type" name="target-type">
-            <option value="boss">Boss</option>
-            <option value="equal_level">Equal Level</option>
-          </select>
-
-          <label for="target-level">Target Level</label>
-          <input id="target-level" name="target-level" type="number" step="1" />
-        </div>
-
-        <div>
-          <label for="spell-power">Spell Power</label>
-          <input id="spell-power" name="spell-power" type="number" step="0.1" />
-
-          <label for="crit">Crit %</label>
-          <input id="crit" name="crit" type="number" step="0.01" />
-
-          <label for="haste">Haste %</label>
-          <input id="haste" name="haste" type="number" step="0.01" />
-
-          <label for="hit">Hit %</label>
-          <input id="hit" name="hit" type="number" step="0.01" />
-
-          <label for="spirit">Spirit</label>
-          <input id="spirit" name="spirit" type="number" step="0.1" />
-
-          <label for="intellect">Intellect</label>
-          <input id="intellect" name="intellect" type="number" step="0.1" />
-
-          <label for="max-mana">Max Mana</label>
-          <input id="max-mana" name="max-mana" type="number" step="1" />
-        </div>
-
-        <div>
-          <label for="duration">Fight Duration (sec)</label>
-          <input id="duration" name="duration" type="number" step="1" />
-
-          <label for="iterations">Iterations</label>
-          <input id="iterations" name="iterations" type="number" step="1" />
-
-          <div id="runes"></div>
-        </div>
+  <div class="page">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Simulator setup</p>
+        <h1>Player Config</h1>
+        <p class="lede">Tune stats, targets, and Mystic Enchants before you fire off a sim run.</p>
       </div>
-      <button type="submit">Save player.yaml</button>
-      <div id="status"></div>
-    </form>
-  </div>
+      <div class="hero-actions">
+        <button form="player-form" type="submit">Save player.yaml</button>
+        <div id="status" class="status"></div>
+      </div>
+    </header>
 
-  <h1>Rotation Editor</h1>
-  <div class="card">
-    <div class="flex">
-      <label for="rotation-select">Rotation</label>
-      <select id="rotation-select"></select>
-      <button id="load-rotation">Load</button>
-      <label for="save-as">Save As</label>
-      <input id="save-as" type="text" placeholder="destruction-new.yaml" class="medium" />
-      <button id="save-rotation">Save Rotation</button>
-      <div id="rotation-status"></div>
+    <form id="player-form">
+      <div class="panel-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <span>Profile</span>
+            <span class="badge">Character</span>
+          </div>
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="level">Level</label>
+              <input id="level" name="level" type="number" step="1" />
+            </div>
+            <div class="field">
+              <label for="pet">Pet</label>
+              <select id="pet" name="pet"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="rotation">Rotation</label>
+            <select id="rotation" name="rotation"></select>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span>Target</span>
+            <span class="badge">Encounter</span>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="target-type">Target Type</label>
+              <select id="target-type" name="target-type">
+                <option value="boss">Boss</option>
+                <option value="equal_level">Equal Level</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="target-level">Target Level</label>
+              <input id="target-level" name="target-level" type="number" step="1" />
+            </div>
+            <div class="field">
+              <label for="target-coe">Target has Curse of the Elements</label>
+              <div class="rune-pill" style="background:#0b1220;border-color:var(--stroke);">
+                <input id="target-coe" type="checkbox" />
+                <span>Pre-applied (skip casting)</span>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="panel-header">
+            <span>Simulation</span>
+            <span class="badge">Runtime</span>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="duration">Fight Duration (sec)</label>
+              <input id="duration" name="duration" type="number" step="1" />
+            </div>
+            <div class="field">
+              <label for="iterations">Iterations</label>
+              <input id="iterations" name="iterations" type="number" step="1" />
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span>Stats</span>
+            <span class="badge">Offense</span>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="spell-power">Spell Power</label>
+              <input id="spell-power" name="spell-power" type="number" step="0.1" />
+            </div>
+            <div class="field">
+              <label for="crit">Crit %</label>
+              <input id="crit" name="crit" type="number" step="0.01" />
+            </div>
+            <div class="field">
+              <label for="haste">Haste %</label>
+              <input id="haste" name="haste" type="number" step="0.01" />
+            </div>
+            <div class="field">
+              <label for="hit">Hit %</label>
+              <input id="hit" name="hit" type="number" step="0.01" />
+            </div>
+            <div class="field">
+              <label for="spirit">Spirit</label>
+              <input id="spirit" name="spirit" type="number" step="0.1" />
+            </div>
+            <div class="field">
+              <label for="intellect">Intellect</label>
+              <input id="intellect" name="intellect" type="number" step="0.1" />
+            </div>
+            <div class="field">
+              <label for="max-mana">Max Mana</label>
+              <input id="max-mana" name="max-mana" type="number" step="1" />
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span>Mystic Enchants</span>
+            <span class="badge">Loadout</span>
+          </div>
+          <div id="runes" class="runes"></div>
+        </section>
+      </div>
+    </form>
+
+    <header class="hero" style="margin-top:32px;">
+      <div>
+        <p class="eyebrow">APL Editor</p>
+        <h1>Rotation Editor</h1>
+      </div>
+    </header>
+    <div class="panel">
+      <div class="flex" style="margin-bottom:10px;">
+        <label for="rotation-select">Rotation</label>
+        <select id="rotation-select"></select>
+        <button id="load-rotation" class="ghost-btn">Load</button>
+        <label for="save-as">Save As</label>
+        <input id="save-as" type="text" placeholder="destruction-new.yaml" class="medium" />
+        <button id="save-rotation">Save Rotation</button>
+        <div id="rotation-status"></div>
+      </div>
+      <div class="actions" id="actions"></div>
+      <button id="add-action" class="ghost-btn" style="margin-top:12px;">Add Action</button>
     </div>
-    <div class="actions" id="actions"></div>
-    <button id="add-action">Add Action</button>
   </div>
 
   <script>
     const state = { options: null, player: null, rotations: [], rotation: null, identifiers: null };
+    const runeDescriptions = {
+      cataclysmic_burst: "Immolate ticks extend burst stacks; Destruction spells consume stacks for extra damage.",
+      destruction_mastery: "Flat damage bonus to core Destruction spells.",
+      agent_of_chaos: "Immolate ticks haste-scale; Chaos Bolt cooldown reduced with a direct hit penalty.",
+      chaos_manifesting: "Chaos spells rotate fire/shadow empowerment windows.",
+      guldans_chosen: "Periodic damage buff that keeps Backdraft charges intact.",
+      heating_up: "Casting builds stacking haste/damage for a short window.",
+      decisive_decimation: "Conflagrate grants a Soul Fire cast time reduction window.",
+      dusk_till_dawn: "Stacks from Shadow/Fire nukes empower your next Shadowburn (auto-Corruption at 3).",
+      endless_flames: "Extends Pyroclasm duration.",
+      inner_flame: "Chance to gain a bonus crit/damage window on cast.",
+      pure_shadow: "Shadow casts stack Shadow Bolt/Fury damage for 15s.",
+      pyroclasmic_shadows: "Shadow Bolt gains crit while Pyroclasm is active.",
+      unstable_void: "Shadowfury triggers Backdraft.",
+      nightfall: "Corruption ticks can grant instant Shadow Bolt (Shadow Trance).",
+      twilight_reaper: "Shadow Trance Shadow Bolt is free and leeches health.",
+      cursed_shadows: "Curse of Agony ticks can empower your next Shadow Bolt (+dmg, -mana).",
+      shadow_siphon: "Shadowburn deals more damage on execute targets.",
+      glyph_of_life_tap: "Life Tap grants bonus spell power for 40s.",
+      glyph_of_conflagrate: "Conflagrate no longer consumes Immolate.",
+      glyph_of_chaos_bolt: "Chaos Bolt cooldown reduced.",
+      glyph_of_incinerate: "Incinerate deals increased damage.",
+      glyph_of_immolate: "Increases Immolate DoT damage.",
+      demonic_aegis: "Convert Spirit into additional spell power.",
+      suppression: "Increases spell hit chance.",
+      improved_imp: "Improves your Imp's damage.",
+    };
 
     async function loadData() {
       const res = await fetch('/api/player');
@@ -156,6 +464,7 @@
 
       document.getElementById('target-type').value = p.Target.Type || 'boss';
       document.getElementById('target-level').value = p.Target.Level || 60;
+      document.getElementById('target-coe').checked = !!p.Target.Debuffs?.CurseOfElements;
 
       document.getElementById('spell-power').value = p.Stats.SpellPower || 0;
       document.getElementById('crit').value = p.Stats.CritPercent || 0;
@@ -171,36 +480,63 @@
       renderRunes(p.MysticEnchants);
     }
 
+    function runeLabel(name) {
+      return name.replace(/_/g, ' ');
+    }
+
     function renderRunes(mystic) {
       const container = document.getElementById('runes');
       container.innerHTML = '';
       const rarities = ['legendary','epic','rare'];
       rarities.forEach(r => {
-        const box = document.createElement('div');
-        box.className = 'card';
-        box.dataset.rarity = r;
-        const title = document.createElement('div');
+        const pane = document.createElement('div');
+        pane.className = 'rune-pane';
+        pane.dataset.rarity = r;
         const limitKey = r.charAt(0).toUpperCase() + r.slice(1);
-        title.textContent = `${r.toUpperCase()} (limit ${mystic.Limits[limitKey] || 0})`;
-        box.appendChild(title);
-
-        const group = document.createElement('div');
-        group.className = 'rune-group';
-        const equippedKey = r.charAt(0).toUpperCase() + r.slice(1);
+        const equippedKey = limitKey;
+        const limit = mystic.Limits[limitKey] || 0;
         const equipped = new Set((mystic.Equipped && mystic.Equipped[equippedKey]) || []);
+
+        const head = document.createElement('div');
+        head.className = 'rune-head';
+        head.innerHTML = `<span>${r.toUpperCase()} (limit ${limit})</span><span class="count" data-count="${r}">${equipped.size}/${limit}</span>`;
+        pane.appendChild(head);
+
+        const grid = document.createElement('div');
+        grid.className = 'rune-grid';
 
         (state.options.runes[r] || []).forEach(name => {
           const lbl = document.createElement('label');
+          lbl.className = 'rune-pill';
+          lbl.dataset.tooltip = runeDescriptions[name] || 'Mystic Enchant';
           const cb = document.createElement('input');
           cb.type = 'checkbox';
           cb.value = name;
           cb.checked = equipped.has(name);
+          cb.onchange = () => updateRuneCounts();
+          const txt = document.createElement('span');
+          txt.className = 'rune-name';
+          txt.textContent = runeLabel(name);
           lbl.appendChild(cb);
-          lbl.appendChild(document.createTextNode(name));
-          group.appendChild(lbl);
+          lbl.appendChild(txt);
+          grid.appendChild(lbl);
         });
-        box.appendChild(group);
-        container.appendChild(box);
+        pane.appendChild(grid);
+        container.appendChild(pane);
+      });
+      updateRuneCounts();
+    }
+
+    function updateRuneCounts() {
+      const rarities = ['legendary','epic','rare'];
+      rarities.forEach(r => {
+        const inputs = document.querySelectorAll(`#runes .rune-pane[data-rarity="${r}"] input[type=checkbox]`);
+        let selected = 0;
+        inputs.forEach(cb => { if (cb.checked) selected++; });
+        const countEl = document.querySelector(`.count[data-count="${r}"]`);
+        if (countEl) {
+          countEl.textContent = `${selected}/${state.player?.MysticEnchants?.Limits?.[r.charAt(0).toUpperCase()+r.slice(1)] || 0}`;
+        }
       });
     }
 
@@ -208,7 +544,7 @@
       const rarities = ['legendary','epic','rare'];
       const equipped = {Legendary:[], Epic:[], Rare:[]};
       rarities.forEach(r => {
-        const inputs = document.querySelectorAll(`#runes .card[data-rarity="${r}"] input[type=checkbox]`);
+        const inputs = document.querySelectorAll(`#runes .rune-pane[data-rarity="${r}"] input[type=checkbox]`);
         inputs.forEach(cb => {
           if (cb.checked) {
             const key = r.charAt(0).toUpperCase() + r.slice(1);
@@ -243,6 +579,9 @@
           Target: {
             Type: document.getElementById('target-type').value,
             Level: Number(document.getElementById('target-level').value),
+            Debuffs: {
+              CurseOfElements: document.getElementById('target-coe').checked,
+            },
           },
           Rotation: document.getElementById('rotation').value,
           Simulation: {

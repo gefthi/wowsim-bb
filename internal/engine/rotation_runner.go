@@ -16,19 +16,21 @@ type rotationContext struct {
 }
 
 type buffState struct {
-	pyroActive       bool
-	pyroExpires      time.Duration
-	backdraftActive  bool
-	backdraftCharges int
-	soulActive       bool
-	empImpActive     bool
-	lifeTapActive    bool
-	lifeTapExpires   time.Duration
-	heatingStacks    int
-	heatingExpires   time.Duration
-	catBurstStacks   int
-	guldansActive    bool
-	guldansExpires   time.Duration
+	pyroActive          bool
+	pyroExpires         time.Duration
+	backdraftActive     bool
+	backdraftCharges    int
+	soulActive          bool
+	empImpActive        bool
+	lifeTapActive       bool
+	lifeTapExpires      time.Duration
+	heatingStacks       int
+	heatingExpires      time.Duration
+	catBurstStacks      int
+	guldansActive       bool
+	guldansExpires      time.Duration
+	shadowTranceActive  bool
+	shadowTranceExpires time.Duration
 }
 
 func (c *rotationContext) BuffActive(name string) bool {
@@ -38,6 +40,9 @@ func (c *rotationContext) BuffActive(name string) bool {
 	}
 	if lower == "decisive_decimation" {
 		return c.char.DecisiveDecimation.Active
+	}
+	if lower == "dusk_till_dawn" {
+		return c.char.DuskTillDawn != nil && c.char.DuskTillDawn.ActiveAt(c.char.CurrentTime)
 	}
 	buff := c.getBuff(lower)
 	if buff == nil {
@@ -60,6 +65,12 @@ func (c *rotationContext) BuffRemaining(name string) time.Duration {
 		}
 		return 0
 	}
+	if lower == "dusk_till_dawn" {
+		if c.char.DuskTillDawn == nil {
+			return 0
+		}
+		return c.char.DuskTillDawn.Remaining(c.char.CurrentTime)
+	}
 	buff := c.getBuff(lower)
 	if buff == nil {
 		return 0
@@ -71,6 +82,12 @@ func (c *rotationContext) BuffRemaining(name string) time.Duration {
 }
 
 func (c *rotationContext) BuffCharges(name string) int {
+	if strings.ToLower(name) == "dusk_till_dawn" {
+		if c.char.DuskTillDawn == nil {
+			return 0
+		}
+		return c.char.DuskTillDawn.Stacks()
+	}
 	buff := c.getBuff(name)
 	if buff == nil {
 		return 0
@@ -84,6 +101,10 @@ func (c *rotationContext) DebuffActive(name string) bool {
 		return c.char.Immolate.Active && c.char.Immolate.ExpiresAt > c.char.CurrentTime
 	case "curse_of_the_elements":
 		return c.char.CurseOfElements.Active && c.char.CurseOfElements.ExpiresAt > c.char.CurrentTime
+	case "corruption":
+		return c.char.Corruption.Active && c.char.Corruption.ExpiresAt > c.char.CurrentTime
+	case "curse_of_agony":
+		return c.char.CurseOfAgony.Active && c.char.CurseOfAgony.ExpiresAt > c.char.CurrentTime
 	default:
 		return false
 	}
@@ -98,6 +119,14 @@ func (c *rotationContext) DebuffRemaining(name string) time.Duration {
 	case "curse_of_the_elements":
 		if c.char.CurseOfElements.Active && c.char.CurseOfElements.ExpiresAt > c.char.CurrentTime {
 			return c.char.CurseOfElements.ExpiresAt - c.char.CurrentTime
+		}
+	case "corruption":
+		if c.char.Corruption.Active && c.char.Corruption.ExpiresAt > c.char.CurrentTime {
+			return c.char.Corruption.ExpiresAt - c.char.CurrentTime
+		}
+	case "curse_of_agony":
+		if c.char.CurseOfAgony.Active && c.char.CurseOfAgony.ExpiresAt > c.char.CurrentTime {
+			return c.char.CurseOfAgony.ExpiresAt - c.char.CurrentTime
 		}
 	}
 	return 0
@@ -121,6 +150,10 @@ func (c *rotationContext) CooldownReady(name string) bool {
 		return c.char.IsCooldownReady(&c.char.Conflagrate)
 	case "chaos_bolt":
 		return c.char.IsCooldownReady(&c.char.ChaosBolt)
+	case "shadowburn":
+		return c.char.IsCooldownReady(&c.char.Shadowburn)
+	case "shadowfury":
+		return c.char.IsCooldownReady(&c.char.Shadowfury)
 	default:
 		return true
 	}
@@ -142,6 +175,20 @@ func (c *rotationContext) CooldownRemaining(name string) time.Duration {
 		if c.char.ChaosBolt.ReadyAt > c.char.CurrentTime {
 			return c.char.ChaosBolt.ReadyAt - c.char.CurrentTime
 		}
+	case "shadowburn":
+		if c.char.IsCooldownReady(&c.char.Shadowburn) {
+			return 0
+		}
+		if c.char.Shadowburn.ReadyAt > c.char.CurrentTime {
+			return c.char.Shadowburn.ReadyAt - c.char.CurrentTime
+		}
+	case "shadowfury":
+		if c.char.IsCooldownReady(&c.char.Shadowfury) {
+			return 0
+		}
+		if c.char.Shadowfury.ReadyAt > c.char.CurrentTime {
+			return c.char.Shadowfury.ReadyAt - c.char.CurrentTime
+		}
 	}
 	return 0
 }
@@ -156,6 +203,8 @@ func (c *rotationContext) getBuff(name string) *character.Buff {
 		return &c.char.ImprovedSoulLeech
 	case "life_tap_buff":
 		return &c.char.LifeTapBuff
+	case "shadow_trance":
+		return &c.char.ShadowTrance
 	default:
 		return nil
 	}
@@ -177,6 +226,18 @@ func spellFromName(name string) (spells.SpellType, bool) {
 		return spells.SpellSoulFire, true
 	case "curse_of_the_elements":
 		return spells.SpellCurseOfElements, true
+	case "shadow_bolt":
+		return spells.SpellShadowBolt, true
+	case "shadowburn":
+		return spells.SpellShadowburn, true
+	case "corruption":
+		return spells.SpellCorruption, true
+	case "curse_of_agony":
+		return spells.SpellCurseOfAgony, true
+	case "shadowfury":
+		return spells.SpellShadowfury, true
+	case "shadow_crash":
+		return spells.SpellShadowCrash, true
 	default:
 		return 0, false
 	}
@@ -198,6 +259,18 @@ func spellTypeName(spell spells.SpellType) string {
 		return "Soul Fire"
 	case spells.SpellCurseOfElements:
 		return "Curse of the Elements"
+	case spells.SpellShadowBolt:
+		return "Shadow Bolt"
+	case spells.SpellShadowburn:
+		return "Shadowburn"
+	case spells.SpellShadowfury:
+		return "Shadowfury"
+	case spells.SpellCorruption:
+		return "Corruption"
+	case spells.SpellCurseOfAgony:
+		return "Curse of Agony"
+	case spells.SpellShadowCrash:
+		return "Shadow Crash"
 	default:
 		return "Unknown"
 	}
@@ -221,19 +294,21 @@ func captureBuffState(char *character.Character) buffState {
 		guldansExpires = char.GuldansChosen.ExpiresAt()
 	}
 	return buffState{
-		pyroActive:       char.Pyroclasm.Active,
-		pyroExpires:      char.Pyroclasm.ExpiresAt,
-		backdraftActive:  char.Backdraft.Active,
-		backdraftCharges: char.Backdraft.Charges,
-		soulActive:       char.ImprovedSoulLeech.Active,
-		empImpActive:     char.EmpoweredImp.Active,
-		lifeTapActive:    char.LifeTapBuff.Active,
-		lifeTapExpires:   char.LifeTapBuff.ExpiresAt,
-		heatingStacks:    heatStacks,
-		heatingExpires:   heatExpires,
-		catBurstStacks:   catStacks,
-		guldansActive:    guldansActive,
-		guldansExpires:   guldansExpires,
+		pyroActive:          char.Pyroclasm.Active,
+		pyroExpires:         char.Pyroclasm.ExpiresAt,
+		backdraftActive:     char.Backdraft.Active,
+		backdraftCharges:    char.Backdraft.Charges,
+		soulActive:          char.ImprovedSoulLeech.Active,
+		empImpActive:        char.EmpoweredImp.Active,
+		lifeTapActive:       char.LifeTapBuff.Active,
+		lifeTapExpires:      char.LifeTapBuff.ExpiresAt,
+		heatingStacks:       heatStacks,
+		heatingExpires:      heatExpires,
+		catBurstStacks:      catStacks,
+		guldansActive:       guldansActive,
+		guldansExpires:      guldansExpires,
+		shadowTranceActive:  char.ShadowTrance.Active,
+		shadowTranceExpires: char.ShadowTrance.ExpiresAt,
 	}
 }
 

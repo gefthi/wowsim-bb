@@ -1,252 +1,1144 @@
-WotLK Destruction Warlock Simulator - Phase 1 MVP
+WotLK Destruction Warlock Simulator - Phase 3
 ==================================================
 
 Character: Destruction Warlock (Level 60)
 Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
+  Intellect: 0
+  Spell Power: 700
+  Crit: 11.2%
+  Haste: 8.0%
+  Spirit: 177
+  Hit: 14.0%
+  Max Mana: 6000
+  Pet: imp
 
+Combat log mode enabled: forcing 1 iteration; using configured duration.
 Simulation Config:
   Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
+  Iterations: 1
+  Target: Equal Level (Level 60)
+  Base Seed: 1764371495651857000
 
 Running simulation...
 
+=== Combat Log Start (duration 300s, iterations 1) ===
+--- Iteration 1 Start ---
+Imp summoned (Firebolt every 2.00s)
+[  0.00s] CAST_RESULT Curse of the Elements HIT damage=0
+[  1.39s] CAST_RESULT Life Tap HIT damage=0
+[  1.39s] RESOURCE Mana +1177 => 6000
+[  1.39s] BUFF_GAIN Life Tap (+35 SP, 40.0s)
+[  2.00s] PET_CAST Firebolt HIT damage=206 (mana 2261/2376)
+[  2.78s] CAST_START Immolate (mana=6000)
+[  2.78s] RESOURCE Mana -252 => 5748
+[  4.00s] PET_CAST Firebolt HIT damage=198 (mana 2149/2376)
+[  4.17s] CAST_RESULT Immolate HIT damage=599
+[  4.17s] CAST_RESULT Conflagrate HIT damage=4204
+[  4.17s] RESOURCE Mana -236 => 5512
+[  4.17s] BUFF_GAIN Backdraft (charges 3)
+[  4.17s] DEBUFF_GAIN Heating Up stacks=1 (15.0s remaining)
+[  5.56s] CAST_START Chaos Bolt (mana=5512)
+[  5.56s] RESOURCE Mana -103 => 5409
+[  5.56s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[  5.56s] DOT_TICK Immolate damage=740
+[  6.00s] PET_CAST Firebolt HIT damage=209 (mana 2037/2376)
+[  6.85s] CAST_RESULT Chaos Bolt HIT damage=3700
+[  6.85s] CAST_START Incinerate (mana=5409)
+[  6.85s] RESOURCE Mana -207 => 5202
+[  6.85s] BUFF_GAIN Cataclysmic Burst stacks=1
+[  8.00s] PET_CAST Firebolt HIT damage=203 (mana 1926/2376)
+[  8.31s] CAST_RESULT Incinerate HIT damage=2157
+[  8.31s] CAST_START Incinerate (mana=5202)
+[  8.31s] RESOURCE Mana -207 => 4995
+[  8.31s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[  8.33s] DOT_TICK Immolate damage=858
+[  9.56s] BUFF_EXPIRE Gul'dan's Chosen
+[  9.77s] CAST_RESULT Incinerate HIT damage=2150
+[  9.77s] CAST_START Incinerate (mana=4995)
+[  9.77s] RESOURCE Mana -207 => 4788
+[  9.77s] BUFF_UPDATE Backdraft charges -> 2
+[  9.77s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 10.00s] PET_CAST Firebolt HIT damage=206 (mana 1814/2376)
+[ 11.11s] DOT_TICK Immolate damage=1835 (CRIT)
+[ 11.23s] CAST_RESULT Incinerate HIT damage=2178
+[ 11.23s] CAST_START Incinerate (mana=4788)
+[ 11.23s] RESOURCE Mana -207 => 4581
+[ 11.23s] BUFF_UPDATE Backdraft charges -> 1
+[ 11.23s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 12.00s] PET_CAST Firebolt HIT damage=204 (mana 1702/2376)
+[ 12.69s] CAST_RESULT Incinerate HIT damage=2141
+[ 12.69s] CAST_START Incinerate (mana=4581)
+[ 12.69s] RESOURCE Mana -207 => 4374
+[ 12.69s] BUFF_UPDATE Backdraft charges -> 0
+[ 13.89s] BUFF_EXPIRE Backdraft
+[ 13.89s] DOT_TICK Immolate damage=977
+[ 14.00s] PET_CAST Firebolt HIT damage=207 (mana 1590/2376)
+[ 14.14s] CAST_RESULT Incinerate HIT damage=2061
+[ 14.14s] CAST_START Chaos Bolt (mana=4374)
+[ 14.14s] RESOURCE Mana -103 => 4271
+[ 14.14s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 15.99s] CAST_RESULT Chaos Bolt HIT damage=3484
+[ 15.99s] CAST_RESULT Conflagrate HIT damage=5661
+[ 15.99s] RESOURCE Mana -236 => 4035
+[ 15.99s] BUFF_GAIN Backdraft (charges 3)
+[ 15.99s] DEBUFF_UPDATE Heating Up stacks=2 (15.0s remaining)
+[ 15.99s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 16.00s] PET_CAST Firebolt HIT damage=202 (mana 1478/2376)
+[ 16.67s] DOT_TICK Immolate damage=754
+[ 17.38s] CAST_START Incinerate (mana=4035)
+[ 17.38s] RESOURCE Mana -207 => 3828
+[ 17.38s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 18.00s] PET_CAST Firebolt HIT damage=207 (mana 1366/2376)
+[ 18.14s] BUFF_EXPIRE Gul'dan's Chosen
+[ 18.84s] CAST_RESULT Incinerate HIT damage=2244
+[ 18.84s] CAST_START Incinerate (mana=3828)
+[ 18.84s] RESOURCE Mana -207 => 3621
+[ 18.84s] BUFF_UPDATE Backdraft charges -> 2
+[ 18.84s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 19.44s] DOT_TICK Immolate damage=875
+[ 20.00s] PET_CAST Firebolt HIT damage=198 (mana 1255/2376)
+[ 20.30s] CAST_RESULT Incinerate CRIT damage=4422
+[ 20.30s] CAST_START Incinerate (mana=3621)
+[ 20.30s] RESOURCE Mana -207 => 3414
+[ 20.30s] BUFF_UPDATE Backdraft charges -> 1
+[ 20.30s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 21.76s] CAST_RESULT Incinerate HIT damage=2217
+[ 21.76s] CAST_START Incinerate (mana=3414)
+[ 21.76s] RESOURCE Mana -207 => 3207
+[ 21.76s] BUFF_UPDATE Backdraft charges -> 0
+[ 21.76s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 22.00s] BUFF_EXPIRE Backdraft
+[ 22.00s] PET_CAST Firebolt HIT damage=200 (mana 1143/2376)
+[ 22.22s] DOT_TICK Immolate damage=996
+[ 23.22s] CAST_RESULT Incinerate HIT damage=2214
+[ 23.22s] CAST_START Chaos Bolt (mana=3207)
+[ 23.22s] RESOURCE Mana -103 => 3104
+[ 23.22s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 24.00s] PET_CAST Firebolt HIT damage=197 (mana 1031/2376)
+[ 25.00s] DOT_TICK Immolate damage=996
+[ 25.07s] CAST_RESULT Chaos Bolt HIT damage=3665
+[ 25.07s] CAST_START Incinerate (mana=3104)
+[ 25.07s] RESOURCE Mana -207 => 2897
+[ 26.00s] PET_CAST Firebolt HIT damage=198 (mana 919/2376)
+[ 27.15s] CAST_RESULT Incinerate HIT damage=2209
+[ 27.15s] CAST_RESULT Conflagrate HIT damage=5772
+[ 27.15s] RESOURCE Mana -236 => 2661
+[ 27.15s] BUFF_GAIN Backdraft (charges 3)
+[ 27.15s] DEBUFF_UPDATE Heating Up stacks=3 (15.0s remaining)
+[ 27.15s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 27.22s] BUFF_EXPIRE Gul'dan's Chosen
+[ 27.78s] DOT_TICK Immolate damage=769
+[ 28.00s] PET_CAST Firebolt HIT damage=202 (mana 807/2376)
+[ 28.54s] CAST_START Incinerate (mana=2661)
+[ 28.54s] RESOURCE Mana -207 => 2454
+[ 28.54s] BUFF_UPDATE Backdraft charges -> 2
+[ 28.54s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 30.00s] CAST_RESULT Incinerate HIT damage=2211
+[ 30.00s] CAST_START Incinerate (mana=2454)
+[ 30.00s] RESOURCE Mana -207 => 2247
+[ 30.00s] BUFF_UPDATE Backdraft charges -> 1
+[ 30.00s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 30.00s] PET_CAST Firebolt HIT damage=205 (mana 695/2376)
+[ 30.56s] DOT_TICK Immolate damage=1784 (CRIT)
+[ 31.46s] CAST_RESULT Incinerate HIT damage=2280
+[ 31.46s] CAST_START Incinerate (mana=2247)
+[ 31.46s] RESOURCE Mana -207 => 2040
+[ 31.46s] BUFF_UPDATE Backdraft charges -> 0
+[ 31.46s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 32.00s] BUFF_EXPIRE Backdraft
+[ 32.00s] PET_CAST Firebolt HIT damage=197 (mana 584/2376)
+[ 32.92s] CAST_RESULT Incinerate HIT damage=2282
+[ 32.92s] CAST_START Chaos Bolt (mana=2040)
+[ 32.92s] RESOURCE Mana -103 => 1937
+[ 32.92s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 33.33s] DOT_TICK Immolate damage=953
+[ 34.00s] PET_CAST Firebolt HIT damage=204 (mana 472/2376)
+[ 34.77s] CAST_RESULT Chaos Bolt HIT damage=3755
+[ 34.77s] CAST_START Incinerate (mana=1937)
+[ 34.77s] RESOURCE Mana -207 => 1730
+[ 34.77s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 36.00s] PET_CAST Firebolt HIT damage=204 (mana 360/2376)
+[ 36.11s] DOT_TICK Immolate damage=1015
+[ 36.85s] CAST_RESULT Incinerate CRIT damage=4500
+[ 36.85s] CAST_RESULT Life Tap HIT damage=0
+[ 36.85s] RESOURCE Mana +1177 => 2907
+[ 36.85s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 36.92s] BUFF_EXPIRE Gul'dan's Chosen
+[ 38.00s] PET_CAST Firebolt HIT damage=196 (mana 248/2376)
+[ 38.24s] CAST_RESULT Conflagrate CRIT damage=11765
+[ 38.24s] RESOURCE Mana -236 => 2671
+[ 38.24s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[ 38.24s] BUFF_GAIN Backdraft (charges 3)
+[ 38.24s] DEBUFF_UPDATE Heating Up stacks=4 (15.0s remaining)
+[ 38.24s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 38.89s] DOT_TICK Immolate damage=1567 (CRIT)
+[ 39.63s] CAST_START Incinerate (mana=2671)
+[ 39.63s] RESOURCE Mana -207 => 2464
+[ 39.63s] BUFF_UPDATE Backdraft charges -> 2
+[ 39.63s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 40.00s] PET_CAST Firebolt HIT damage=205 (mana 136/2376)
+[ 41.09s] CAST_RESULT Incinerate HIT damage=2322
+[ 41.49s] CAST_START Chaos Bolt (mana=2464)
+[ 41.49s] RESOURCE Mana -103 => 2361
+[ 41.49s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 41.67s] DOT_TICK Immolate damage=1692 (CRIT)
+[ 42.00s] PET_CAST Firebolt HIT damage=203 (mana 24/2376)
+[ 42.78s] CAST_RESULT Chaos Bolt CRIT damage=8382
+[ 42.78s] CAST_START Incinerate (mana=2361)
+[ 42.78s] RESOURCE Mana -207 => 2154
+[ 42.78s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 44.24s] CAST_RESULT Incinerate CRIT damage=4647
+[ 44.24s] CAST_START Incinerate (mana=2154)
+[ 44.24s] RESOURCE Mana -207 => 1947
+[ 44.24s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 44.44s] DOT_TICK Immolate damage=971
+[ 45.49s] BUFF_EXPIRE Gul'dan's Chosen
+[ 45.70s] CAST_RESULT Incinerate HIT damage=2394
+[ 45.70s] CAST_START Incinerate (mana=1947)
+[ 45.70s] RESOURCE Mana -207 => 1740
+[ 45.70s] BUFF_UPDATE Backdraft charges -> 1
+[ 45.70s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 47.16s] CAST_RESULT Incinerate HIT damage=2384
+[ 47.16s] CAST_START Incinerate (mana=1740)
+[ 47.16s] RESOURCE Mana -207 => 1533
+[ 47.16s] BUFF_UPDATE Backdraft charges -> 0
+[ 47.22s] BUFF_EXPIRE Backdraft
+[ 47.22s] DOT_TICK Immolate damage=1034
+[ 48.24s] BUFF_EXPIRE Pyroclasm
+[ 48.62s] CAST_RESULT Incinerate HIT damage=2347
+[ 48.62s] CAST_RESULT Life Tap HIT damage=0
+[ 48.62s] RESOURCE Mana +1177 => 2710
+[ 48.62s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 50.00s] DOT_TICK Immolate damage=1034
+[ 50.01s] CAST_RESULT Conflagrate HIT damage=5994
+[ 50.01s] RESOURCE Mana -236 => 2474
+[ 50.01s] BUFF_GAIN Backdraft (charges 3)
+[ 50.01s] DEBUFF_UPDATE Heating Up stacks=5 (15.0s remaining)
+[ 50.01s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 51.40s] CAST_START Chaos Bolt (mana=2474)
+[ 51.40s] RESOURCE Mana -103 => 2371
+[ 51.40s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 52.25s] PET_CAST Firebolt HIT damage=203 (mana 0/2376)
+[ 52.69s] CAST_RESULT Chaos Bolt HIT damage=3698
+[ 52.69s] CAST_START Incinerate (mana=2371)
+[ 52.69s] RESOURCE Mana -207 => 2164
+[ 52.69s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 52.78s] DOT_TICK Immolate damage=862
+[ 54.15s] CAST_RESULT Incinerate HIT damage=2372
+[ 54.15s] CAST_START Incinerate (mana=2164)
+[ 54.15s] RESOURCE Mana -207 => 1957
+[ 54.15s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 55.40s] BUFF_EXPIRE Gul'dan's Chosen
+[ 55.56s] DOT_TICK Immolate damage=926
+[ 55.61s] CAST_RESULT Incinerate HIT damage=2311
+[ 55.61s] CAST_START Incinerate (mana=1957)
+[ 55.61s] RESOURCE Mana -207 => 1750
+[ 55.61s] BUFF_UPDATE Backdraft charges -> 2
+[ 55.61s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 57.07s] CAST_RESULT Incinerate HIT damage=2323
+[ 57.07s] CAST_START Incinerate (mana=1750)
+[ 57.07s] RESOURCE Mana -207 => 1543
+[ 57.07s] BUFF_UPDATE Backdraft charges -> 1
+[ 57.07s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 58.33s] DOT_TICK Immolate damage=1053
+[ 58.52s] CAST_RESULT Incinerate HIT damage=2342
+[ 58.52s] CAST_START Incinerate (mana=1543)
+[ 58.52s] RESOURCE Mana -207 => 1336
+[ 58.52s] BUFF_UPDATE Backdraft charges -> 0
+[ 59.98s] BUFF_EXPIRE Backdraft
+[ 59.98s] CAST_RESULT Incinerate HIT damage=2365
+[ 59.98s] CAST_RESULT Life Tap HIT damage=0
+[ 59.98s] RESOURCE Mana +1177 => 2513
+[ 59.98s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 61.11s] DOT_TICK Immolate damage=2107 (CRIT)
+[ 61.37s] CAST_RESULT Conflagrate HIT damage=6105
+[ 61.37s] RESOURCE Mana -236 => 2277
+[ 61.37s] BUFF_GAIN Backdraft (charges 3)
+[ 61.37s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 62.76s] CAST_START Chaos Bolt (mana=2277)
+[ 62.76s] RESOURCE Mana -103 => 2174
+[ 62.76s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 63.89s] DOT_TICK Immolate damage=798
+[ 64.06s] CAST_RESULT Chaos Bolt CRIT damage=7441
+[ 64.06s] CAST_START Incinerate (mana=2174)
+[ 64.06s] RESOURCE Mana -207 => 1967
+[ 64.06s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 64.82s] PET_CAST Firebolt HIT damage=197 (mana 0/2376)
+[ 65.52s] CAST_RESULT Incinerate HIT damage=2350
+[ 65.52s] CAST_START Incinerate (mana=1967)
+[ 65.52s] RESOURCE Mana -207 => 1760
+[ 65.52s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 66.67s] DOT_TICK Immolate damage=1851 (CRIT)
+[ 66.76s] BUFF_EXPIRE Gul'dan's Chosen
+[ 66.97s] CAST_RESULT Incinerate HIT damage=2325
+[ 66.97s] CAST_START Incinerate (mana=1760)
+[ 66.97s] RESOURCE Mana -207 => 1553
+[ 66.97s] BUFF_UPDATE Backdraft charges -> 2
+[ 66.97s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 68.43s] CAST_RESULT Incinerate HIT damage=2289
+[ 68.43s] CAST_START Incinerate (mana=1553)
+[ 68.43s] RESOURCE Mana -207 => 1346
+[ 68.43s] BUFF_UPDATE Backdraft charges -> 1
+[ 68.43s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 69.44s] DOT_TICK Immolate damage=1053
+[ 69.89s] CAST_RESULT Incinerate CRIT damage=4744
+[ 69.89s] CAST_START Incinerate (mana=1346)
+[ 69.89s] RESOURCE Mana -207 => 1139
+[ 69.89s] BUFF_UPDATE Backdraft charges -> 0
+[ 71.35s] BUFF_EXPIRE Backdraft
+[ 71.35s] CAST_RESULT Incinerate HIT damage=2353
+[ 71.35s] CAST_RESULT Life Tap HIT damage=0
+[ 71.35s] RESOURCE Mana +1177 => 2316
+[ 71.35s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 72.22s] DOT_TICK Immolate damage=1053
+[ 72.74s] CAST_RESULT Conflagrate CRIT damage=12209
+[ 72.74s] RESOURCE Mana -236 => 2080
+[ 72.74s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[ 72.74s] BUFF_GAIN Backdraft (charges 3)
+[ 72.74s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 74.13s] CAST_START Chaos Bolt (mana=2080)
+[ 74.13s] RESOURCE Mana -103 => 1977
+[ 74.13s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 75.00s] DOT_TICK Immolate damage=798
+[ 75.42s] CAST_RESULT Chaos Bolt HIT damage=3989
+[ 75.42s] CAST_START Incinerate (mana=1977)
+[ 75.42s] RESOURCE Mana -207 => 1770
+[ 75.42s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 76.88s] CAST_RESULT Incinerate HIT damage=2470
+[ 76.88s] CAST_START Incinerate (mana=1770)
+[ 76.88s] RESOURCE Mana -207 => 1563
+[ 76.88s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 77.39s] PET_CAST Firebolt HIT damage=200 (mana 0/2376)
+[ 77.78s] DOT_TICK Immolate damage=926
+[ 78.13s] BUFF_EXPIRE Gul'dan's Chosen
+[ 78.34s] CAST_RESULT Incinerate HIT damage=2404
+[ 78.34s] CAST_START Incinerate (mana=1563)
+[ 78.34s] RESOURCE Mana -207 => 1356
+[ 78.34s] BUFF_UPDATE Backdraft charges -> 2
+[ 78.34s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 79.80s] CAST_RESULT Incinerate HIT damage=2439
+[ 79.80s] CAST_START Incinerate (mana=1356)
+[ 79.80s] RESOURCE Mana -207 => 1149
+[ 79.80s] BUFF_UPDATE Backdraft charges -> 1
+[ 79.80s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 80.56s] DOT_TICK Immolate damage=1053
+[ 81.26s] CAST_RESULT Incinerate HIT damage=2394
+[ 81.26s] CAST_START Incinerate (mana=1149)
+[ 81.26s] RESOURCE Mana -207 => 942
+[ 81.26s] BUFF_UPDATE Backdraft charges -> 0
+[ 82.72s] BUFF_EXPIRE Backdraft
+[ 82.72s] CAST_RESULT Incinerate CRIT damage=4999
+[ 82.72s] CAST_RESULT Life Tap HIT damage=0
+[ 82.72s] RESOURCE Mana +1177 => 2119
+[ 82.72s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 82.74s] BUFF_EXPIRE Pyroclasm
+[ 83.33s] DOT_TICK Immolate damage=2107 (CRIT)
+[ 84.10s] CAST_RESULT Conflagrate CRIT damage=12209
+[ 84.10s] RESOURCE Mana -236 => 1883
+[ 84.10s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[ 84.10s] BUFF_GAIN Backdraft (charges 3)
+[ 84.10s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 85.49s] CAST_START Chaos Bolt (mana=1883)
+[ 85.49s] RESOURCE Mana -103 => 1780
+[ 85.49s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 86.11s] DOT_TICK Immolate damage=798
+[ 86.79s] CAST_RESULT Chaos Bolt CRIT damage=7670
+[ 86.79s] CAST_START Incinerate (mana=1780)
+[ 86.79s] RESOURCE Mana -207 => 1573
+[ 86.79s] BUFF_GAIN Cataclysmic Burst stacks=1
+[ 88.25s] CAST_RESULT Incinerate HIT damage=2459
+[ 88.25s] CAST_START Incinerate (mana=1573)
+[ 88.25s] RESOURCE Mana -207 => 1366
+[ 88.25s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[ 88.89s] DOT_TICK Immolate damage=926
+[ 89.49s] BUFF_EXPIRE Gul'dan's Chosen
+[ 89.71s] CAST_RESULT Incinerate HIT damage=2515
+[ 89.71s] CAST_START Incinerate (mana=1366)
+[ 89.71s] RESOURCE Mana -207 => 1159
+[ 89.71s] BUFF_UPDATE Backdraft charges -> 2
+[ 89.71s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[ 89.95s] PET_CAST Firebolt HIT damage=209 (mana 0/2376)
+[ 91.16s] CAST_RESULT Incinerate CRIT damage=4878
+[ 91.16s] CAST_START Incinerate (mana=1159)
+[ 91.16s] RESOURCE Mana -207 => 952
+[ 91.16s] BUFF_UPDATE Backdraft charges -> 1
+[ 91.16s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[ 91.67s] DOT_TICK Immolate damage=1053
+[ 92.62s] CAST_RESULT Incinerate HIT damage=2521
+[ 92.62s] CAST_START Incinerate (mana=952)
+[ 92.62s] RESOURCE Mana -207 => 745
+[ 92.62s] BUFF_UPDATE Backdraft charges -> 0
+[ 94.08s] BUFF_EXPIRE Backdraft
+[ 94.08s] CAST_RESULT Incinerate HIT damage=2450
+[ 94.08s] CAST_RESULT Life Tap HIT damage=0
+[ 94.08s] RESOURCE Mana +1177 => 1922
+[ 94.08s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[ 94.10s] BUFF_EXPIRE Pyroclasm
+[ 94.44s] DOT_TICK Immolate damage=1053
+[ 95.47s] CAST_RESULT Conflagrate CRIT damage=12209
+[ 95.47s] RESOURCE Mana -236 => 1686
+[ 95.47s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[ 95.47s] BUFF_GAIN Backdraft (charges 3)
+[ 95.47s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[ 96.86s] CAST_START Chaos Bolt (mana=1686)
+[ 96.86s] RESOURCE Mana -103 => 1583
+[ 96.86s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[ 97.22s] DOT_TICK Immolate damage=798
+[ 97.44s] DOT_EXPIRE Immolate
+[ 98.16s] CAST_RESULT Chaos Bolt HIT damage=4113
+[ 98.16s] CAST_START Immolate (mana=1583)
+[ 98.16s] RESOURCE Mana -252 => 1331
+[ 99.16s] CAST_RESULT Immolate HIT damage=699
+[ 99.16s] CAST_START Incinerate (mana=1331)
+[ 99.16s] RESOURCE Mana -207 => 1124
+[ 99.16s] BUFF_GAIN Cataclysmic Burst stacks=1
+[100.61s] CAST_RESULT Incinerate HIT damage=2467
+[100.61s] CAST_START Incinerate (mana=1124)
+[100.61s] RESOURCE Mana -207 => 917
+[100.61s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[100.86s] BUFF_EXPIRE Gul'dan's Chosen
+[100.93s] DOT_TICK Immolate damage=1962 (CRIT)
+[102.07s] CAST_RESULT Incinerate CRIT damage=4896
+[102.07s] CAST_START Incinerate (mana=917)
+[102.07s] RESOURCE Mana -207 => 710
+[102.07s] BUFF_UPDATE Backdraft charges -> 2
+[102.07s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[102.52s] PET_CAST Firebolt HIT damage=206 (mana 0/2376)
+[103.53s] CAST_RESULT Incinerate HIT damage=2485
+[103.53s] CAST_START Incinerate (mana=710)
+[103.53s] RESOURCE Mana -207 => 503
+[103.53s] BUFF_UPDATE Backdraft charges -> 1
+[103.53s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[103.71s] DOT_TICK Immolate damage=1116
+[104.99s] CAST_RESULT Incinerate CRIT damage=5044
+[104.99s] CAST_START Incinerate (mana=503)
+[104.99s] RESOURCE Mana -207 => 296
+[104.99s] BUFF_UPDATE Backdraft charges -> 0
+[105.47s] BUFF_EXPIRE Pyroclasm
+[106.45s] BUFF_EXPIRE Backdraft
+[106.45s] CAST_RESULT Incinerate HIT damage=2466
+[106.45s] CAST_RESULT Life Tap HIT damage=0
+[106.45s] RESOURCE Mana +1177 => 1473
+[106.45s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[106.49s] DOT_TICK Immolate damage=1116
+[107.83s] CAST_RESULT Life Tap HIT damage=0
+[107.83s] RESOURCE Mana +1177 => 2650
+[107.83s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[109.22s] CAST_RESULT Conflagrate CRIT damage=12942
+[109.22s] RESOURCE Mana -236 => 2414
+[109.22s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[109.22s] BUFF_GAIN Backdraft (charges 3)
+[109.22s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[109.27s] DOT_TICK Immolate damage=846
+[110.61s] CAST_START Chaos Bolt (mana=2414)
+[110.61s] RESOURCE Mana -103 => 2311
+[110.61s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[111.91s] CAST_RESULT Chaos Bolt HIT damage=4239
+[111.91s] CAST_START Incinerate (mana=2311)
+[111.91s] RESOURCE Mana -207 => 2104
+[111.91s] BUFF_GAIN Cataclysmic Burst stacks=1
+[112.04s] DOT_TICK Immolate damage=913
+[113.37s] CAST_RESULT Incinerate CRIT damage=4942
+[113.37s] CAST_START Incinerate (mana=2104)
+[113.37s] RESOURCE Mana -207 => 1897
+[113.37s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[114.61s] BUFF_EXPIRE Gul'dan's Chosen
+[114.82s] DOT_TICK Immolate damage=981
+[114.83s] CAST_RESULT Incinerate HIT damage=2444
+[114.83s] CAST_START Incinerate (mana=1897)
+[114.83s] RESOURCE Mana -207 => 1690
+[114.83s] BUFF_UPDATE Backdraft charges -> 2
+[114.83s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[115.08s] PET_CAST Firebolt HIT damage=207 (mana 0/2376)
+[116.28s] CAST_RESULT Incinerate CRIT damage=4830
+[116.28s] CAST_START Incinerate (mana=1690)
+[116.28s] RESOURCE Mana -207 => 1483
+[116.28s] BUFF_UPDATE Backdraft charges -> 1
+[116.28s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[117.60s] DOT_TICK Immolate damage=1116
+[117.74s] CAST_RESULT Incinerate CRIT damage=4955
+[117.74s] CAST_START Incinerate (mana=1483)
+[117.74s] RESOURCE Mana -207 => 1276
+[117.74s] BUFF_UPDATE Backdraft charges -> 0
+[119.20s] BUFF_EXPIRE Backdraft
+[119.20s] CAST_RESULT Incinerate HIT damage=2466
+[119.20s] CAST_RESULT Life Tap HIT damage=0
+[119.20s] RESOURCE Mana +1177 => 2453
+[119.20s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[119.22s] BUFF_EXPIRE Pyroclasm
+[120.38s] DOT_TICK Immolate damage=1116
+[120.59s] CAST_RESULT Conflagrate CRIT damage=12942
+[120.59s] RESOURCE Mana -236 => 2217
+[120.59s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[120.59s] BUFF_GAIN Backdraft (charges 3)
+[120.59s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[121.98s] CAST_START Chaos Bolt (mana=2217)
+[121.98s] RESOURCE Mana -103 => 2114
+[121.98s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[123.16s] DOT_TICK Immolate damage=846
+[123.28s] CAST_RESULT Chaos Bolt HIT damage=3953
+[123.28s] CAST_START Incinerate (mana=2114)
+[123.28s] RESOURCE Mana -207 => 1907
+[123.28s] BUFF_GAIN Cataclysmic Burst stacks=1
+[124.73s] CAST_RESULT Incinerate HIT damage=2410
+[124.73s] CAST_START Incinerate (mana=1907)
+[124.73s] RESOURCE Mana -207 => 1700
+[124.73s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[125.93s] DOT_TICK Immolate damage=981
+[125.98s] BUFF_EXPIRE Gul'dan's Chosen
+[126.19s] CAST_RESULT Incinerate CRIT damage=4971
+[126.19s] CAST_START Incinerate (mana=1700)
+[126.19s] RESOURCE Mana -207 => 1493
+[126.19s] BUFF_UPDATE Backdraft charges -> 2
+[126.19s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[127.65s] CAST_RESULT Incinerate CRIT damage=4948
+[127.65s] CAST_START Incinerate (mana=1493)
+[127.65s] RESOURCE Mana -207 => 1286
+[127.65s] BUFF_UPDATE Backdraft charges -> 1
+[127.65s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[127.65s] PET_CAST Firebolt HIT damage=209 (mana 0/2376)
+[128.71s] DOT_TICK Immolate damage=1116
+[129.11s] CAST_RESULT Incinerate HIT damage=2480
+[129.11s] CAST_START Incinerate (mana=1286)
+[129.11s] RESOURCE Mana -207 => 1079
+[129.11s] BUFF_UPDATE Backdraft charges -> 0
+[130.57s] BUFF_EXPIRE Backdraft
+[130.57s] CAST_RESULT Incinerate HIT damage=2395
+[130.57s] CAST_RESULT Life Tap HIT damage=0
+[130.57s] RESOURCE Mana +1177 => 2256
+[130.57s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[130.59s] BUFF_EXPIRE Pyroclasm
+[131.49s] DOT_TICK Immolate damage=1116
+[131.96s] CAST_RESULT Conflagrate HIT damage=6471
+[131.96s] RESOURCE Mana -236 => 2020
+[131.96s] BUFF_GAIN Backdraft (charges 3)
+[131.96s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[133.34s] CAST_START Chaos Bolt (mana=2020)
+[133.34s] RESOURCE Mana -103 => 1917
+[133.34s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[134.27s] DOT_TICK Immolate damage=846
+[134.64s] CAST_RESULT Chaos Bolt HIT damage=3693
+[134.64s] CAST_START Incinerate (mana=1917)
+[134.64s] RESOURCE Mana -207 => 1710
+[134.64s] BUFF_GAIN Cataclysmic Burst stacks=1
+[136.10s] CAST_RESULT Incinerate HIT damage=2255
+[136.10s] CAST_START Incinerate (mana=1710)
+[136.10s] RESOURCE Mana -207 => 1503
+[136.10s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[137.04s] DOT_TICK Immolate damage=981
+[137.34s] BUFF_EXPIRE Gul'dan's Chosen
+[137.56s] CAST_RESULT Incinerate HIT damage=2347
+[137.56s] CAST_START Incinerate (mana=1503)
+[137.56s] RESOURCE Mana -207 => 1296
+[137.56s] BUFF_UPDATE Backdraft charges -> 2
+[137.56s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[139.02s] CAST_RESULT Incinerate HIT damage=2335
+[139.02s] CAST_START Incinerate (mana=1296)
+[139.02s] RESOURCE Mana -207 => 1089
+[139.02s] BUFF_UPDATE Backdraft charges -> 1
+[139.02s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[139.82s] DOT_TICK Immolate damage=2233 (CRIT)
+[140.22s] PET_CAST Firebolt HIT damage=207 (mana 0/2376)
+[140.47s] CAST_RESULT Incinerate HIT damage=2251
+[140.47s] CAST_START Incinerate (mana=1089)
+[140.47s] RESOURCE Mana -207 => 882
+[140.47s] BUFF_UPDATE Backdraft charges -> 0
+[141.93s] BUFF_EXPIRE Backdraft
+[141.93s] CAST_RESULT Incinerate CRIT damage=4612
+[141.93s] CAST_RESULT Life Tap HIT damage=0
+[141.93s] RESOURCE Mana +1177 => 2059
+[141.93s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[142.60s] DOT_TICK Immolate damage=1116
+[143.32s] CAST_RESULT Conflagrate HIT damage=6471
+[143.32s] RESOURCE Mana -236 => 1823
+[143.32s] BUFF_GAIN Backdraft (charges 3)
+[143.32s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[144.71s] CAST_START Chaos Bolt (mana=1823)
+[144.71s] RESOURCE Mana -103 => 1720
+[144.71s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[145.38s] DOT_TICK Immolate damage=846
+[146.01s] CAST_RESULT Chaos Bolt HIT damage=4001
+[146.01s] CAST_START Incinerate (mana=1720)
+[146.01s] RESOURCE Mana -207 => 1513
+[146.01s] BUFF_GAIN Cataclysmic Burst stacks=1
+[147.47s] CAST_RESULT Incinerate HIT damage=2238
+[147.47s] CAST_START Incinerate (mana=1513)
+[147.47s] RESOURCE Mana -207 => 1306
+[147.47s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[148.16s] DOT_TICK Immolate damage=981
+[148.71s] BUFF_EXPIRE Gul'dan's Chosen
+[148.92s] CAST_RESULT Incinerate HIT damage=2306
+[148.92s] CAST_START Incinerate (mana=1306)
+[148.92s] RESOURCE Mana -207 => 1099
+[148.92s] BUFF_UPDATE Backdraft charges -> 2
+[148.92s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[150.38s] CAST_RESULT Incinerate HIT damage=2362
+[150.38s] CAST_START Incinerate (mana=1099)
+[150.38s] RESOURCE Mana -207 => 892
+[150.38s] BUFF_UPDATE Backdraft charges -> 1
+[150.38s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[150.93s] DOT_TICK Immolate damage=2233 (CRIT)
+[151.84s] CAST_RESULT Incinerate CRIT damage=4598
+[151.84s] CAST_START Incinerate (mana=892)
+[151.84s] RESOURCE Mana -207 => 685
+[151.84s] BUFF_UPDATE Backdraft charges -> 0
+[152.79s] BUFF_EXPIRE Backdraft
+[152.79s] PET_CAST Firebolt HIT damage=200 (mana 0/2376)
+[153.30s] CAST_RESULT Incinerate CRIT damage=4574
+[153.30s] CAST_RESULT Life Tap HIT damage=0
+[153.30s] RESOURCE Mana +1177 => 1862
+[153.30s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[153.71s] DOT_TICK Immolate damage=1116
+[154.69s] CAST_RESULT Conflagrate HIT damage=6471
+[154.69s] RESOURCE Mana -236 => 1626
+[154.69s] BUFF_GAIN Backdraft (charges 3)
+[154.69s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[156.08s] CAST_START Chaos Bolt (mana=1626)
+[156.08s] RESOURCE Mana -103 => 1523
+[156.08s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[156.49s] DOT_TICK Immolate damage=1692 (CRIT)
+[157.37s] CAST_RESULT Chaos Bolt HIT damage=3892
+[157.37s] CAST_START Incinerate (mana=1523)
+[157.37s] RESOURCE Mana -207 => 1316
+[157.37s] BUFF_GAIN Cataclysmic Burst stacks=1
+[158.83s] CAST_RESULT Incinerate CRIT damage=4609
+[158.83s] CAST_START Incinerate (mana=1316)
+[158.83s] RESOURCE Mana -207 => 1109
+[158.83s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[159.27s] DOT_TICK Immolate damage=981
+[160.08s] BUFF_EXPIRE Gul'dan's Chosen
+[160.29s] CAST_RESULT Incinerate CRIT damage=4518
+[160.29s] CAST_START Incinerate (mana=1109)
+[160.29s] RESOURCE Mana -207 => 902
+[160.29s] BUFF_UPDATE Backdraft charges -> 2
+[160.29s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[161.75s] CAST_RESULT Incinerate HIT damage=2327
+[161.75s] CAST_START Incinerate (mana=902)
+[161.75s] RESOURCE Mana -207 => 695
+[161.75s] BUFF_UPDATE Backdraft charges -> 1
+[161.75s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[162.04s] DOT_TICK Immolate damage=1116
+[163.21s] CAST_RESULT Incinerate HIT damage=2300
+[163.21s] CAST_START Incinerate (mana=695)
+[163.21s] RESOURCE Mana -207 => 488
+[163.21s] BUFF_UPDATE Backdraft charges -> 0
+[164.66s] BUFF_EXPIRE Backdraft
+[164.66s] CAST_RESULT Incinerate HIT damage=2339
+[164.66s] CAST_RESULT Life Tap HIT damage=0
+[164.66s] RESOURCE Mana +1177 => 1665
+[164.66s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[164.82s] DOT_TICK Immolate damage=1116
+[165.35s] PET_CAST Firebolt HIT damage=209 (mana 0/2376)
+[166.05s] CAST_RESULT Life Tap HIT damage=0
+[166.05s] RESOURCE Mana +1177 => 2842
+[166.05s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[167.44s] CAST_RESULT Conflagrate CRIT damage=12942
+[167.44s] RESOURCE Mana -236 => 2606
+[167.44s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[167.44s] BUFF_GAIN Backdraft (charges 3)
+[167.44s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[167.60s] DOT_TICK Immolate damage=846
+[168.83s] CAST_START Chaos Bolt (mana=2606)
+[168.83s] RESOURCE Mana -103 => 2503
+[168.83s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[170.13s] CAST_RESULT Chaos Bolt HIT damage=4232
+[170.13s] CAST_START Incinerate (mana=2503)
+[170.13s] RESOURCE Mana -207 => 2296
+[170.13s] BUFF_GAIN Cataclysmic Burst stacks=1
+[170.38s] DOT_TICK Immolate damage=1827 (CRIT)
+[171.59s] CAST_RESULT Incinerate HIT damage=2401
+[171.59s] CAST_START Incinerate (mana=2296)
+[171.59s] RESOURCE Mana -207 => 2089
+[171.59s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[172.83s] BUFF_EXPIRE Gul'dan's Chosen
+[173.04s] CAST_RESULT Incinerate HIT damage=2389
+[173.04s] CAST_START Incinerate (mana=2089)
+[173.04s] RESOURCE Mana -207 => 1882
+[173.04s] BUFF_UPDATE Backdraft charges -> 2
+[173.04s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[173.16s] DOT_TICK Immolate damage=1049
+[174.50s] CAST_RESULT Incinerate CRIT damage=4884
+[174.50s] CAST_START Incinerate (mana=1882)
+[174.50s] RESOURCE Mana -207 => 1675
+[174.50s] BUFF_UPDATE Backdraft charges -> 1
+[174.50s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[175.93s] DOT_TICK Immolate damage=2233 (CRIT)
+[175.96s] CAST_RESULT Incinerate HIT damage=2483
+[175.96s] CAST_START Incinerate (mana=1675)
+[175.96s] RESOURCE Mana -207 => 1468
+[175.96s] BUFF_UPDATE Backdraft charges -> 0
+[177.42s] BUFF_EXPIRE Backdraft
+[177.42s] CAST_RESULT Incinerate CRIT damage=4916
+[177.42s] CAST_RESULT Life Tap HIT damage=0
+[177.42s] RESOURCE Mana +1177 => 2645
+[177.42s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[177.44s] BUFF_EXPIRE Pyroclasm
+[177.92s] PET_CAST Firebolt HIT damage=197 (mana 0/2376)
+[178.71s] DOT_TICK Immolate damage=1116
+[178.81s] CAST_RESULT Conflagrate CRIT damage=12942
+[178.81s] RESOURCE Mana -236 => 2409
+[178.81s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[178.81s] BUFF_GAIN Backdraft (charges 3)
+[178.81s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[180.20s] CAST_START Chaos Bolt (mana=2409)
+[180.20s] RESOURCE Mana -103 => 2306
+[180.20s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[181.49s] DOT_TICK Immolate damage=846
+[181.49s] CAST_RESULT Chaos Bolt HIT damage=4270
+[181.49s] CAST_START Incinerate (mana=2306)
+[181.49s] RESOURCE Mana -207 => 2099
+[181.49s] BUFF_GAIN Cataclysmic Burst stacks=1
+[182.95s] CAST_RESULT Incinerate HIT damage=2456
+[182.95s] CAST_START Incinerate (mana=2099)
+[182.95s] RESOURCE Mana -207 => 1892
+[182.95s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[184.20s] BUFF_EXPIRE Gul'dan's Chosen
+[184.27s] DOT_TICK Immolate damage=1962 (CRIT)
+[184.41s] CAST_RESULT Incinerate HIT damage=2371
+[184.41s] CAST_START Incinerate (mana=1892)
+[184.41s] RESOURCE Mana -207 => 1685
+[184.41s] BUFF_UPDATE Backdraft charges -> 2
+[184.41s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[185.87s] CAST_RESULT Incinerate HIT damage=2373
+[185.87s] CAST_START Incinerate (mana=1685)
+[185.87s] RESOURCE Mana -207 => 1478
+[185.87s] BUFF_UPDATE Backdraft charges -> 1
+[185.87s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[187.04s] DOT_TICK Immolate damage=1116
+[187.33s] CAST_RESULT Incinerate HIT damage=2397
+[187.33s] CAST_START Incinerate (mana=1478)
+[187.33s] RESOURCE Mana -207 => 1271
+[187.33s] BUFF_UPDATE Backdraft charges -> 0
+[188.78s] BUFF_EXPIRE Backdraft
+[188.78s] CAST_RESULT Incinerate HIT damage=2461
+[188.78s] CAST_RESULT Life Tap HIT damage=0
+[188.78s] RESOURCE Mana +1177 => 2448
+[188.78s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[188.81s] BUFF_EXPIRE Pyroclasm
+[189.82s] DOT_TICK Immolate damage=1116
+[190.17s] CAST_RESULT Conflagrate CRIT damage=12942
+[190.17s] RESOURCE Mana -236 => 2212
+[190.17s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[190.17s] BUFF_GAIN Backdraft (charges 3)
+[190.17s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[190.49s] PET_CAST Firebolt HIT damage=207 (mana 0/2376)
+[191.56s] CAST_START Chaos Bolt (mana=2212)
+[191.56s] RESOURCE Mana -103 => 2109
+[191.56s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[192.60s] DOT_TICK Immolate damage=846
+[192.86s] CAST_RESULT Chaos Bolt CRIT damage=8559
+[192.86s] CAST_START Incinerate (mana=2109)
+[192.86s] RESOURCE Mana -207 => 1902
+[192.86s] BUFF_GAIN Cataclysmic Burst stacks=1
+[194.32s] CAST_RESULT Incinerate CRIT damage=4825
+[194.32s] CAST_START Incinerate (mana=1902)
+[194.32s] RESOURCE Mana -207 => 1695
+[194.32s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[195.38s] DOT_TICK Immolate damage=981
+[195.56s] BUFF_EXPIRE Gul'dan's Chosen
+[195.78s] CAST_RESULT Incinerate HIT damage=2497
+[195.78s] CAST_START Incinerate (mana=1695)
+[195.78s] RESOURCE Mana -207 => 1488
+[195.78s] BUFF_UPDATE Backdraft charges -> 2
+[195.78s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[197.23s] CAST_RESULT Incinerate HIT damage=2449
+[197.23s] CAST_START Incinerate (mana=1488)
+[197.23s] RESOURCE Mana -207 => 1281
+[197.23s] BUFF_UPDATE Backdraft charges -> 1
+[197.23s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[198.16s] DOT_TICK Immolate damage=1116
+[198.69s] CAST_RESULT Incinerate HIT damage=2428
+[198.69s] CAST_START Incinerate (mana=1281)
+[198.69s] RESOURCE Mana -207 => 1074
+[198.69s] BUFF_UPDATE Backdraft charges -> 0
+[200.15s] BUFF_EXPIRE Backdraft
+[200.15s] CAST_RESULT Incinerate HIT damage=2505
+[200.15s] CAST_RESULT Life Tap HIT damage=0
+[200.15s] RESOURCE Mana +1177 => 2251
+[200.15s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[200.17s] BUFF_EXPIRE Pyroclasm
+[200.93s] DOT_TICK Immolate damage=1116
+[201.54s] CAST_RESULT Conflagrate CRIT damage=12942
+[201.54s] RESOURCE Mana -236 => 2015
+[201.54s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[201.54s] BUFF_GAIN Backdraft (charges 3)
+[201.54s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[202.93s] CAST_START Chaos Bolt (mana=2015)
+[202.93s] RESOURCE Mana -103 => 1912
+[202.93s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[203.05s] PET_CAST Firebolt HIT damage=197 (mana 0/2376)
+[203.71s] DOT_TICK Immolate damage=846
+[204.22s] CAST_RESULT Chaos Bolt HIT damage=4169
+[204.22s] CAST_START Incinerate (mana=1912)
+[204.22s] RESOURCE Mana -207 => 1705
+[204.22s] BUFF_GAIN Cataclysmic Burst stacks=1
+[205.68s] CAST_RESULT Incinerate HIT damage=2463
+[205.68s] CAST_START Incinerate (mana=1705)
+[205.68s] RESOURCE Mana -207 => 1498
+[205.68s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[206.49s] DOT_TICK Immolate damage=981
+[206.93s] BUFF_EXPIRE Gul'dan's Chosen
+[207.14s] CAST_RESULT Incinerate HIT damage=2405
+[207.14s] CAST_START Incinerate (mana=1498)
+[207.14s] RESOURCE Mana -207 => 1291
+[207.14s] BUFF_UPDATE Backdraft charges -> 2
+[207.14s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[208.60s] CAST_RESULT Incinerate HIT damage=2425
+[208.60s] CAST_START Incinerate (mana=1291)
+[208.60s] RESOURCE Mana -207 => 1084
+[208.60s] BUFF_UPDATE Backdraft charges -> 1
+[208.60s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[209.27s] DOT_TICK Immolate damage=1116
+[210.06s] CAST_RESULT Incinerate CRIT damage=4841
+[210.06s] CAST_START Incinerate (mana=1084)
+[210.06s] RESOURCE Mana -207 => 877
+[210.06s] BUFF_UPDATE Backdraft charges -> 0
+[211.52s] BUFF_EXPIRE Backdraft
+[211.52s] CAST_RESULT Incinerate HIT damage=2398
+[211.52s] CAST_RESULT Life Tap HIT damage=0
+[211.52s] RESOURCE Mana +1177 => 2054
+[211.52s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[211.54s] BUFF_EXPIRE Pyroclasm
+[212.04s] DOT_TICK Immolate damage=1116
+[212.91s] CAST_RESULT Conflagrate HIT damage=6471
+[212.91s] RESOURCE Mana -236 => 1818
+[212.91s] BUFF_GAIN Backdraft (charges 3)
+[212.91s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[214.29s] CAST_START Chaos Bolt (mana=1818)
+[214.29s] RESOURCE Mana -103 => 1715
+[214.29s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[214.82s] DOT_TICK Immolate damage=846
+[214.82s] DOT_EXPIRE Immolate
+[215.59s] CAST_RESULT Chaos Bolt CRIT damage=7285
+[215.59s] CAST_START Immolate (mana=1715)
+[215.59s] RESOURCE Mana -252 => 1463
+[215.62s] PET_CAST Firebolt HIT damage=205 (mana 0/2376)
+[216.59s] CAST_RESULT Immolate HIT damage=659
+[216.59s] CAST_START Incinerate (mana=1463)
+[216.59s] RESOURCE Mana -207 => 1256
+[216.59s] BUFF_GAIN Cataclysmic Burst stacks=1
+[218.05s] CAST_RESULT Incinerate HIT damage=2343
+[218.05s] CAST_START Incinerate (mana=1256)
+[218.05s] RESOURCE Mana -207 => 1049
+[218.05s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[218.29s] BUFF_EXPIRE Gul'dan's Chosen
+[218.37s] DOT_TICK Immolate damage=926
+[219.51s] CAST_RESULT Incinerate HIT damage=2298
+[219.51s] CAST_START Incinerate (mana=1049)
+[219.51s] RESOURCE Mana -207 => 842
+[219.51s] BUFF_UPDATE Backdraft charges -> 2
+[219.51s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[220.97s] CAST_RESULT Incinerate HIT damage=2335
+[220.97s] CAST_START Incinerate (mana=842)
+[220.97s] RESOURCE Mana -207 => 635
+[220.97s] BUFF_UPDATE Backdraft charges -> 1
+[220.97s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[221.15s] DOT_TICK Immolate damage=2107 (CRIT)
+[222.42s] CAST_RESULT Incinerate HIT damage=2339
+[222.42s] CAST_START Incinerate (mana=635)
+[222.42s] RESOURCE Mana -207 => 428
+[222.42s] BUFF_UPDATE Backdraft charges -> 0
+[223.88s] BUFF_EXPIRE Backdraft
+[223.88s] CAST_RESULT Incinerate HIT damage=2248
+[223.88s] CAST_RESULT Life Tap HIT damage=0
+[223.88s] RESOURCE Mana +1177 => 1605
+[223.88s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[223.92s] DOT_TICK Immolate damage=2107 (CRIT)
+[225.27s] CAST_RESULT Life Tap HIT damage=0
+[225.27s] RESOURCE Mana +1177 => 2782
+[225.27s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[226.66s] CAST_RESULT Conflagrate CRIT damage=12209
+[226.66s] RESOURCE Mana -236 => 2546
+[226.66s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[226.66s] BUFF_GAIN Backdraft (charges 3)
+[226.66s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[226.70s] DOT_TICK Immolate damage=1596 (CRIT)
+[228.05s] CAST_START Chaos Bolt (mana=2546)
+[228.05s] RESOURCE Mana -103 => 2443
+[228.05s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[228.19s] PET_CAST Firebolt HIT damage=199 (mana 0/2376)
+[229.34s] CAST_RESULT Chaos Bolt CRIT damage=7785
+[229.34s] CAST_START Incinerate (mana=2443)
+[229.34s] RESOURCE Mana -207 => 2236
+[229.34s] BUFF_GAIN Cataclysmic Burst stacks=1
+[229.48s] DOT_TICK Immolate damage=862
+[230.80s] CAST_RESULT Incinerate HIT damage=2400
+[230.80s] CAST_START Incinerate (mana=2236)
+[230.80s] RESOURCE Mana -207 => 2029
+[230.80s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[232.05s] BUFF_EXPIRE Gul'dan's Chosen
+[232.26s] DOT_TICK Immolate damage=926
+[232.26s] CAST_RESULT Incinerate HIT damage=2402
+[232.26s] CAST_START Incinerate (mana=2029)
+[232.26s] RESOURCE Mana -207 => 1822
+[232.26s] BUFF_UPDATE Backdraft charges -> 2
+[232.26s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[233.72s] CAST_RESULT Incinerate HIT damage=2382
+[233.72s] CAST_START Incinerate (mana=1822)
+[233.72s] RESOURCE Mana -207 => 1615
+[233.72s] BUFF_UPDATE Backdraft charges -> 1
+[233.72s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[235.03s] DOT_TICK Immolate damage=1053
+[235.18s] CAST_RESULT Incinerate HIT damage=2395
+[235.18s] CAST_START Incinerate (mana=1615)
+[235.18s] RESOURCE Mana -207 => 1408
+[235.18s] BUFF_UPDATE Backdraft charges -> 0
+[236.64s] BUFF_EXPIRE Backdraft
+[236.64s] CAST_RESULT Incinerate HIT damage=2357
+[236.64s] CAST_RESULT Life Tap HIT damage=0
+[236.64s] RESOURCE Mana +1177 => 2585
+[236.64s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[236.66s] BUFF_EXPIRE Pyroclasm
+[237.81s] DOT_TICK Immolate damage=1053
+[238.03s] CAST_RESULT Conflagrate HIT damage=6105
+[238.03s] RESOURCE Mana -236 => 2349
+[238.03s] BUFF_GAIN Backdraft (charges 3)
+[238.03s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[239.41s] CAST_START Chaos Bolt (mana=2349)
+[239.41s] RESOURCE Mana -103 => 2246
+[239.41s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[240.59s] DOT_TICK Immolate damage=798
+[240.71s] CAST_RESULT Chaos Bolt HIT damage=3926
+[240.71s] CAST_START Incinerate (mana=2246)
+[240.71s] RESOURCE Mana -207 => 2039
+[240.71s] BUFF_GAIN Cataclysmic Burst stacks=1
+[240.75s] PET_CAST Firebolt HIT damage=208 (mana 0/2376)
+[242.17s] CAST_RESULT Incinerate CRIT damage=4745
+[242.17s] CAST_START Incinerate (mana=2039)
+[242.17s] RESOURCE Mana -207 => 1832
+[242.17s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[243.37s] DOT_TICK Immolate damage=926
+[243.41s] BUFF_EXPIRE Gul'dan's Chosen
+[243.63s] CAST_RESULT Incinerate HIT damage=2228
+[243.63s] CAST_START Incinerate (mana=1832)
+[243.63s] RESOURCE Mana -207 => 1625
+[243.63s] BUFF_UPDATE Backdraft charges -> 2
+[243.63s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[245.09s] CAST_RESULT Incinerate HIT damage=2292
+[245.09s] CAST_START Incinerate (mana=1625)
+[245.09s] RESOURCE Mana -207 => 1418
+[245.09s] BUFF_UPDATE Backdraft charges -> 1
+[245.09s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[246.15s] DOT_TICK Immolate damage=1053
+[246.54s] CAST_RESULT Incinerate HIT damage=2341
+[246.54s] CAST_START Incinerate (mana=1418)
+[246.54s] RESOURCE Mana -207 => 1211
+[246.54s] BUFF_UPDATE Backdraft charges -> 0
+[248.00s] BUFF_EXPIRE Backdraft
+[248.00s] CAST_RESULT Incinerate HIT damage=2369
+[248.00s] CAST_RESULT Life Tap HIT damage=0
+[248.00s] RESOURCE Mana +1177 => 2388
+[248.00s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[248.92s] DOT_TICK Immolate damage=1053
+[249.39s] CAST_RESULT Conflagrate HIT damage=6105
+[249.39s] RESOURCE Mana -236 => 2152
+[249.39s] BUFF_GAIN Backdraft (charges 3)
+[249.39s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[250.78s] CAST_START Chaos Bolt (mana=2152)
+[250.78s] RESOURCE Mana -103 => 2049
+[250.78s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[251.70s] DOT_TICK Immolate damage=798
+[252.08s] CAST_RESULT Chaos Bolt HIT damage=3748
+[252.08s] CAST_START Incinerate (mana=2049)
+[252.08s] RESOURCE Mana -207 => 1842
+[252.08s] BUFF_GAIN Cataclysmic Burst stacks=1
+[253.32s] PET_CAST Firebolt HIT damage=209 (mana 0/2376)
+[253.53s] CAST_RESULT Incinerate HIT damage=2271
+[253.53s] CAST_START Incinerate (mana=1842)
+[253.53s] RESOURCE Mana -207 => 1635
+[253.53s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[254.48s] DOT_TICK Immolate damage=1851 (CRIT)
+[254.78s] BUFF_EXPIRE Gul'dan's Chosen
+[254.99s] CAST_RESULT Incinerate HIT damage=2323
+[254.99s] CAST_START Incinerate (mana=1635)
+[254.99s] RESOURCE Mana -207 => 1428
+[254.99s] BUFF_UPDATE Backdraft charges -> 2
+[254.99s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[256.45s] CAST_RESULT Incinerate HIT damage=2253
+[256.45s] CAST_START Incinerate (mana=1428)
+[256.45s] RESOURCE Mana -207 => 1221
+[256.45s] BUFF_UPDATE Backdraft charges -> 1
+[256.45s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[257.26s] DOT_TICK Immolate damage=1053
+[257.91s] CAST_RESULT Incinerate HIT damage=2270
+[257.91s] CAST_START Incinerate (mana=1221)
+[257.91s] RESOURCE Mana -207 => 1014
+[257.91s] BUFF_UPDATE Backdraft charges -> 0
+[259.37s] BUFF_EXPIRE Backdraft
+[259.37s] CAST_RESULT Incinerate HIT damage=2355
+[259.37s] CAST_RESULT Life Tap HIT damage=0
+[259.37s] RESOURCE Mana +1177 => 2191
+[259.37s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[260.03s] DOT_TICK Immolate damage=1053
+[260.76s] CAST_RESULT Conflagrate HIT damage=6105
+[260.76s] RESOURCE Mana -236 => 1955
+[260.76s] BUFF_GAIN Backdraft (charges 3)
+[260.76s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[262.14s] CAST_START Chaos Bolt (mana=1955)
+[262.14s] RESOURCE Mana -103 => 1852
+[262.14s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[262.81s] DOT_TICK Immolate damage=798
+[263.44s] CAST_RESULT Chaos Bolt HIT damage=3856
+[263.44s] CAST_START Incinerate (mana=1852)
+[263.44s] RESOURCE Mana -207 => 1645
+[263.44s] BUFF_GAIN Cataclysmic Burst stacks=1
+[264.90s] CAST_RESULT Incinerate HIT damage=2318
+[264.90s] CAST_START Incinerate (mana=1645)
+[264.90s] RESOURCE Mana -207 => 1438
+[264.90s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[265.59s] DOT_TICK Immolate damage=926
+[265.89s] PET_CAST Firebolt HIT damage=197 (mana 0/2376)
+[266.14s] BUFF_EXPIRE Gul'dan's Chosen
+[266.36s] CAST_RESULT Incinerate HIT damage=2294
+[266.36s] CAST_START Incinerate (mana=1438)
+[266.36s] RESOURCE Mana -207 => 1231
+[266.36s] BUFF_UPDATE Backdraft charges -> 2
+[266.36s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[267.82s] CAST_RESULT Incinerate HIT damage=2240
+[267.82s] CAST_START Incinerate (mana=1231)
+[267.82s] RESOURCE Mana -207 => 1024
+[267.82s] BUFF_UPDATE Backdraft charges -> 1
+[267.82s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[268.37s] DOT_TICK Immolate damage=1053
+[269.27s] CAST_RESULT Incinerate HIT damage=2251
+[269.27s] CAST_START Incinerate (mana=1024)
+[269.27s] RESOURCE Mana -207 => 817
+[269.27s] BUFF_UPDATE Backdraft charges -> 0
+[270.73s] BUFF_EXPIRE Backdraft
+[270.73s] CAST_RESULT Incinerate HIT damage=2250
+[270.73s] CAST_RESULT Curse of the Elements HIT damage=0
+[271.14s] DOT_TICK Immolate damage=1053
+[272.12s] CAST_RESULT Life Tap HIT damage=0
+[272.12s] RESOURCE Mana +1177 => 1994
+[272.12s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[273.51s] CAST_RESULT Conflagrate CRIT damage=12209
+[273.51s] RESOURCE Mana -236 => 1758
+[273.51s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[273.51s] BUFF_GAIN Backdraft (charges 3)
+[273.51s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[273.92s] DOT_TICK Immolate damage=798
+[274.90s] CAST_START Chaos Bolt (mana=1758)
+[274.90s] RESOURCE Mana -103 => 1655
+[274.90s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[276.20s] CAST_RESULT Chaos Bolt HIT damage=4188
+[276.20s] CAST_START Incinerate (mana=1655)
+[276.20s] RESOURCE Mana -207 => 1448
+[276.20s] BUFF_GAIN Cataclysmic Burst stacks=1
+[276.70s] DOT_TICK Immolate damage=862
+[277.65s] CAST_RESULT Incinerate HIT damage=2456
+[277.65s] CAST_START Incinerate (mana=1448)
+[277.65s] RESOURCE Mana -207 => 1241
+[277.65s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[278.45s] PET_CAST Firebolt HIT damage=198 (mana 0/2376)
+[278.90s] BUFF_EXPIRE Gul'dan's Chosen
+[279.11s] CAST_RESULT Incinerate HIT damage=2510
+[279.11s] CAST_START Incinerate (mana=1241)
+[279.11s] RESOURCE Mana -207 => 1034
+[279.11s] BUFF_UPDATE Backdraft charges -> 2
+[279.11s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[279.48s] DOT_TICK Immolate damage=989
+[280.57s] CAST_RESULT Incinerate HIT damage=2399
+[280.57s] CAST_START Incinerate (mana=1034)
+[280.57s] RESOURCE Mana -207 => 827
+[280.57s] BUFF_UPDATE Backdraft charges -> 1
+[280.57s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[282.03s] CAST_RESULT Incinerate HIT damage=2475
+[282.03s] CAST_START Incinerate (mana=827)
+[282.03s] RESOURCE Mana -207 => 620
+[282.03s] BUFF_UPDATE Backdraft charges -> 0
+[282.26s] BUFF_EXPIRE Backdraft
+[282.26s] DOT_TICK Immolate damage=1053
+[283.49s] CAST_RESULT Incinerate CRIT damage=4905
+[283.49s] CAST_RESULT Life Tap HIT damage=0
+[283.49s] RESOURCE Mana +1177 => 1797
+[283.49s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[283.51s] BUFF_EXPIRE Pyroclasm
+[284.88s] CAST_RESULT Life Tap HIT damage=0
+[284.88s] RESOURCE Mana +1177 => 2974
+[284.88s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[285.03s] DOT_TICK Immolate damage=1053
+[286.27s] CAST_RESULT Conflagrate CRIT damage=12209
+[286.27s] RESOURCE Mana -236 => 2738
+[286.27s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[286.27s] BUFF_GAIN Backdraft (charges 3)
+[286.27s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[287.65s] CAST_START Chaos Bolt (mana=2738)
+[287.65s] RESOURCE Mana -103 => 2635
+[287.65s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[287.81s] DOT_TICK Immolate damage=798
+[288.95s] CAST_RESULT Chaos Bolt HIT damage=3951
+[288.95s] CAST_START Incinerate (mana=2635)
+[288.95s] RESOURCE Mana -207 => 2428
+[288.95s] BUFF_GAIN Cataclysmic Burst stacks=1
+[290.41s] CAST_RESULT Incinerate HIT damage=2388
+[290.41s] CAST_START Incinerate (mana=2428)
+[290.41s] RESOURCE Mana -207 => 2221
+[290.41s] BUFF_UPDATE Cataclysmic Burst stacks=2
+[290.59s] DOT_TICK Immolate damage=926
+[291.02s] PET_CAST Firebolt HIT damage=207 (mana 0/2376)
+[291.65s] BUFF_EXPIRE Gul'dan's Chosen
+[291.87s] CAST_RESULT Incinerate HIT damage=2398
+[291.87s] CAST_START Incinerate (mana=2221)
+[291.87s] RESOURCE Mana -207 => 2014
+[291.87s] BUFF_UPDATE Backdraft charges -> 2
+[291.87s] BUFF_UPDATE Cataclysmic Burst stacks=3
+[293.33s] CAST_RESULT Incinerate HIT damage=2421
+[293.33s] CAST_START Incinerate (mana=2014)
+[293.33s] RESOURCE Mana -207 => 1807
+[293.33s] BUFF_UPDATE Backdraft charges -> 1
+[293.33s] BUFF_UPDATE Cataclysmic Burst stacks=4
+[293.37s] DOT_TICK Immolate damage=1053
+[294.78s] CAST_RESULT Incinerate CRIT damage=4981
+[294.78s] CAST_START Incinerate (mana=1807)
+[294.78s] RESOURCE Mana -207 => 1600
+[294.78s] BUFF_UPDATE Backdraft charges -> 0
+[296.14s] BUFF_EXPIRE Backdraft
+[296.14s] DOT_TICK Immolate damage=1053
+[296.24s] CAST_RESULT Incinerate HIT damage=2445
+[296.24s] CAST_RESULT Life Tap HIT damage=0
+[296.24s] RESOURCE Mana +1177 => 2777
+[296.24s] BUFF_REFRESH Life Tap (+35 SP, 40.0s)
+[296.27s] BUFF_EXPIRE Pyroclasm
+[297.63s] CAST_RESULT Conflagrate CRIT damage=12209
+[297.63s] RESOURCE Mana -236 => 2541
+[297.63s] BUFF_GAIN Pyroclasm (duration 10.0s)
+[297.63s] BUFF_GAIN Backdraft (charges 3)
+[297.63s] BUFF_EXPIRE Cataclysmic Burst stacks=0
+[298.92s] DOT_TICK Immolate damage=1596 (CRIT)
+[299.02s] CAST_START Chaos Bolt (mana=2541)
+[299.02s] RESOURCE Mana -103 => 2438
+[299.02s] BUFF_GAIN Gul'dan's Chosen (4.0s window)
+[300.32s] CAST_RESULT Chaos Bolt HIT damage=4154
 ========================================
 Simulation Results
 ========================================
 Duration: 300s
-Iterations: 1000
+Iterations: 1
 
-Total DPS: 1011.32
-Total Damage: 303396
+Total DPS: 2868.76
+Total Damage: 860629
 
-Spell Breakdown:
+Spell Breakdown (average per iteration):
+--------------------------------------------------------------------------------
+Spell         |   Casts |       Damage |  Share |     Avg |     Min |     Max |   Crit% |   Miss%
+--------------------------------------------------------------------------------
+Incinerate    |   124.0 |       352882 |  41.0% |    2846 |    2061 |    5044 |   20.2% |    0.0%
+Conflagrate   |    26.0 |       246815 |  28.7% |    9493 |    4204 |   12942 |   53.8% |    0.0%
+Chaos Bolt    |    27.0 |       129800 |  15.1% |    4807 |    3484 |    8559 |   22.2% |    0.0%
+Immolate      |     3.0 |       122811 |  14.3% |    1127 |     599 |    2233 |   17.4% |    0.0%
+Firebolt (Imp) |    41.0 |         8321 |   1.0% |     203 |     196 |     209 |    0.0% |    0.0%
+--------------------------------------------------------------------------------
+Life Tap casts (avg): 28.0
+
+Buff Uptimes:
 ----------------------------------------
-Immolate:     21 casts  |  91300 damage (30.1%)  |  4 avg
-Incinerate:   32 casts  |  63593 damage (21.0%)  |  2 avg
-Chaos Bolt:   20 casts  |  69897 damage (23.0%)  |  3 avg
-Conflagrate:  21 casts  |  78605 damage (25.9%)  |  4 avg
-Life Tap:      7 casts
+Pyroclasm:           132.7s (44.2%)
+Improved Soul Leech: 0.0s (0.0%)
+Backdraft:           211.1s (70.4%) | avg charges 2.46
 
 Statistics:
 ----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       34 (33.7%)
-========================================
-WotLK Destruction Warlock Simulator - Phase 1 MVP
-==================================================
-
-Character: Destruction Warlock (Level 60)
-Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
-
-Simulation Config:
-  Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
-
-Running simulation...
-
-========================================
-Simulation Results
-========================================
-Duration: 300s
-Iterations: 1000
-
-Total DPS: 1014.92
-Total Damage: 304477
-
-Spell Breakdown:
-----------------------------------------
-Immolate:     21 casts  |  91624 damage (30.1%)  |  4 avg
-Incinerate:   32 casts  |  63655 damage (20.9%)  |  2 avg
-Chaos Bolt:   20 casts  |  70368 damage (23.1%)  |  3 avg
-Conflagrate:  21 casts  |  78831 damage (25.9%)  |  4 avg
-Life Tap:      7 casts
-
-Statistics:
-----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       35 (34.1%)
-========================================
-WotLK Destruction Warlock Simulator - Phase 1 MVP
-==================================================
-
-Character: Destruction Warlock (Level 60)
-Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
-
-Simulation Config:
-  Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
-
-Running simulation...
-
-========================================
-Simulation Results
-========================================
-Duration: 300s
-Iterations: 1000
-
-Total DPS: 1014.34
-Total Damage: 304301
-
-Spell Breakdown:
-----------------------------------------
-Immolate:     21 casts  |  91927 damage (30.2%)  |  4 avg
-Incinerate:   32 casts  |  63553 damage (20.9%)  |  2 avg
-Chaos Bolt:   20 casts  |  70043 damage (23.0%)  |  3 avg
-Conflagrate:  21 casts  |  78778 damage (25.9%)  |  4 avg
-Life Tap:      7 casts
-
-Statistics:
-----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       34 (34.0%)
-========================================
-WotLK Destruction Warlock Simulator - Phase 1 MVP
-==================================================
-
-Character: Destruction Warlock (Level 60)
-Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
-
-Simulation Config:
-  Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
-
-Running simulation...
-
-========================================
-Simulation Results
-========================================
-Duration: 300s
-Iterations: 1000
-
-Total DPS: 1013.32
-Total Damage: 303995
-
-Spell Breakdown:
-----------------------------------------
-Immolate:     21 casts  |  91817 damage (30.2%)  |  4 avg
-Incinerate:   32 casts  |  63539 damage (20.9%)  |  2 avg
-Chaos Bolt:   20 casts  |  70102 damage (23.1%)  |  3 avg
-Conflagrate:  21 casts  |  78538 damage (25.8%)  |  4 avg
-Life Tap:      7 casts
-
-Statistics:
-----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       34 (33.9%)
-========================================
-WotLK Destruction Warlock Simulator - Phase 1 MVP
-==================================================
-
-Character: Destruction Warlock (Level 60)
-Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
-
-Simulation Config:
-  Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
-
-Running simulation...
-
-========================================
-Simulation Results
-========================================
-Duration: 300s
-Iterations: 1000
-
-Total DPS: 1012.10
-Total Damage: 303629
-
-Spell Breakdown:
-----------------------------------------
-Immolate:     21 casts  |  91654 damage (30.2%)  |  4 avg
-Incinerate:   32 casts  |  63599 damage (20.9%)  |  2 avg
-Chaos Bolt:   20 casts  |  69826 damage (23.0%)  |  3 avg
-Conflagrate:  21 casts  |  78550 damage (25.9%)  |  4 avg
-Life Tap:      7 casts
-
-Statistics:
-----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       34 (33.8%)
-========================================
-WotLK Destruction Warlock Simulator - Phase 1 MVP
-==================================================
-
-Character: Destruction Warlock (Level 60)
-Character Stats:
-  Spell Power: 800
-  Crit: 25.0%
-  Haste: 0.0%
-  Spirit: 200
-  Hit: 17.0%
-  Max Mana: 8000
-
-Simulation Config:
-  Fight Duration: 300 seconds
-  Iterations: 1000
-  Target: Boss (Level 63)
-
-Running simulation...
-
-========================================
-Simulation Results
-========================================
-Duration: 300s
-Iterations: 1000
-
-Total DPS: 1014.45
-Total Damage: 304334
-
-Spell Breakdown:
-----------------------------------------
-Immolate:     21 casts  |  92027 damage (30.2%)  |  4 avg
-Incinerate:   32 casts  |  63434 damage (20.8%)  |  2 avg
-Chaos Bolt:   20 casts  |  70173 damage (23.1%)  |  3 avg
-Conflagrate:  21 casts  |  78701 damage (25.9%)  |  4 avg
-Life Tap:      7 casts
-
-Statistics:
-----------------------------------------
-Total Casts: 102
-Misses:      0 (0.0%)
-Crits:       34 (33.9%)
+Total Casts: 210.0
+Misses:      0.0 (0.0%)
+Crits:       45.0 (21.4%)
 ========================================

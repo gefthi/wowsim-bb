@@ -45,7 +45,7 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	}
 	result.DidHit = true
 
-	forceCrit := e.consumeEmpoweredImp(char)
+	forceCrit := e.consumeEmpoweredImp(char) || e.consumeInnerFlame(char)
 	directDamage := e.CalculateSpellDamage(spellData.DirectDamage, spellData.SPCoefficientDirect, char)
 	directDamage *= e.Config.Talents.ImprovedImmolate.DamageMultiplier
 	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
@@ -67,6 +67,9 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	if e.Config.Player.HasRune(runes.RuneDestructionMastery) {
 		dotSnapshot *= runes.DestructionMasteryImmolateBonus
 	}
+	if e.Config.Player.HasRune(runes.RuneGlyphOfImmolate) {
+		dotSnapshot *= runes.GlyphOfImmolateDotMultiplier
+	}
 	if e.Config.Player.HasRune(runes.RuneAgentOfChaos) && baseTickCount > 0 {
 		dotSnapshot *= float64(tickCount) / float64(baseTickCount)
 	}
@@ -83,6 +86,7 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	result.Damage = directDamage
 
 	e.CheckSoulLeechProc(char)
+	e.tryProcInnerFlame(char)
 
 	char.Immolate.Active = true
 	char.Immolate.ExpiresAt = char.CurrentTime + time.Duration(effectiveDuration*float64(time.Second))
@@ -97,8 +101,11 @@ func (e *Engine) CastImmolate(char *character.Character) CastResult {
 	}
 	char.Immolate.LastTick = char.CurrentTime
 	char.Immolate.TickDamage = baseTickDamage
+	char.Immolate.BaseTickDamage = baseTickDamage
+	char.Immolate.SPTickDamage = 0
 	char.Immolate.TickCritChance = tickCritChance
 	char.Immolate.TicksRemaining = tickCount
+	char.Immolate.TotalTicks = tickCount
 	char.Immolate.SnapshotDotDamage = dotSnapshot
 
 	return result

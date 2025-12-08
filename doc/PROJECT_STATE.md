@@ -5,7 +5,7 @@ Last Updated: 2025-11-28
 - Core sim engine with event queue (cast timeline, GCD, cooldowns, logging hooks)
 - Spells: Immolate (direct+DoT), Incinerate, Chaos Bolt, Conflagrate, Life Tap, Soul Fire (Decisive buff aware)
 - Talents/runes: Emberstorm, Improved Immolate, Aftermath, Fire and Brimstone, Ruin, Devastation, Backlash, Pyroclasm, Improved Soul Leech (instant + HoT buff), Backdraft (-30% cast/GCD, tracked uptime/avg charges), Demonic Power, Empowered Imp, Decisive Decimation (buff applied by Conflagrate)
-- Mystic Enchants support: selection in `configs/player.yaml`; implemented effects include Glyph of Life Tap (buff), Glyph of Conflagrate (no consume), Destruction Mastery, Heating Up, Cataclysmic Burst, Gul'dan's Chosen, Agent of Chaos hook, Suppression, Curse of the Elements debuff (10% damage multiplier)
+ - Mystic Enchants support: selection in `configs/player.yaml`; implemented effects include Destruction Mastery, Cataclysmic Burst, Heating Up, Gul'dan's Chosen, Agent of Chaos (hasteable Immolate ticks + CB CDR, direct penalty), Chaos Manifesting, Decisive Decimation, Inner Flame, Endless Flames (Pyroclasm duration), Glyphs of Life Tap / Conflagrate / Chaos Bolt / Incinerate / Immolate, Demonic Aegis, Suppression, Improved Imp, Curse of the Elements debuff (10% damage multiplier)
 - Haste now applied to casts/GCD (respecting min GCD); DoT haste gated behind Agent of Chaos; Immolate tick scheduling fixed to honor Cataclysmic extensions without gaps
 - Data-driven config: YAML for constants, player stats, spells, talents, runes; rotation via YAML APL with loader/compiler/validator
 - Modular spells, shared aura/timer helpers in `internal/effects`, per-spell files under `internal/spells/`

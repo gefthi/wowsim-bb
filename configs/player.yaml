@@ -5,15 +5,17 @@ pet:
     summon: imp
 stats:
     intellect: 0
-    spell_power: 700
-    crit_percent: 11.2
-    haste_percent: 8
+    spell_power: 900
+    crit_percent: 19.2
+    haste_percent: 11.7
     spirit: 177
     hit_percent: 14
     max_mana: 6000
 target:
     type: equal_level
     level: 60
+    debuffs:
+        curse_of_elements: true
 rotation: destruction-cataclysmic.yaml
 simulation:
     duration_seconds: 300
@@ -27,12 +29,13 @@ mystic_enchants:
         legendary:
             - cataclysmic_burst
         epic:
-            - agent_of_chaos
             - guldans_chosen
             - heating_up
+            - inner_flame
         rare:
             - demonic_aegis
             - glyph_of_chaos_bolt
             - glyph_of_conflagrate
+            - glyph_of_immolate
             - glyph_of_life_tap
             - suppression

@@ -7,6 +7,7 @@ import (
 
 	"wotlk-destro-sim/internal/character"
 	"wotlk-destro-sim/internal/config"
+	"wotlk-destro-sim/internal/runes"
 	"wotlk-destro-sim/internal/spells"
 )
 
@@ -189,6 +190,9 @@ func (imp *impController) castFirebolt(sim *Simulator, owner *character.Characte
 		if points > 0 {
 			damage *= 1 + float64(points)*imp.cfg.Talents.EmpoweredImp.DamagePerPoint
 		}
+	}
+	if imp.cfg != nil && imp.cfg.Player.HasRune(runes.RuneImprovedImp) {
+		damage *= runes.ImprovedImpDamageMultiplier
 	}
 
 	didCrit := false

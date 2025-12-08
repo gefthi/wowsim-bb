@@ -5,6 +5,7 @@ import (
 	"io"
 	"math"
 	"sort"
+	"strings"
 	"time"
 	"wotlk-destro-sim/internal/apl"
 	"wotlk-destro-sim/internal/character"
@@ -24,6 +25,12 @@ var spellPrintOrder = []struct {
 	Type  spells.SpellType
 	Label string
 }{
+	{spells.SpellShadowBolt, "Shadow Bolt"},
+	{spells.SpellShadowburn, "Shadowburn"},
+	{spells.SpellShadowfury, "Shadowfury"},
+	{spells.SpellShadowCrash, "Shadow Crash"},
+	{spells.SpellCurseOfAgony, "Curse of Agony"},
+	{spells.SpellCorruption, "Corruption"},
 	{spells.SpellSoulFire, "Soul Fire"},
 	{spells.SpellImmolate, "Immolate"},
 	{spells.SpellIncinerate, "Incinerate"},
@@ -115,6 +122,20 @@ func (s *Simulator) cancelImmolateTicks(char *character.Character) {
 	}
 }
 
+func (s *Simulator) cancelCorruptionTicks(char *character.Character) {
+	if char.Corruption.TickHandle != nil {
+		char.Corruption.TickHandle.Cancel()
+		char.Corruption.TickHandle = nil
+	}
+}
+
+func (s *Simulator) cancelCurseOfAgonyTicks(char *character.Character) {
+	if char.CurseOfAgony.TickHandle != nil {
+		char.CurseOfAgony.TickHandle.Cancel()
+		char.CurseOfAgony.TickHandle = nil
+	}
+}
+
 func (s *Simulator) scheduleNextImmolateTick(char *character.Character, result *SimulationResult, spellEngine *spells.Engine) {
 	if char.Immolate.TickInterval <= 0 {
 		return
@@ -124,6 +145,28 @@ func (s *Simulator) scheduleNextImmolateTick(char *character.Character, result *
 		s.executeImmolateTick(char, nextTick, result, spellEngine)
 	})
 	char.Immolate.TickHandle = handle
+}
+
+func (s *Simulator) scheduleNextCorruptionTick(char *character.Character, result *SimulationResult, spellEngine *spells.Engine) {
+	if char.Corruption.TickInterval <= 0 {
+		return
+	}
+	nextTick := char.Corruption.LastTick + char.Corruption.TickInterval
+	handle := s.scheduleEvent(nextTick, func() {
+		s.executeCorruptionTick(char, nextTick, result, spellEngine)
+	})
+	char.Corruption.TickHandle = handle
+}
+
+func (s *Simulator) scheduleNextCurseOfAgonyTick(char *character.Character, result *SimulationResult, spellEngine *spells.Engine) {
+	if char.CurseOfAgony.TickInterval <= 0 {
+		return
+	}
+	nextTick := char.CurseOfAgony.LastTick + char.CurseOfAgony.TickInterval
+	handle := s.scheduleEvent(nextTick, func() {
+		s.executeCurseOfAgonyTick(char, nextTick, result, spellEngine)
+	})
+	char.CurseOfAgony.TickHandle = handle
 }
 
 func (s *Simulator) executeImmolateTick(char *character.Character, tickTime time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
@@ -174,6 +217,97 @@ func (s *Simulator) executeImmolateTick(char *character.Character, tickTime time
 	s.scheduleNextImmolateTick(char, result, spellEngine)
 }
 
+func (s *Simulator) executeCorruptionTick(char *character.Character, tickTime time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
+	char.Corruption.TickHandle = nil
+	if !char.Corruption.Active {
+		return
+	}
+
+	damage := char.Corruption.TickDamage
+	if char.CurseOfElements.Active && char.CurseOfElements.ExpiresAt > tickTime {
+		damage *= spells.CurseOfElementsMultiplier
+	}
+
+	didCrit := false
+	chance := char.Corruption.TickCritChance
+	if chance >= 1 {
+		didCrit = true
+	} else if chance > 0 && spellEngine.Rng.Float64() < chance {
+		didCrit = true
+	}
+	if didCrit {
+		damage *= s.Config.Talents.Ruin.CritMultiplier
+	}
+
+	result.recordDotTick(spells.SpellCorruption, damage, didCrit)
+	if s.LogEnabled {
+		critTag := ""
+		if didCrit {
+			critTag = " (CRIT)"
+		}
+		s.logAt(tickTime, "DOT_TICK Corruption damage=%.0f%s", damage, critTag)
+	}
+
+	char.Corruption.LastTick = tickTime
+	char.Corruption.TicksRemaining--
+
+	s.tryNightfallProc(char, result, spellEngine)
+	s.scheduleNextCorruptionTick(char, result, spellEngine)
+}
+
+func curseOfAgonyStageMultiplier(tickNumber int) float64 {
+	switch {
+	case tickNumber <= 0:
+		return 1
+	case tickNumber <= 4:
+		return 0.5
+	case tickNumber <= 8:
+		return 1
+	default:
+		return 1.5
+	}
+}
+
+func (s *Simulator) executeCurseOfAgonyTick(char *character.Character, tickTime time.Duration, result *SimulationResult, spellEngine *spells.Engine) {
+	char.CurseOfAgony.TickHandle = nil
+	if !char.CurseOfAgony.Active {
+		return
+	}
+
+	tickNumber := 1
+	if char.CurseOfAgony.TotalTicks > 0 {
+		tickNumber = char.CurseOfAgony.TotalTicks - char.CurseOfAgony.TicksRemaining + 1
+	}
+	damage := char.CurseOfAgony.TickDamage
+	if char.CurseOfAgony.BaseTickDamage > 0 || char.CurseOfAgony.SPTickDamage > 0 {
+		stage := curseOfAgonyStageMultiplier(tickNumber)
+		damage = char.CurseOfAgony.BaseTickDamage*stage + char.CurseOfAgony.SPTickDamage
+		char.CurseOfAgony.TickDamage = damage
+	}
+	if char.CurseOfElements.Active && char.CurseOfElements.ExpiresAt > tickTime {
+		damage *= spells.CurseOfElementsMultiplier
+	}
+
+	result.recordDotTick(spells.SpellCurseOfAgony, damage, false)
+	if s.LogEnabled {
+		s.logAt(tickTime, "DOT_TICK Curse of Agony damage=%.0f", damage)
+	}
+
+	char.CurseOfAgony.LastTick = tickTime
+	char.CurseOfAgony.TicksRemaining--
+
+	if s.Config.Player.HasRune(runes.RuneCursedShadows) && spellEngine.Rng.Float64() < runes.CursedShadowsProcChance {
+		char.CursedShadows.Active = true
+		char.CursedShadows.ExpiresAt = tickTime + time.Duration(runes.CursedShadowsDurationSec*float64(time.Second))
+		if s.LogEnabled {
+			remain := char.CursedShadows.ExpiresAt - tickTime
+			s.logAt(tickTime, "BUFF_GAIN Cursed Shadows (%.1fs window)", remain.Seconds())
+		}
+	}
+
+	s.scheduleNextCurseOfAgonyTick(char, result, spellEngine)
+}
+
 func (s *SpellStats) add(other *SpellStats) {
 	s.Casts += other.Casts
 	s.Hits += other.Hits
@@ -192,11 +326,16 @@ func (s *SpellStats) add(other *SpellStats) {
 
 // SimulationResult holds results from simulation
 type SimulationResult struct {
-	TotalDPS     float64
-	TotalDamage  float64
-	Duration     time.Duration
-	Iterations   int
-	LifeTapCount int
+	TotalDPS      float64
+	TotalDamage   float64
+	TotalHealing  float64
+	Duration      time.Duration
+	Iterations    int
+	TargetDebuffs struct {
+		CurseOfElements bool
+	}
+	LifeTapCount      int
+	ShadowTranceProcs int
 
 	// Spell breakdown
 	SpellBreakdown map[spells.SpellType]*SpellStats
@@ -292,6 +431,7 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 		Iterations:     s.SimConfig.Iterations,
 		SpellBreakdown: newSpellStatsMap(),
 	}
+	result.TargetDebuffs.CurseOfElements = s.Config.Player.Target.Debuffs.CurseOfElements
 	if s.LogEnabled {
 		s.logStaticf("=== Combat Log Start (duration %.0fs, iterations %d) ===", s.SimConfig.Duration.Seconds(), s.SimConfig.Iterations)
 	}
@@ -304,6 +444,7 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 
 	// Calculate averages
 	result.TotalDamage /= float64(s.SimConfig.Iterations)
+	result.TotalHealing /= float64(s.SimConfig.Iterations)
 	result.TotalDPS = result.TotalDamage / s.SimConfig.Duration.Seconds()
 
 	return result
@@ -313,6 +454,10 @@ func (s *Simulator) Run(char *character.Character) *SimulationResult {
 func (s *Simulator) runSingleIteration(originalChar *character.Character, iteration int) *SimulationResult {
 	// Create a fresh copy of character for this iteration
 	char := character.NewCharacter(originalChar.Stats)
+	if s.Config.Player.Target.Debuffs.CurseOfElements {
+		char.CurseOfElements.Active = true
+		char.CurseOfElements.ExpiresAt = s.SimConfig.Duration
+	}
 	s.resetPets(char)
 	s.events = s.events[:0]
 	if s.LogEnabled {
@@ -426,6 +571,19 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		manaCost = 0
 	case spells.SpellSoulFire:
 		manaCost = s.Config.Spells.SoulFire.ManaCost
+	case spells.SpellShadowBolt:
+		manaCost = s.Config.Spells.ShadowBolt.ManaCost
+		if char.ShadowTrance.Active && char.ShadowTranceFreeCast && char.ShadowTrance.ExpiresAt > char.CurrentTime {
+			manaCost = 0
+		}
+	case spells.SpellShadowburn:
+		manaCost = s.Config.Spells.Shadowburn.ManaCost
+	case spells.SpellCorruption:
+		manaCost = s.Config.Spells.Corruption.ManaCost
+	case spells.SpellCurseOfAgony:
+		manaCost = s.Config.Spells.CurseOfAgony.ManaCost
+	case spells.SpellShadowfury:
+		manaCost = s.Config.Spells.ShadowFury.ManaCost
 	}
 
 	if manaCost > 0 && !char.HasMana(manaCost) {
@@ -462,6 +620,45 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		castResult = spellEngine.CastCurseOfElements(char)
 	case spells.SpellSoulFire:
 		castResult = spellEngine.CastSoulFire(char)
+	case spells.SpellShadowBolt:
+		castResult = spellEngine.CastShadowBolt(char)
+	case spells.SpellShadowburn:
+		if !char.IsCooldownReady(&char.Shadowburn) {
+			return false
+		}
+		castResult = spellEngine.CastShadowburn(char)
+	case spells.SpellCorruption:
+		castResult = spellEngine.CastCorruption(char)
+		if castResult.DidHit {
+			s.cancelCorruptionTicks(char)
+			s.scheduleNextCorruptionTick(char, result, spellEngine)
+		} else {
+			s.cancelCorruptionTicks(char)
+		}
+	case spells.SpellCurseOfAgony:
+		castResult = spellEngine.CastCurseOfAgony(char)
+		if castResult.DidHit {
+			s.cancelCurseOfAgonyTicks(char)
+			s.scheduleNextCurseOfAgonyTick(char, result, spellEngine)
+		} else {
+			s.cancelCurseOfAgonyTicks(char)
+		}
+	case spells.SpellShadowfury:
+		if !char.IsCooldownReady(&char.Shadowfury) {
+			return false
+		}
+		castResult = spellEngine.CastShadowfury(char)
+	}
+
+	// If Corruption was (re)applied by effects (e.g., Dusk till Dawn), ensure ticks are scheduled.
+	if char.Corruption.Active && char.Corruption.TickHandle == nil && char.Corruption.TicksRemaining > 0 {
+		s.cancelCorruptionTicks(char)
+		s.scheduleNextCorruptionTick(char, result, spellEngine)
+	}
+	// If Curse of Agony was applied, ensure ticks are scheduled.
+	if char.CurseOfAgony.Active && char.CurseOfAgony.TickHandle == nil && char.CurseOfAgony.TicksRemaining > 0 {
+		s.cancelCurseOfAgonyTicks(char)
+		s.scheduleNextCurseOfAgonyTick(char, result, spellEngine)
 	}
 
 	if s.LogEnabled && castResult.CastTime > 0 {
@@ -488,10 +685,16 @@ func (s *Simulator) tryCast(char *character.Character, spell spells.SpellType, r
 		if castResult.ManaGained > 0 {
 			s.logf(char, "RESOURCE Mana +%.0f => %.0f", castResult.ManaGained, char.Resources.CurrentMana)
 		}
+		if castResult.Healing > 0 {
+			s.logf(char, "HEAL +%.0f", castResult.Healing)
+		}
 		s.logBuffChanges(prevBuffs, char)
 	}
 
 	result.recordSpellCast(spell, castResult)
+	if castResult.Healing > 0 {
+		result.TotalHealing += castResult.Healing
+	}
 
 	// Track statistics
 	result.TotalCasts++
@@ -598,8 +801,11 @@ func (s *Simulator) clearImmolateDebuff(char *character.Character) {
 	s.cancelImmolateTicks(char)
 	char.Immolate.Active = false
 	char.Immolate.TickDamage = 0
+	char.Immolate.BaseTickDamage = 0
+	char.Immolate.SPTickDamage = 0
 	char.Immolate.TickCritChance = 0
 	char.Immolate.TicksRemaining = 0
+	char.Immolate.TotalTicks = 0
 	char.Immolate.SnapshotDotDamage = 0
 	if char.CataclysmicBurst != nil {
 		char.CataclysmicBurst.Clear(char.CurrentTime)
@@ -624,6 +830,61 @@ func (s *Simulator) reduceChaosBoltCooldown(char *character.Character, amount ti
 	char.ChaosBolt.ReadyAt -= amount
 	if char.ChaosBolt.ReadyAt < 0 {
 		char.ChaosBolt.ReadyAt = 0
+	}
+}
+
+func (s *Simulator) nightfallEnabled() bool {
+	return s.Config.Player.HasRune(runes.RuneNightfall) || s.Config.Talents.Nightfall.Points > 0
+}
+
+func (s *Simulator) activateShadowTrance(char *character.Character) {
+	char.ShadowTrance.Active = true
+	char.ShadowTrance.Charges = 1
+	char.ShadowTrance.ExpiresAt = char.CurrentTime + time.Duration(runes.NightfallBuffDurationSec*float64(time.Second))
+	char.ShadowTranceFreeCast = s.Config.Player.HasRune(runes.RuneTwilightReaper)
+	if char.ShadowTranceFreeCast {
+		char.ShadowTranceLeechFraction = runes.TwilightReaperLeechFraction
+	} else {
+		char.ShadowTranceLeechFraction = 0
+	}
+	if s.LogEnabled {
+		tag := ""
+		if char.ShadowTranceFreeCast {
+			tag = " (Twilight Reaper)"
+		}
+		remain := char.ShadowTrance.ExpiresAt - char.CurrentTime
+		s.logf(char, "BUFF_GAIN Shadow Trance%s (%.1fs window)", tag, remain.Seconds())
+	}
+}
+
+func (s *Simulator) clearShadowTrance(char *character.Character) {
+	char.ShadowTrance.Active = false
+	char.ShadowTrance.Charges = 0
+	char.ShadowTrance.ExpiresAt = 0
+	char.ShadowTranceFreeCast = false
+	char.ShadowTranceLeechFraction = 0
+}
+
+func (s *Simulator) tryNightfallProc(char *character.Character, result *SimulationResult, spellEngine *spells.Engine) {
+	if !s.nightfallEnabled() {
+		char.NightfallStacks = 0
+		return
+	}
+	if char.ShadowTrance.Active && char.ShadowTrance.ExpiresAt > char.CurrentTime {
+		return
+	}
+	chance := runes.NightfallBaseProcChance + runes.NightfallRampBonus*float64(char.NightfallStacks)
+	if chance > 1 {
+		chance = 1
+	}
+	if spellEngine.Rng.Float64() < chance {
+		s.activateShadowTrance(char)
+		if s.Config.Player.HasRune(runes.RuneNightfall) {
+			result.ShadowTranceProcs++
+		}
+		char.NightfallStacks = 0
+	} else {
+		char.NightfallStacks++
 	}
 }
 
@@ -654,6 +915,17 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.EmpoweredImp.ExpiresAt, "BUFF_EXPIRE Empowered Imp")
 		}
 	}
+	if char.ShadowTrance.Active && now >= char.ShadowTrance.ExpiresAt {
+		expireAt := char.ShadowTrance.ExpiresAt
+		s.clearShadowTrance(char)
+		if s.LogEnabled {
+			ts := expireAt
+			if ts == 0 {
+				ts = now
+			}
+			s.logAt(ts, "BUFF_EXPIRE Shadow Trance")
+		}
+	}
 	if char.Backdraft.Active && (now >= char.Backdraft.ExpiresAt || char.Backdraft.Charges <= 0) {
 		char.Backdraft.Active = false
 		char.Backdraft.Charges = 0
@@ -671,6 +943,19 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(char.Immolate.ExpiresAt, "DOT_EXPIRE Immolate")
 		}
 	}
+	if char.Corruption.Active && now >= char.Corruption.ExpiresAt {
+		char.Corruption.Active = false
+		char.NightfallStacks = 0
+		if s.LogEnabled {
+			s.logAt(char.Corruption.ExpiresAt, "DOT_EXPIRE Corruption")
+		}
+	}
+	if char.CurseOfAgony.Active && now >= char.CurseOfAgony.ExpiresAt {
+		char.CurseOfAgony.Active = false
+		if s.LogEnabled {
+			s.logAt(char.CurseOfAgony.ExpiresAt, "DOT_EXPIRE Curse of Agony")
+		}
+	}
 	if char.CurseOfElements.Active && now >= char.CurseOfElements.ExpiresAt {
 		char.CurseOfElements.Active = false
 		char.CurseOfElements.ExpiresAt = 0
@@ -686,15 +971,17 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 		}
 	}
 	if char.ChaosManifesting.FireExpiresAt > 0 && now >= char.ChaosManifesting.FireExpiresAt {
+		expireAt := char.ChaosManifesting.FireExpiresAt
 		char.ChaosManifesting.FireExpiresAt = 0
 		if s.LogEnabled {
-			s.logAt(char.ChaosManifesting.FireExpiresAt, "BUFF_EXPIRE Chaos Manifesting (Fire)")
+			s.logAt(expireAt, "BUFF_EXPIRE Chaos Manifesting (Fire)")
 		}
 	}
 	if char.ChaosManifesting.ShadowExpiresAt > 0 && now >= char.ChaosManifesting.ShadowExpiresAt {
+		expireAt := char.ChaosManifesting.ShadowExpiresAt
 		char.ChaosManifesting.ShadowExpiresAt = 0
 		if s.LogEnabled {
-			s.logAt(char.ChaosManifesting.ShadowExpiresAt, "BUFF_EXPIRE Chaos Manifesting (Shadow)")
+			s.logAt(expireAt, "BUFF_EXPIRE Chaos Manifesting (Shadow)")
 		}
 	}
 	if char.GuldansChosen != nil && char.GuldansChosen.Active() {
@@ -707,12 +994,22 @@ func (s *Simulator) expireBuffs(char *character.Character) {
 			s.logAt(ts, "BUFF_EXPIRE Gul'dan's Chosen")
 		}
 	}
+	if char.CursedShadows.Active && now >= char.CursedShadows.ExpiresAt {
+		char.CursedShadows.Active = false
+		char.CursedShadows.ExpiresAt = 0
+		char.CursedShadows.Charges = 0
+		if s.LogEnabled {
+			s.logAt(now, "BUFF_EXPIRE Cursed Shadows")
+		}
+	}
 }
 
 // aggregateResult combines results from multiple iterations
 func (r *SimulationResult) aggregateResult(iter *SimulationResult) {
 	r.TotalDamage += iter.TotalDamage
+	r.TotalHealing += iter.TotalHealing
 	r.LifeTapCount += iter.LifeTapCount
+	r.ShadowTranceProcs += iter.ShadowTranceProcs
 	r.MissCount += iter.MissCount
 	r.CritCount += iter.CritCount
 	r.TotalCasts += iter.TotalCasts
@@ -738,11 +1035,27 @@ func (r *SimulationResult) PrintResults() {
 	fmt.Println("========================================")
 	fmt.Printf("Duration: %.0fs\n", r.Duration.Seconds())
 	fmt.Printf("Iterations: %d\n", r.Iterations)
+	fmt.Print("Target Debuffs: ")
+	{
+		var tags []string
+		if r.TargetDebuffs.CurseOfElements {
+			tags = append(tags, "Curse of the Elements (pre-applied)")
+		}
+		if len(tags) == 0 {
+			fmt.Println("None")
+		} else {
+			fmt.Println(strings.Join(tags, ", "))
+		}
+	}
 	fmt.Println()
 
 	fmt.Printf("Total DPS: %.2f\n", r.TotalDPS)
 	fmt.Printf("Total Damage: %.0f\n", r.TotalDamage)
 	fmt.Println()
+	if r.TotalHealing > 0 {
+		fmt.Printf("Total Healing: %.0f\n", r.TotalHealing)
+		fmt.Println()
+	}
 
 	fmt.Println("Spell Breakdown (average per iteration):")
 	fmt.Println("--------------------------------------------------------------------------------")
@@ -850,6 +1163,9 @@ func (r *SimulationResult) PrintResults() {
 	if r.OOMEvents > 0 {
 		fmt.Printf("OOM Events:  %.1f\n", float64(r.OOMEvents)/float64(r.Iterations))
 	}
+	if r.ShadowTranceProcs > 0 {
+		fmt.Printf("Shadow Trance Procs: %.1f\n", float64(r.ShadowTranceProcs)/float64(r.Iterations))
+	}
 	fmt.Println("========================================")
 }
 
@@ -943,6 +1259,19 @@ func (s *Simulator) logBuffChanges(prev buffState, char *character.Character) {
 		s.logf(char, "BUFF_GAIN Empowered Imp (%.1fs window)", remain.Seconds())
 	} else if prev.empImpActive && !char.EmpoweredImp.Active {
 		s.logf(char, "BUFF_EXPIRE Empowered Imp")
+	}
+	if !prev.shadowTranceActive && char.ShadowTrance.Active {
+		remain := char.ShadowTrance.ExpiresAt - char.CurrentTime
+		tag := ""
+		if char.ShadowTranceFreeCast {
+			tag = " (free/leech)"
+		}
+		s.logf(char, "BUFF_GAIN Shadow Trance%s (%.1fs window)", tag, remain.Seconds())
+	} else if prev.shadowTranceActive && !char.ShadowTrance.Active {
+		s.logf(char, "BUFF_EXPIRE Shadow Trance")
+	} else if char.ShadowTrance.Active && prev.shadowTranceExpires != char.ShadowTrance.ExpiresAt {
+		remain := char.ShadowTrance.ExpiresAt - char.CurrentTime
+		s.logf(char, "BUFF_REFRESH Shadow Trance (%.1fs window)", remain.Seconds())
 	}
 }
 

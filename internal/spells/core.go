@@ -13,7 +13,7 @@ import (
 type SpellType int
 
 const (
-	pvePowerMultiplier        = 1.25
+	pvePowerMultiplier        = 1.24
 	CurseOfElementsMultiplier = 1.10
 )
 
@@ -25,6 +25,12 @@ const (
 	SpellConflagrate
 	SpellLifeTap
 	SpellSoulFire
+	SpellShadowBolt
+	SpellShadowburn
+	SpellCorruption
+	SpellShadowfury
+	SpellCurseOfAgony
+	SpellShadowCrash
 	SpellImpFirebolt
 )
 
@@ -32,6 +38,7 @@ const (
 type CastResult struct {
 	Spell      SpellType
 	Damage     float64
+	Healing    float64
 	DidHit     bool
 	DidCrit    bool
 	ManaSpent  float64
@@ -146,6 +153,12 @@ func (e *Engine) ApplyFireAndBrimstone(damage float64, char *character.Character
 
 func (e *Engine) fireTargetMultiplier(char *character.Character) float64 {
 	mult := 1.0
+	if e.Config.Talents.Pyroclasm.Points > 0 && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
+		mult *= e.Config.Talents.Pyroclasm.DamageMultiplier
+	}
+	if e.Config.Player.HasRune(runes.RuneChaosManifesting) && char.ChaosManifesting.FireExpiresAt > char.CurrentTime {
+		mult *= runes.ChaosManifestingEmpowerment
+	}
 	if e.Config.Player.HasRune(runes.RuneHeatingUp) && char.HeatingUp != nil {
 		active := char.HeatingUp.ActiveAt(char.CurrentTime)
 		mult *= runes.HeatingUpMultiplier(active, char.HeatingUp.Stacks(), char.HeatingUp.ExpiresAt(), char.CurrentTime)
@@ -161,6 +174,27 @@ func (e *Engine) applyFireTargetModifiers(damage float64, char *character.Charac
 		return damage
 	}
 	return damage * e.fireTargetMultiplier(char)
+}
+
+func (e *Engine) shadowTargetMultiplier(char *character.Character) float64 {
+	mult := 1.0
+	if e.Config.Talents.Pyroclasm.Points > 0 && char.Pyroclasm.Active && char.CurrentTime < char.Pyroclasm.ExpiresAt {
+		mult *= e.Config.Talents.Pyroclasm.DamageMultiplier
+	}
+	if e.Config.Player.HasRune(runes.RuneChaosManifesting) && char.ChaosManifesting.ShadowExpiresAt > char.CurrentTime {
+		mult *= runes.ChaosManifestingEmpowerment
+	}
+	if char.CurseOfElements.Active && char.CurseOfElements.ExpiresAt > char.CurrentTime {
+		mult *= CurseOfElementsMultiplier
+	}
+	return mult
+}
+
+func (e *Engine) applyShadowTargetModifiers(damage float64, char *character.Character) float64 {
+	if damage <= 0 {
+		return damage
+	}
+	return damage * e.shadowTargetMultiplier(char)
 }
 
 func (e *Engine) applyHeatingUpStack(char *character.Character) {
@@ -241,4 +275,38 @@ func (e *Engine) consumeEmpoweredImp(char *character.Character) bool {
 	}
 	char.EmpoweredImp.Active = false
 	return true
+}
+
+func (e *Engine) consumeInnerFlame(char *character.Character) bool {
+	if !e.Config.Player.HasRune(runes.RuneInnerFlame) {
+		return false
+	}
+	if !char.InnerFlame.Active {
+		return false
+	}
+	char.InnerFlame.Active = false
+	return true
+}
+
+func (e *Engine) tryProcInnerFlame(char *character.Character) {
+	if !e.Config.Player.HasRune(runes.RuneInnerFlame) {
+		return
+	}
+	if e.Rng.Float64() < runes.InnerFlameProcChance {
+		char.InnerFlame.Active = true
+	}
+}
+
+func (e *Engine) triggerChaosManifesting(char *character.Character) {
+	if !e.Config.Player.HasRune(runes.RuneChaosManifesting) {
+		return
+	}
+	expire := char.CurrentTime + time.Duration(runes.ChaosManifestingDurationSec*float64(time.Second))
+	if e.Rng.Float64() < 0.5 {
+		char.ChaosManifesting.FireExpiresAt = expire
+		char.ChaosManifesting.ShadowExpiresAt = 0
+	} else {
+		char.ChaosManifesting.ShadowExpiresAt = expire
+		char.ChaosManifesting.FireExpiresAt = 0
+	}
 }

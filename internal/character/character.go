@@ -38,8 +38,11 @@ type Debuff struct {
 	TickInterval      time.Duration
 	LastTick          time.Duration
 	TickDamage        float64
+	BaseTickDamage    float64
+	SPTickDamage      float64
 	TickCritChance    float64
 	TicksRemaining    int
+	TotalTicks        int
 	SnapshotDotDamage float64
 	TickHandle        EventHandle
 }
@@ -66,6 +69,8 @@ type Character struct {
 	ImprovedSoulLeech Buff // Phase 2: Mana regen over time
 	EmpoweredImp      Buff
 	LifeTapBuff       Buff // Glyph of Life Tap bonus
+	CursedShadows     Buff
+	ShadowTrance      Buff
 	CataclysmicBurst  *effects.Aura
 	InnerFlame        struct {
 		Active bool
@@ -81,12 +86,16 @@ type Character struct {
 	GuldansChosen *effects.Aura
 
 	// Debuffs on target
-	Immolate Debuff
+	Immolate        Debuff
+	Corruption      Debuff
+	CurseOfAgony    Debuff
 	CurseOfElements Debuff
 
 	// Cooldowns
 	ChaosBolt   Cooldown
 	Conflagrate Cooldown
+	Shadowburn  Cooldown
+	Shadowfury  Cooldown
 
 	// GCD
 	GCD effects.Timer
@@ -98,6 +107,15 @@ type Character struct {
 
 	// Soul Leech tracking (for HoT ticks)
 	SoulLeechLastTick time.Duration
+
+	// Mystic Enchants buffs
+	PureShadow   *effects.Aura
+	DuskTillDawn *effects.Aura
+
+	// Nightfall tracking
+	ShadowTranceFreeCast      bool
+	ShadowTranceLeechFraction float64
+	NightfallStacks           int
 }
 
 // NewCharacter creates a new character with given stats
@@ -113,6 +131,8 @@ func NewCharacter(stats Stats) *Character {
 	gcDuration := time.Duration(runes.GuldansChosenDurationSec * float64(time.Second))
 	char.GuldansChosen = effects.NewAura("Gul'dan's Chosen", gcDuration, 1)
 	char.CataclysmicBurst = effects.NewAura("Cataclysmic Burst", 0, runes.CataclysmicBurstMaxStacks)
+	char.PureShadow = effects.NewAura("Pure Shadow", time.Duration(runes.PureShadowDurationSec*float64(time.Second)), runes.PureShadowMaxStacks)
+	char.DuskTillDawn = effects.NewAura("Dusk till Dawn", time.Duration(runes.DuskTillDawnDurationSec*float64(time.Second)), runes.DuskTillDawnMaxStacks)
 	char.GCD.ForceReady(0)
 	return char
 }

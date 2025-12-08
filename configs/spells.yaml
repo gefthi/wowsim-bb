@@ -49,3 +49,50 @@ life_tap:
   mana_base: 827
   spellpower_coefficient: 0.5
   improved_lifetap_per_rank: 0.10  # 10% per talent rank (we don't have this)
+
+shadow_bolt:
+  base_damage_min: 694
+  base_damage_max: 775
+  cast_time: 3.0
+  mana_cost: 300
+  sp_coefficient: 0.857
+
+shadowburn:
+  base_damage_min: 775
+  base_damage_max: 865
+  cast_time: 0
+  cooldown: 15
+  mana_cost: 350
+  sp_coefficient: 0.429
+
+corruption:
+  dot_damage: 1080
+  dot_duration: 18
+  dot_ticks: 6
+  mana_cost: 250
+  sp_coefficient_dot: 1.0
+
+curse_of_agony:
+  # Ramps 50/100/150% base every 4 ticks; SP evenly splits per tick.
+  dot_damage: 1740
+  dot_duration: 24
+  dot_ticks: 12
+  mana_cost: 300
+  sp_coefficient_dot: 1.2
+
+shadow_fury:
+  base_damage_min: 394
+  base_damage_max: 469
+  cast_time: 0
+  cooldown: 20
+  mana_cost: 399
+  sp_coefficient: 0.19
+
+shadow_crash:
+  # Placeholder: zero damage until numbers are confirmed.
+  base_damage_min: 0
+  base_damage_max: 0
+  cast_time: 0
+  cooldown: 20
+  mana_cost: 0
+  sp_coefficient: 0.0

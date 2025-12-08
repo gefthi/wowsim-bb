@@ -43,6 +43,9 @@ pyroclasm:
     - conflagrate
     - searing_pain  # Not implemented yet
 
+nightfall:
+  points: 0  # Nightfall talent toggles Shadow Trance procs from Corruption
+
 improved_soul_leech:
   points: 0
   instant_mana_return: 0.02  # 2% of max mana instantly

@@ -1,0 +1,95 @@
+name: "Destruction - Cataclysmic Burst"
+description: |
+  Cataclysmic Burst rotation
+imports: []
+variables:
+  life_tap_threshold: 0.30
+  life_tap_buff_refresh: 5.0
+  immolate_refresh_buffer: 0.5
+rotation:
+
+
+  - action: cast_spell
+    spell: life_tap
+    when:
+      any:
+        - not:
+            buff_active:
+              buff: life_tap_buff
+        - buff_active:
+            buff: life_tap_buff
+            max_remaining: ${life_tap_buff_refresh}
+        - all:
+            - buff_active:
+                buff: life_tap_buff
+                max_remaining: ${life_tap_buff_refresh}
+            - not:
+                buff_active:
+                  buff: backdraft
+
+  - action: cast_spell
+    spell: life_tap
+    when:
+      all:
+        - resource_percent:
+            resource: mana
+            lt: ${life_tap_threshold}
+        - not:
+            buff_active:
+              buff: backdraft
+
+  - action: cast_spell
+    spell: immolate
+    when:
+      any:
+        - not:
+            debuff_active:
+              debuff: immolate
+        - debuff_active:
+            debuff: immolate
+            max_remaining: ${immolate_refresh_buffer}
+
+  # Fire Chaos Bolt as soon as it is ready so Agent of Chaos CDR is reflected.
+  - action: cast_spell
+    spell: chaos_bolt
+    when:
+      all:
+        - charges:
+            buff: backdraft
+            gte: 2
+        - cooldown_ready:
+            spell: chaos_bolt
+
+  - action: cast_spell
+    spell: chaos_bolt
+    when:
+      cooldown_ready:
+        spell: chaos_bolt
+
+  # Preferred Conflagrate: only when Cataclysmic Burst is stacked (>=3)
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate
+          
+        - cooldown_ready:
+            spell: conflagrate
+        - charges:
+            buff: cataclysmic_burst
+            gte: 3
+
+  # Fallback Conflagrate: fire immediately when ready (prevents over-delaying at low stacks)
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate          
+        - cooldown_ready:
+            spell: conflagrate
+
+  - action: cast_spell
+    spell: incinerate
+    when: true
