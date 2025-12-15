@@ -1,13 +1,13 @@
-name: "Destruction - Decisive (Soul Fire)"
+name: "Destruction - Cataclysmic Burst"
 description: |
-  Default rotation with Decisive Decimation: maintain CoE/Life Tap/Immolate,
-  Conflagrate/Chaos Bolt on CD, cast Soul Fire whenever Backdraft is active.
+  Cataclysmic Burst rotation
 imports: []
 variables:
   life_tap_threshold: 0.30
   life_tap_buff_refresh: 5.0
+  immolate_refresh_buffer: 0.5
 rotation:
-  
+
 
   - action: cast_spell
     spell: life_tap
@@ -19,13 +19,24 @@ rotation:
         - buff_active:
             buff: life_tap_buff
             max_remaining: ${life_tap_buff_refresh}
+        - all:
+            - buff_active:
+                buff: life_tap_buff
+                max_remaining: ${life_tap_buff_refresh}
+            - not:
+                buff_active:
+                  buff: backdraft
 
   - action: cast_spell
     spell: life_tap
     when:
-      resource_percent:
-        resource: mana
-        lt: ${life_tap_threshold}
+      all:
+        - resource_percent:
+            resource: mana
+            lt: ${life_tap_threshold}
+        - not:
+            buff_active:
+              buff: backdraft
 
   - action: cast_spell
     spell: immolate
@@ -34,26 +45,35 @@ rotation:
         - not:
             debuff_active:
               debuff: immolate
+        - debuff_active:
+            debuff: immolate
+            max_remaining: ${immolate_refresh_buffer}
 
+  # Preferred Conflagrate: only when Cataclysmic Burst is stacked (>=3)
   - action: cast_spell
     spell: conflagrate
     when:
       all:
         - debuff_active:
             debuff: immolate
+          
+        - cooldown_ready:
+            spell: conflagrate
+        - charges:
+            buff: cataclysmic_burst
+            gte: 3
+            
+  # Fallback Conflagrate: fire immediately when ready (prevents over-delaying at low stacks)
+  - action: cast_spell
+    spell: conflagrate
+    when:
+      all:
+        - debuff_active:
+            debuff: immolate          
         - cooldown_ready:
             spell: conflagrate
 
-  # After Conflagrate, if Decisive + Backdraft are up, fire Soul Fire immediately.
-  - action: cast_spell
-    spell: soul_fire
-    when:
-      all:
-        - buff_active:
-            buff: decisive_decimation
-        - buff_active:
-            buff: backdraft
-
+  # If Backdraft has 2+ charges and CB is ready, fire CB now (aim for 3–2 stack usage).
   - action: cast_spell
     spell: chaos_bolt
     when:
@@ -63,13 +83,14 @@ rotation:
             gte: 2
         - cooldown_ready:
             spell: chaos_bolt
-
   - action: cast_spell
-    spell: chaos_bolt
+    spell: soul_fire
     when:
-      cooldown_ready:
-        spell: chaos_bolt
-
+      all:
+        - buff_active:
+            buff: decisive_decimation
+        - buff_active:
+            buff: backdraft
   # Buffer with Life Tap (does not consume Backdraft) only if CB is very close (<0.6s) and Life Tap buff is actually expiring soon (<5s).
   - action: cast_spell
     spell: life_tap
@@ -96,16 +117,12 @@ rotation:
         - cooldown_remaining:
             spell: chaos_bolt
             lt_seconds: 0.5
-            
-  # Decisive Decimation window: cast Soul Fire when Backdraft is active (any charge count).
+
   - action: cast_spell
-    spell: soul_fire
+    spell: chaos_bolt
     when:
-      all:
-        - buff_active:
-            buff: decisive_decimation
-        - buff_active:
-            buff: backdraft
+      cooldown_ready:
+        spell: chaos_bolt
 
   - action: cast_spell
     spell: incinerate

@@ -6,8 +6,8 @@ pet:
 stats:
     intellect: 0
     spell_power: 900
-    crit_percent: 19.2
-    haste_percent: 11.7
+    crit_percent: 16.2
+    haste_percent: 11.2
     spirit: 177
     hit_percent: 14
     max_mana: 6000
@@ -29,9 +29,9 @@ mystic_enchants:
         legendary:
             - cataclysmic_burst
         epic:
+            - agent_of_chaos
             - guldans_chosen
             - heating_up
-            - inner_flame
         rare:
             - demonic_aegis
             - glyph_of_chaos_bolt

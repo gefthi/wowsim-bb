@@ -167,6 +167,75 @@ func main() {
 		}
 	}
 	w.Flush()
+
+	var (
+		spWeight   float64
+		critWeight float64
+		hasteWeight float64
+		hitWeight  float64
+		spDelta    float64
+		critDelta  float64
+		hasteDelta float64
+		hitDelta   float64
+	)
+	for _, res := range results {
+		if res.delta.name == "Spell Power" {
+			spWeight = res.weight
+			spDelta = res.delta.delta
+		}
+		if res.delta.name == "Crit" {
+			critWeight = res.weight
+			critDelta = res.delta.delta
+		}
+		if res.delta.name == "Haste" {
+			hasteWeight = res.weight
+			hasteDelta = res.delta.delta
+		}
+		if res.delta.name == "Hit" {
+			hitWeight = res.weight
+			hitDelta = res.delta.delta
+		}
+	}
+	if spWeight != 0 {
+		// Weight calculations are per-unit already; keep explicit SP-per-point for clarity.
+		spPerPoint := spWeight
+		if spDelta != 0 {
+			spPerPoint = spWeight // weight is already per 1 SP
+		}
+
+		nw := tabWriter()
+		fmt.Fprintf(nw, "\nNormalized (SP = 1.0)\n")
+		fmt.Fprintf(nw, "Stat\tDelta\tWeight vs SP\n")
+		for _, res := range results {
+			fmt.Fprintf(nw, "%s\t%+.0f %s\t%.3f\n",
+				res.delta.name, res.delta.delta, res.delta.unit, res.weight/spPerPoint)
+		}
+		fmt.Fprintf(nw, "%s\t%+d %s\t%.3f\n", "Spirit", 1, "Spirit", 0.6) // Hardcoded: 1 Spirit worth 0.6 SP
+		nw.Flush()
+
+		// Pawn string assumes 1% crit = 14 rating, 1% haste = 10 rating, 1% hit = 10 rating.
+		const critRatingPerPercent = 14.0
+		const hasteRatingPerPercent = 10.0
+		const hitRatingPerPercent = 10.0
+
+		critPerRating := 0.0
+		if critWeight != 0 && critDelta != 0 {
+			critPerRating = (critWeight / critDelta) / critRatingPerPercent / spPerPoint
+		}
+		hastePerRating := 0.0
+		if hasteWeight != 0 && hasteDelta != 0 {
+			hastePerRating = (hasteWeight / hasteDelta) / hasteRatingPerPercent / spPerPoint
+		}
+		hitPerRating := 0.0
+		if hitWeight != 0 && hitDelta != 0 {
+			hitPerRating = (hitWeight / hitDelta) / hitRatingPerPercent / spPerPoint
+		}
+
+		const spiritWeightVsSP = 0.6
+
+		fmt.Printf("\nPawn: v1: \"StatWeights (Sim)\": SpellPower=1, CritRating=%.2f, HasteRating=%.2f, HitRating=%.2f, Spirit=%.2f\n",
+			critPerRating, hastePerRating, hitPerRating, spiritWeightVsSP)
+	}
 }
 
 func runDPS(cfg *config.Config, simCfg engine.SimulationConfig, rotation *apl.CompiledRotation, stats character.Stats, seed int64) float64 {
