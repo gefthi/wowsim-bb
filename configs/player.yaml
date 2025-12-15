@@ -5,10 +5,10 @@ pet:
     summon: imp
 stats:
     intellect: 0
-    spell_power: 900
-    crit_percent: 16.2
-    haste_percent: 11.2
-    spirit: 177
+    spell_power: 863
+    crit_percent: 14.95
+    haste_percent: 8.8
+    spirit: 300
     hit_percent: 14
     max_mana: 6000
 target:
