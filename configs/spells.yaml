@@ -18,12 +18,12 @@ incinerate:
   sp_coefficient: 0.714
 
 chaos_bolt:
-  base_damage_min: 1250
-  base_damage_max: 1508
+  base_damage_min: 1000
+  base_damage_max: 1206
   cast_time: 2.0  # After Bane
   cooldown: 12  # Base cooldown (before ME)
   mana_cost: 103
-  sp_coefficient: 0.714
+  sp_coefficient: 0.821
 
 soul_fire:
   base_damage_min: 808

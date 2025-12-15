@@ -153,12 +153,12 @@ incinerate:
   sp_coefficient: 0.714
 
 chaos_bolt:
-  base_damage_min: 1250
-  base_damage_max: 1508
+  base_damage_min: 1000
+  base_damage_max: 1206
   cast_time: 2.0  # After Bane
   cooldown: 12  # Base cooldown (before rune)
   mana_cost: 103
-  sp_coefficient: 0.714
+  sp_coefficient: 0.821
 
 conflagrate:
   immolate_dot_percentage: 0.60  # 60% of Immolate DoT
@@ -685,11 +685,11 @@ Modifiers:
 
 #### Chaos Bolt
 ```
-Base: 1250-1508 (avg 1379)
+Base: 1000-1206 (avg 1103)
 Cast Time: 2.0s (includes Bane)
 Cooldown: 12s base (10s with rune)
 Mana Cost: 103
-SP Coefficient: ~0.714
+SP Coefficient: ~0.821
 Modifiers:
   - Emberstorm: +15% damage
   - Fire and Brimstone: +10% damage (if target has Immolate)
@@ -815,8 +815,8 @@ These are baked into character stats:
 - Affects: Immolate, Conflagrate, Incinerate, Chaos Bolt (chaos is both fire and shadow), Soul Fire
 
 **Decisive Decimation**
-- When you cast Conflagrate: next Soul Fire has -40% cast time AND no soul shard cost
-- Soul Fire base: 6s cast → 4s (with Bane) → affected by haste → affected by Backdraft → -40% from this ME
+- When you cast Conflagrate: next Soul Fire has -30% cast time AND no soul shard cost
+- Soul Fire base: 6s cast → 4s (with Bane) → affected by haste → affected by Backdraft → -30% from this ME
 - Soul Fire damage: 808-1014 fire damage
 - Generally only used WITH this ME active (otherwise 4s+ cast time is too long)
 

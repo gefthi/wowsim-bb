@@ -48,7 +48,8 @@ func (e *Engine) CastIncinerate(char *character.Character) CastResult {
 		damage *= runes.GlyphOfIncinerateDamageMultiplier
 	}
 
-	result.Damage = damage
+	// result.Damage = damage
+	result.Damage = damage * 0.93 // Nerf Incinerate damage by 7%
 
 	if result.DidHit {
 		e.handleCataclysmicBurstIncinerate(char)

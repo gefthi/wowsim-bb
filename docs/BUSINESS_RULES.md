@@ -12,7 +12,7 @@ Source of truth for the mechanical assumptions in the simulator. Covers spell da
 ## Spells
 - **Immolate**: 404 direct + 770 DoT over 15s (5 ticks). 1.5s cast. SP coeff: 0.20 direct / 1.00 DoT. DoT snapshots multipliers at cast.
 - **Incinerate**: 416–490 base plus 104–123 bonus when Immolate is active. 2.25s cast. SP coeff: 0.714.
-- **Chaos Bolt**: 1250–1508 base, 12s cooldown (10s with Glyph of Chaos Bolt). 2.0s cast. SP coeff: 0.714.
+- **Chaos Bolt**: 1000–1206 base, 12s cooldown (10s with Glyph of Chaos Bolt). 2.0s cast. SP coeff: 0.821.
 - **Soul Fire**: 808–1014 base, 4.0s cast, SP coeff: 1.0.
 - **Conflagrate**: Instant, 10s cooldown. Deals 60% of Immolate’s DoT as direct damage and applies a DoT equal to 40% of that hit. SP coeff: 0.60. Triggers Backdraft/pyro procs.
 - **Life Tap**: Instant (GCD only). Health cost: `827 + spirit * 1.5`. Mana gain: `827 + spellpower * 0.5`. Improved Life Tap talent not present; glyph may add Spirit → SP buff.
